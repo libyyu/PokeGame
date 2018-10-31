@@ -1,0 +1,76 @@
+ManifestFileVersion: 0
+CRC: 504241308
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: assets/arts/prefab/flashtipui.prefab.assetbundle
+      Dependencies: {}
+    Info_1:
+      Name: assets/arts/prefab/loadingui.prefab.assetbundle
+      Dependencies: {}
+    Info_2:
+      Name: assets/arts/prefab/msgboxui.prefab.assetbundle
+      Dependencies: {}
+    Info_3:
+      Name: assets/arts/prefab/serverlistui.prefab.assetbundle
+      Dependencies: {}
+    Info_4:
+      Name: assets/arts/prefab/pokermain.prefab.assetbundle
+      Dependencies: {}
+    Info_5:
+      Name: assets/arts/prefab/level.prefab.assetbundle
+      Dependencies: {}
+    Info_6:
+      Name: assets/arts/prefab/consoleui.prefab.assetbundle
+      Dependencies: {}
+    Info_7:
+      Name: assets/arts/prefab/waitingui.prefab.assetbundle
+      Dependencies: {}
+    Info_8:
+      Name: assets/arts/prefab/updateui.prefab.assetbundle
+      Dependencies: {}
+    Info_9:
+      Name: assets/arts/prefab/loginui.prefab.assetbundle
+      Dependencies: {}
+    Info_10:
+      Name: assets/arts/prefab/pokerlogin.prefab.assetbundle
+      Dependencies: {}
+    Info_11:
+      Name: assets/arts/sound/background.mp3.assetbundle
+      Dependencies: {}
+    Info_12:
+      Name: assets/arts/sound/loginbgm.mp3.assetbundle
+      Dependencies: {}
+    Info_13:
+      Name: assets/arts/bundleusage_fui.bytes.assetbundle
+      Dependencies: {}
+    Info_14:
+      Name: assets/arts/poker_fui.bytes.assetbundle
+      Dependencies: {}
+    Info_15:
+      Name: assets/arts/fairygui/login.assetbundle
+      Dependencies: {}
+    Info_16:
+      Name: assets/arts/fairygui/messagebox.assetbundle
+      Dependencies: {}
+    Info_17:
+      Name: assets/arts/fairygui/consoleui.assetbundle
+      Dependencies: {}
+    Info_18:
+      Name: assets/arts/fairygui/updateui.assetbundle
+      Dependencies: {}
+    Info_19:
+      Name: assets/arts/fairygui/main.assetbundle
+      Dependencies: {}
+    Info_20:
+      Name: assets/arts/fairygui/common.assetbundle
+      Dependencies: {}
+    Info_21:
+      Name: assets/arts/fairygui/pokertable.assetbundle
+      Dependencies: {}
+    Info_22:
+      Name: assets/arts/fairygui/waitingui.assetbundle
+      Dependencies: {}
+    Info_23:
+      Name: assets/arts/fairygui/loadingui.assetbundle
+      Dependencies: {}

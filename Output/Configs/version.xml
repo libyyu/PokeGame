@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--打包的时候会打到文件包里面去，是只读的-->
+<app name="luagame">
+    <!--program-->
+    <program method="open_url" action="http://www.baidu.com" m5d=""/>
+    <!--package_url 更新地址-->
+    <resource package_url="http://47.92.230.103:8004/patches/" ext=".zip"/>
+</app>

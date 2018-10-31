@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1297910351
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1f17710c7924c1e142d5a72390a58736
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/Arts/FairyGUI/PokerTable_fui.bytes
+Dependencies: []

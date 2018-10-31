@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--打包的时候会打到文件包里面去，是只读的-->
+<!--程序启动参数-->
+<entrypoint>
+    <!--program_updage 是否允许程序更新-->
+    <program_updage>false</program_updage>
+    <!--resource_update 是否允许更新-->
+    <resource_update>true</resource_update>
+    <!--dirserver dir地址信息-->
+    <dirserver host="47.92.230.103" port="8002" />
+</entrypoint>
