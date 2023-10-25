@@ -76,6 +76,15 @@ namespace SLua
             list.Add("FairyGUI");
         }
 
+        public static Dictionary<string, string> OnAddCustomCheckType()
+        {
+            return new Dictionary<string, string>
+            {
+                { "FairyGUI.DestroyMethod&", "checkEnum" }
+            };
+        }
+
+
         public static HashSet<string> OnAddCustomNamespace()
         {
             return new HashSet<string>
@@ -114,6 +123,7 @@ namespace SLua
             "UnityEngine.DrivenRectTransformTracker.StartRecordingUndo",
             "UnityEngine.DrivenRectTransformTracker.StopRecordingUndo",
             "UnityEngine.Texture.imageContentsHash",
+            "UnityEngine.ArticulationBody.set_jointAcceleration"
         };
         // black list if white list not given
         public static void OnGetNoUseList(out List<string> list)
@@ -212,6 +222,7 @@ namespace SLua
                 "Unity.Jobs.LowLevel.Unsafe",
                 "Unity.Collections.LowLevel.Unsafe",
                  "UnityEngine.tvOS",
+                 "HashUnsafeUtilities"
             };
         }
 

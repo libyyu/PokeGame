@@ -34,6 +34,7 @@ namespace SLua
     using System.Text.RegularExpressions;
     using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
+    using System.Runtime.Serialization.Formatters;
 
     public interface ICustomExportPost { }
 
@@ -172,6 +173,11 @@ namespace SLua
             if (target != null)
             {
                 GenerateFor(target, "Unity/", 0, "BindUnity");
+            }
+			else
+			{
+                GenerateFor("UnityEngine", "Unity/", 0, "BindUnity");
+                GenerateFor("UnityEngine.CoreModule", "Unity/", 0, "BindUnity");
             }
 #else
             GenerateFor("UnityEngine", "Unity/", 0, "BindUnity");
@@ -983,6 +989,10 @@ namespace SLua
 
 			temp = temp.Replace("$TN", t.Name);
 			temp = temp.Replace("$FN", ExportName(t));
+			if("Lua_FairyGUI_UIPackage_LoadResource" == ExportName(t))
+			{
+				Debug.Log("111");
+			}
 
             temp = temp.Replace("$RET", 
                 mi.ReturnType != typeof(void)?SimpleType(mi.ReturnType):"void");
@@ -1208,7 +1218,10 @@ namespace SLua
 
         string GetCheckType(Type t, int n, string v = "v", string prefix = "")
         {
-            if (t.IsEnum)
+            string customCheckType = GetCustomCheckType(t);
+            if (!string.IsNullOrEmpty(customCheckType))
+                return string.Format("{3}(l,{2}{0},out {1});", n, v, prefix, customCheckType);
+            else if (t.IsEnum || t.BaseType == typeof(System.Enum))
             {
                 return string.Format("checkEnum(l,{2}{0},out {1});", n, v, prefix);
             }
@@ -1679,7 +1692,11 @@ namespace SLua
 				
 				if(!propname.ContainsKey(fi.Name))
 				    propname.Add(fi.Name, pp);
-				if(!delegateFields.ContainsKey(fi.FieldType))
+				if(fi.FieldType.ToString().Contains("MemoryUsageChangedCallback"))
+				{
+					Debug.Log("222");
+				}
+				if(!delegateFields.ContainsKey(fi.FieldType) && !IsObsolete(fi.FieldType) && !DontExport(fi.FieldType))
                 	delegateFields.Add(fi.FieldType, true);
 				//tryMake(fi.FieldType);
 			}
@@ -1773,7 +1790,11 @@ namespace SLua
 				
 				if (!propname.ContainsKey(fi.Name))
 					propname.Add(fi.Name, pp);
-				if(!delegateFields.ContainsKey(fi.PropertyType))
+                if (fi.PropertyType.ToString().Contains("MemoryUsageChangedCallback"))
+                {
+                    Debug.Log("222");
+                }
+                if (!delegateFields.ContainsKey(fi.PropertyType) && !IsObsolete(fi.PropertyType) && !DontExport(fi.PropertyType))
 					delegateFields.Add(fi.PropertyType, true);
 				//tryMake(fi.PropertyType);
 			}
@@ -1885,7 +1906,10 @@ namespace SLua
 		
 		void WriteCheckType(StreamWriter file, Type t, int n, string v = "v", string nprefix = "")
 		{
-			if (t.IsEnum || t.BaseType == typeof(System.Enum))
+            string customCheckType = GetCustomCheckType(t);
+            if (!string.IsNullOrEmpty(customCheckType))
+                Write(file, "{3}(l,{2}{0},out {1});", n, v, nprefix, customCheckType);
+            else if (t.IsEnum || t.BaseType == typeof(System.Enum))
 				Write(file, "checkEnum(l,{2}{0},out {1});", n, v, nprefix);
 			else if (t.BaseType == typeof(System.MulticastDelegate))
 				Write(file, "int op=checkDelegate(l,{2}{0},out {1});", n, v, nprefix);
@@ -1948,39 +1972,15 @@ namespace SLua
 		bool DontExport(MemberInfo mi)
 		{
 		    var methodString = string.Format("{0}.{1}", mi.DeclaringType, mi.Name);
-            //Debug.Log("method:" + methodString);
-
-            //var test = methodString;
-            //if (mi.MemberType == MemberTypes.Method)
-            //{
-	        //    test += "(";
-            //    var methodInfo = mi as MethodInfo;
-            //    foreach(var p in methodInfo.GetParameters())
-            //    {
-            //        test += p.ParameterType.FullName + " " + p.ParameterType.Name + ",";
-			//
-            //        if (p.ParameterType.IsGenericType)
-            //        {
-	        //            test += p.ParameterType.GetGenericTypeDefinition().ToString();
-            //        }
-            //    }
-            //    test += ")";
-            //}
-
-            //FileStream fs = new FileStream("./test.txt", FileMode.Append);
-            ////获得字节数组
-            //byte[] data = System.Text.Encoding.Default.GetBytes(test+"\n");
-            ////开始写入
-            //fs.Write(data, 0, data.Length);
-            ////清空缓冲区、关闭流
-            //fs.Flush();
-            //fs.Close();
-            //Debug.Log(test);
+			if (methodString.Contains("LoadResource"))
+			{
+				Debug.Log("method:" + methodString);
+			}
 
 		    if (CustomExport.FunctionFilterList.Contains(methodString))
 		        return true;
             // directly ignore any components .ctor
-            if (mi.DeclaringType.IsSubclassOf(typeof(UnityEngine.Component)))
+            if (mi.DeclaringType != null && mi.DeclaringType.IsSubclassOf(typeof(UnityEngine.Component)))
             {
                 if (mi.MemberType == MemberTypes.Constructor)
                 {
@@ -1998,7 +1998,7 @@ namespace SLua
                 }
             }
 
-            if (mi.DeclaringType.IsGenericType && mi.DeclaringType.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            if (mi.DeclaringType != null && mi.DeclaringType.IsGenericType && mi.DeclaringType.GetGenericTypeDefinition() == typeof(Dictionary<,>))
             {
                 if (mi.MemberType == MemberTypes.Constructor)
                 {
@@ -2023,18 +2023,124 @@ namespace SLua
             }
 
             if (mi.MemberType == MemberTypes.Method)
-            {
-	            var methodInfo = mi as MethodInfo;
-	            foreach (var p in methodInfo.GetParameters())
-	            {
+			{
+                var methodInfo = mi as MethodInfo;
+                if (IsUsedByNativeCode(mi.DeclaringType))
+				{
+					return true;
+				}
+                if (IsUsedByNativeCode(methodInfo.ReturnType))
+                {
+                    return true;
+                }
 
-	            }
+
+                if (methodInfo.IsDefined(typeof(MethodImplAttribute), false))
+				{
+                    MethodImplAttribute[] attris = methodInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+					if(attris != null)
+					{
+						foreach(MethodImplAttribute attr in attris)
+						{
+                            if (attr.Value == MethodImplOptions.InternalCall)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                if (methodInfo.ReturnType != null && methodInfo.ReturnType.ToString().Contains('*'))
+                {//返回值带*， Native
+                    return true;
+                }
+                foreach (var p in methodInfo.GetParameters())
+	            {
+					if(IsUsedByNativeCode(p.ParameterType))
+					{
+						return true;
+					}
+                    if (p.ParameterType.ToString().Contains('*') || p.ParameterType.ToString().Contains('&'))
+                    {//参数带*， Native
+                        return true;
+                    }
+                }
+            }
+			else if(mi.MemberType == MemberTypes.Field)
+			{
+				var fieldInfo = mi as FieldInfo;
+                if (IsUsedByNativeCode(fieldInfo.DeclaringType))
+                {
+                    return true;
+                }
+                if (fieldInfo.DeclaringType != null && fieldInfo.DeclaringType.ToString().Contains('*'))
+                {
+                    return true;
+                }
+                if (fieldInfo.FieldType != null && fieldInfo.FieldType.ToString().Contains('*'))
+				{
+					return true;
+				}
+
+                if (fieldInfo.IsDefined(typeof(MethodImplAttribute), false))
+                {
+                    MethodImplAttribute[] attris = fieldInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+                    if (attris != null)
+                    {
+                        foreach (MethodImplAttribute attr in attris)
+                        {
+                            if (attr.Value == MethodImplOptions.InternalCall)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (mi.MemberType == MemberTypes.Property)
+			{
+				var propInfo = mi as PropertyInfo;
+                if (IsUsedByNativeCode(propInfo.DeclaringType))
+                {
+                    return true;
+                }
+                if (propInfo.DeclaringType != null && propInfo.DeclaringType.ToString().Contains('*'))
+                {
+                    return true;
+                }
+                if (propInfo.PropertyType != null && propInfo.PropertyType.ToString().Contains('*'))
+                {
+                    return true;
+                }
+
+                if (propInfo.IsDefined(typeof(MethodImplAttribute), false))
+                {
+                    MethodImplAttribute[] attris = propInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+                    if (attris != null)
+                    {
+                        foreach (MethodImplAttribute attr in attris)
+                        {
+                            if (attr.Value == MethodImplOptions.InternalCall)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
 
-            return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
+           return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
 		}
 		
-		
+		string GetCustomCheckType(Type t)
+		{
+			var dict = CustomExport.OnAddCustomCheckType();
+			if(dict != null && dict.ContainsKey(t.ToString()))
+			{
+				return dict[t.ToString()];
+			}
+			return null;
+		}
 		private void WriteConstructor(Type t, StreamWriter file)
 		{
 			ConstructorInfo[] cons = GetValidConstructor(t);
@@ -2632,12 +2738,19 @@ namespace SLua
 			
 			if (!isout)
 			{
-				if (t.IsEnum)
+				string customCheckType = GetCustomCheckType(t);
+				if(!string.IsNullOrEmpty(customCheckType))
+                    Write(file, "{2}(l,{0},out a{1});", n + argstart, n + 1, customCheckType);
+                else if (t.IsEnum || t.BaseType == typeof(System.Enum))
 					Write(file, "checkEnum(l,{0},out a{1});", n + argstart, n + 1);
 				else if (t.BaseType == typeof(System.MulticastDelegate))
 				{
-					//tryMake(t);
-					if(!delegateFields.ContainsKey(t))
+                    //tryMake(t);
+                    if (t.ToString().Contains("MemoryUsageChangedCallback"))
+                    {
+                        Debug.Log("222");
+                    }
+                    if (!delegateFields.ContainsKey(t) && !IsObsolete(t) && !DontExport(t))
                 		delegateFields.Add(t, true);
 					Write(file, "checkDelegate(l,{0},out a{1});", n + argstart, n + 1);
 				}
@@ -2684,8 +2797,32 @@ namespace SLua
 		{
 			return t.Name.Contains("ReadOnlySpan`");
 		}
-		
-		string FullName(string str)
+		bool IsUsedByNativeCode(Type t)
+		{
+            Attribute[] v = t.GetCustomAttributes() as Attribute[];
+			if(v != null)
+			{
+				foreach(Attribute a in v)
+				{
+                    if (a.ToString().Contains("UsedByNativeCodeAttribute"))
+					{
+						return true;
+					}
+					else if(a.ToString().Contains("NativeHeaderAttribute"))
+					{
+						return true;
+					}
+					else if(a.ToString().Contains("NativeTypeAttribute"))
+					{
+						return true;
+					}
+                }
+			}
+            return false;
+        }
+
+
+        string FullName(string str)
 		{
 			if (str == null)
 			{
