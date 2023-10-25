@@ -36,8 +36,9 @@ public class GUITools  {
         cam.nearClipPlane = 0;
         cam.orthographic = true;
         cam.orthographicSize = 3.2f;
-
+#if !UNITY_2021_1_OR_NEWER
         goCam.AddComponent<GUILayer>();
+#endif
         goCam.AddComponent<FlareLayer>();
 
         Canvas canVas = uiRoot2D.GetComponent<Canvas>();
@@ -131,7 +132,9 @@ public class GUITools  {
         camobj.transform.localScale = new Vector3(1, 1, 1);
         camobj.AddComponent<Camera>();
         camobj.AddComponent<FlareLayer>();
+#if !UNITY_2021_1_OR_NEWER
         camobj.AddComponent<GUILayer>();
+#endif
         camobj.tag = "MainCamera";
     }
 #endif

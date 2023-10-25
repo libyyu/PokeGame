@@ -117,11 +117,19 @@ namespace SLua
 
         }
 
+#if UNITY_2017_2_OR_NEWER
+        public static string[] unityModule = new string[] { "UnityEngine","UnityEngine.CoreModule","UnityEngine.UIModule","UnityEngine.TextRenderingModule","UnityEngine.TextRenderingModule",
+                "UnityEngine.UnityWebRequestWWWModule","UnityEngine.Physics2DModule","UnityEngine.AnimationModule","UnityEngine.TextRenderingModule","UnityEngine.IMGUIModule","UnityEngine.UnityWebRequestModule",
+            "UnityEngine.PhysicsModule", "UnityEngine.UI", "UnityEngine.AudioModule" };
+#else
+        public static string[] unityModule = null;
+#endif
+
         [MenuItem("SLua/All/Make")]
         static public void GenerateAll()
         {
             autoRefresh = false;
-            Generate();
+            GenerateModule(unityModule);
             GenerateUI();
             GenerateAds();
             Custom();
@@ -158,14 +166,22 @@ namespace SLua
             }
         }
 
-        [MenuItem("SLua/Unity/Make UnityEngine")]
-        static public void Generate()
+        static void GenerateModule(string[] target = null)
         {
 #if UNITY_2017_2_OR_NEWER
-            GenerateFor("UnityEngine.CoreModule", "Unity/", 0, "BindUnity");
+            if (target != null)
+            {
+                GenerateFor(target, "Unity/", 0, "BindUnity");
+            }
 #else
             GenerateFor("UnityEngine", "Unity/", 0, "BindUnity");
 #endif
+        }
+
+        [MenuItem("SLua/Unity/Make UnityEngine")]
+        static public void Generate()
+        {
+            GenerateModule();
         }
 
         [MenuItem("SLua/Unity/Make UnityEngine.UI")]
@@ -180,6 +196,80 @@ namespace SLua
             GenerateFor("UnityEngine.Advertisements", "Unity/", 2, "BindUnityAds");
         }
 
+        static List<Type> GetExportsType(string[] asemblyNames, string genAtPath)
+        {
+
+            List<Type> exports = new List<Type>();
+
+            foreach (string asemblyName in asemblyNames)
+            {
+                Assembly assembly;
+                try { assembly = Assembly.Load(asemblyName); }
+                catch (Exception) { continue; }
+
+                Type[] types = assembly.GetExportedTypes();
+
+                List<string> uselist;
+                List<string> noUseList;
+
+                CustomExport.OnGetNoUseList(out noUseList);
+                CustomExport.OnGetUseList(out uselist);
+
+                // Get use and nouse list from custom export.
+                object[] aCustomExport = new object[1];
+                InvokeEditorMethod<ICustomExportPost>("OnGetUseList", ref aCustomExport);
+                if (null != aCustomExport[0])
+                {
+                    if (null != uselist)
+                    {
+                        uselist.AddRange((List<string>)aCustomExport[0]);
+                    }
+                    else
+                    {
+                        uselist = (List<string>)aCustomExport[0];
+                    }
+                }
+
+                aCustomExport[0] = null;
+                InvokeEditorMethod<ICustomExportPost>("OnGetNoUseList", ref aCustomExport);
+                if (null != aCustomExport[0])
+                {
+                    if ((null != noUseList))
+                    {
+                        noUseList.AddRange((List<string>)aCustomExport[0]);
+                    }
+                    else
+                    {
+                        noUseList = (List<string>)aCustomExport[0];
+                    }
+                }
+
+                string path = GenPath + genAtPath;
+                foreach (Type t in types)
+                {
+                    if (filterType(t, noUseList, uselist) && Generate(t, path))
+                        exports.Add(t);
+                }
+                Debug.Log("Generate interface finished: " + asemblyName);
+            }
+            return exports;
+        }
+
+        static public void GenerateFor(string[] asemblyNames, string genAtPath, int genOrder, string bindMethod)
+        {
+            if (IsCompiling)
+            {
+                Debug.LogWarning ("Please Run Later while unity is compile scripts");
+                return;
+            }
+
+            List<Type> exports = GetExportsType(asemblyNames, genAtPath);
+            string path = GenPath + genAtPath;
+            GenerateBind(exports, bindMethod, genOrder, path);
+            if (autoRefresh)
+                AssetDatabase.Refresh();
+        }
+
         static public void GenerateFor(string asemblyName, string genAtPath, int genOrder, string bindMethod)
         {
             if (IsCompiling)
@@ -188,58 +278,13 @@ namespace SLua
                 return;
             }
 			Debug.Log ("Generate for " + asemblyName + " at path " + genAtPath);
-            Assembly assembly;
-            try { assembly = Assembly.Load(asemblyName); }
-            catch (Exception) { return; }
 
-            Type[] types = assembly.GetExportedTypes();
-
-            List<string> uselist;
-            List<string> noUseList;
-
-            CustomExport.OnGetNoUseList(out noUseList);
-            CustomExport.OnGetUseList(out uselist);
-
-            // Get use and nouse list from custom export.
-            object[] aCustomExport = new object[1];
-            InvokeEditorMethod<ICustomExportPost>("OnGetUseList", ref aCustomExport);
-            if (null != aCustomExport[0])
-            {
-                if (null != uselist)
-                {
-                    uselist.AddRange((List<string>)aCustomExport[0]);
-                }
-                else
-                {
-                    uselist = (List<string>)aCustomExport[0];
-                }
-            }
-
-            aCustomExport[0] = null;
-            InvokeEditorMethod<ICustomExportPost>("OnGetNoUseList", ref aCustomExport);
-            if (null != aCustomExport[0])
-            {
-                if ((null != noUseList))
-                {
-                    noUseList.AddRange((List<string>)aCustomExport[0]);
-                }
-                else
-                {
-                    noUseList = (List<string>)aCustomExport[0];
-                }
-            }
-
-            List<Type> exports = new List<Type>();
+            List<Type> exports = GetExportsType(new string[] { asemblyName }, genAtPath);
             string path = GenPath + genAtPath;
-            foreach (Type t in types)
-            {
-                if (filterType(t, noUseList, uselist) && Generate(t, path))
-                    exports.Add(t);
-            }
-
             GenerateBind(exports, bindMethod, genOrder, path);
             if (autoRefresh)
                 AssetDatabase.Refresh();
+
             Debug.Log("Generate interface finished: " + asemblyName);
         }
 
@@ -469,7 +514,11 @@ namespace SLua
 
 #region libraries
             List<string> libraries = new List<string>();
+#if UNITY_2017_2_OR_NEWER
+            string[] referenced = unityModule;
+#else
             string[] referenced = new string[] { "UnityEngine", "UnityEngine.UI" };
+#endif
             string projectPath = Path.GetFullPath(Application.dataPath+"/..").Replace("\\", "/");
             // http://stackoverflow.com/questions/52797/how-do-i-get-the-path-of-the-assembly-the-code-is-in
             foreach (var assem in AppDomain.CurrentDomain.GetAssemblies())
@@ -1895,10 +1944,27 @@ namespace SLua
 		bool DontExport(MemberInfo mi)
 		{
 		    var methodString = string.Format("{0}.{1}", mi.DeclaringType, mi.Name);
-            if(methodString.Contains("probePositions") || methodString.Contains("streamingMipmapsRenderersPerFrame"))
+            Debug.Log("method:" + methodString);
+
+            var test = methodString;
+            if (mi.MemberType == MemberTypes.Method)
             {
-                Debug.Log("1");
+                var methodInfo = mi as MethodInfo;
+                foreach(var p in methodInfo.GetParameters())
+                {
+                    test += ";" + p.Name;
+                }
             }
+
+            FileStream fs = new FileStream("./test.txt", FileMode.Append);
+            //获得字节数组
+            byte[] data = System.Text.Encoding.Default.GetBytes(test+"\n");
+            //开始写入
+            fs.Write(data, 0, data.Length);
+            //清空缓冲区、关闭流
+            fs.Flush();
+            fs.Close();
+
 		    if (CustomExport.FunctionFilterList.Contains(methodString))
 		        return true;
             // directly ignore any components .ctor
@@ -1917,6 +1983,30 @@ namespace SLua
                 if (((List<string>)aFilterList).Contains(methodString))
                 {
                     return true;
+                }
+            }
+
+            if (mi.DeclaringType.IsGenericType && mi.DeclaringType.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                if (mi.MemberType == MemberTypes.Constructor)
+                {
+                    ConstructorInfo constructorInfo = mi as ConstructorInfo;
+                    var parameterInfos = constructorInfo.GetParameters();
+                    if (parameterInfos.Length > 0)
+                    {
+                        if (typeof(System.Collections.IEnumerable).IsAssignableFrom(parameterInfos[0].ParameterType))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else if (mi.MemberType == MemberTypes.Method)
+                {
+                    var methodInfo = mi as MethodInfo;
+                    if (methodInfo.Name == "TryAdd" || methodInfo.Name == "Remove" && methodInfo.GetParameters().Length == 2)
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -2201,7 +2291,7 @@ namespace SLua
 			MemberInfo[] cons = t.GetMember(name, bf);
 			foreach (MemberInfo _m in cons)
 			{
-				MemberInfo m = _m;
+                MemberInfo m = _m;
 				if (m.MemberType == MemberTypes.Method) m = tryFixGenericMethod((MethodInfo)m);
 				if (m.MemberType == MemberTypes.Method
 				    && !IsObsolete(m)

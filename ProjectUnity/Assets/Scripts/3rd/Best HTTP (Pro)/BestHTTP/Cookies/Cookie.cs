@@ -310,9 +310,9 @@ namespace BestHTTP.Cookies
             return str.Read(ref pos, ';');
         }
 
-        private static List<KeyValuePair> ParseCookieHeader(string str)
+        private static List<BestHTTP.Extensions.KeyValuePair> ParseCookieHeader(string str)
         {
-            List<KeyValuePair> result = new List<KeyValuePair>();
+            List<BestHTTP.Extensions.KeyValuePair> result = new List<BestHTTP.Extensions.KeyValuePair>();
 
             if (str == null)
                 return result;
@@ -324,7 +324,7 @@ namespace BestHTTP.Cookies
             {
                 // Read key
                 string key = str.Read(ref idx, (ch) => ch != '=' && ch != ';').Trim();
-                KeyValuePair qp = new KeyValuePair(key);
+                BestHTTP.Extensions.KeyValuePair qp = new BestHTTP.Extensions.KeyValuePair(key);
 
                 if (idx < str.Length && str[idx - 1] == '=')
                     qp.Value = ReadValue(str, ref idx);
