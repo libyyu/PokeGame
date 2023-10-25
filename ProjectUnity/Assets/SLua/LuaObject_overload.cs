@@ -107,8 +107,38 @@ namespace SLua
 			pars = new Vector2[0];
 			return true;
 		}
+        static public bool checkParams(IntPtr l, int p, out Vector3[] pars)
+        {
+            int top = LuaDLL.lua_gettop(l);
+            if (top - p >= 0)
+            {
+                pars = new Vector3[top - p + 1];
+                for (int n = p, k = 0; n <= top; n++, k++)
+                {
+                    checkType(l, n, out pars[k]);
+                }
+                return true;
+            }
+            pars = new Vector3[0];
+            return true;
+        }
+        static public bool checkParams(IntPtr l, int p, out Vector4[] pars)
+        {
+            int top = LuaDLL.lua_gettop(l);
+            if (top - p >= 0)
+            {
+                pars = new Vector4[top - p + 1];
+                for (int n = p, k = 0; n <= top; n++, k++)
+                {
+                    checkType(l, n, out pars[k]);
+                }
+                return true;
+            }
+            pars = new Vector4[0];
+            return true;
+        }
 
-		public static void pushValue(IntPtr l, RaycastHit2D r)
+        public static void pushValue(IntPtr l, RaycastHit2D r)
 		{
 			pushObject(l, r);
 		}

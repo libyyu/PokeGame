@@ -121,7 +121,7 @@ namespace SLua
 #if UNITY_2017_2_OR_NEWER
         public static string[] unityModule = new string[] { "UnityEngine","UnityEngine.CoreModule","UnityEngine.UIModule","UnityEngine.TextRenderingModule","UnityEngine.TextRenderingModule",
                 "UnityEngine.UnityWebRequestWWWModule","UnityEngine.Physics2DModule","UnityEngine.AnimationModule","UnityEngine.TextRenderingModule","UnityEngine.IMGUIModule","UnityEngine.UnityWebRequestModule",
-            "UnityEngine.PhysicsModule", "UnityEngine.UI", "UnityEngine.AudioModule" };
+            "UnityEngine.PhysicsModule", "UnityEngine.UI", "UnityEngine.AudioModule", "UnityEngine.ParticleSystemModule", "UnityEngine.InputLegacyModule"};
 #else
         public static string[] unityModule = null;
 #endif
@@ -139,7 +139,7 @@ namespace SLua
             AssetDatabase.Refresh();
         }
 
-        static bool filterType(Type t, List<string> noUseList, List<string> uselist)
+        static public bool filterType(Type t, List<string> noUseList, List<string> uselist)
         {
             if (t.IsDefined(typeof(CompilerGeneratedAttribute), false))
             {
@@ -743,6 +743,11 @@ namespace SLua
 			"MonoBehaviour.runInEditMode",
 			"MonoBehaviour.useGUILayout",
 			"PlayableGraph.CreateScriptPlayable",
+            "TrailRenderer.GetPositions",
+            "TrailRenderer.AddPositions",
+            "LineRenderer.GetPositions",
+            "LineRenderer.AddPositions",
+            "AudioSource.gamepadSpeakerOutputType",
         };
 
 
@@ -897,9 +902,10 @@ namespace SLua
 			if (!t.IsGenericTypeDefinition && (!IsObsolete(t) && t != typeof(YieldInstruction) && t != typeof(Coroutine))
 			    || (t.BaseType != null && t.BaseType == typeof(System.MulticastDelegate)))
 			{
-
-				if (t.IsNested && t.DeclaringType.IsPublic == false)
-					return false;
+                if (t.IsNested
+                    && ((!t.DeclaringType.IsNested && t.DeclaringType.IsPublic == false)
+                    || (t.DeclaringType.IsNested && t.DeclaringType.IsNestedPublic == false)))
+                    return false;
 
 				if (t.IsEnum)
 				{
@@ -913,6 +919,8 @@ namespace SLua
 					if (t.ContainsGenericParameters)
 						return false;
 
+                    if (DontExportDelegate(t))
+						return false;
 					string f = DelegateExportFilename(LuaCodeGen.GenPath + "Delegagte/", t);
 					if (!Directory.Exists(LuaCodeGen.GenPath + "Delegagte"))
 						Directory.CreateDirectory(LuaCodeGen.GenPath + "Delegagte");
@@ -1229,7 +1237,7 @@ namespace SLua
             {
                 return string.Format("int op=checkDelegate(l,{2}{0},out {1});", n, v, prefix);
             }
-            else if (IsValueType(t))
+            else if (IsValueTypeNew(t))
             {
                 if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
                     return string.Format("checkNullable(l,{2}{0},out {1});", n, v, prefix);
@@ -1692,11 +1700,11 @@ namespace SLua
 				
 				if(!propname.ContainsKey(fi.Name))
 				    propname.Add(fi.Name, pp);
-				if(fi.FieldType.ToString().Contains("MemoryUsageChangedCallback"))
+				if(fi.FieldType.ToString().Contains("ApplicationMemory"))
 				{
 					Debug.Log("222");
 				}
-				if(!delegateFields.ContainsKey(fi.FieldType) && !IsObsolete(fi.FieldType) && !DontExport(fi.FieldType))
+				if(!delegateFields.ContainsKey(fi.FieldType) && !DontExportDelegate(fi.FieldType))
                 	delegateFields.Add(fi.FieldType, true);
 				//tryMake(fi.FieldType);
 			}
@@ -1790,11 +1798,11 @@ namespace SLua
 				
 				if (!propname.ContainsKey(fi.Name))
 					propname.Add(fi.Name, pp);
-                if (fi.PropertyType.ToString().Contains("MemoryUsageChangedCallback"))
+                if (fi.PropertyType.ToString().Contains("ApplicationMemory"))
                 {
                     Debug.Log("222");
                 }
-                if (!delegateFields.ContainsKey(fi.PropertyType) && !IsObsolete(fi.PropertyType) && !DontExport(fi.PropertyType))
+                if (!delegateFields.ContainsKey(fi.PropertyType) && !DontExportDelegate(fi.PropertyType))
 					delegateFields.Add(fi.PropertyType, true);
 				//tryMake(fi.PropertyType);
 			}
@@ -1907,20 +1915,24 @@ namespace SLua
 		void WriteCheckType(StreamWriter file, Type t, int n, string v = "v", string nprefix = "")
 		{
             string customCheckType = GetCustomCheckType(t);
-            if (!string.IsNullOrEmpty(customCheckType))
-                Write(file, "{3}(l,{2}{0},out {1});", n, v, nprefix, customCheckType);
-            else if (t.IsEnum || t.BaseType == typeof(System.Enum))
+			if (!string.IsNullOrEmpty(customCheckType))
+				Write(file, "{3}(l,{2}{0},out {1});", n, v, nprefix, customCheckType);
+			else if (t.IsEnum || t.BaseType == typeof(System.Enum))
 				Write(file, "checkEnum(l,{2}{0},out {1});", n, v, nprefix);
 			else if (t.BaseType == typeof(System.MulticastDelegate))
 				Write(file, "int op=checkDelegate(l,{2}{0},out {1});", n, v, nprefix);
-			else if (IsValueType(t))
-                if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    Write(file, "checkNullable(l,{2}{0},out {1});", n, v, nprefix);
-                else if(IsSpanArray(t))
-	                Write(file, "checkArray(l,{2}{0},out {1});", n, v, nprefix);
-                else
-                    Write(file, "checkValueType(l,{2}{0},out {1});", n, v, nprefix);
+			else if (IsValueTypeNew(t))
+			{
+				if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+					Write(file, "checkNullable(l,{2}{0},out {1});", n, v, nprefix);
+				else if (IsSpanArray(t))
+					Write(file, "checkArray(l,{2}{0},out {1});", n, v, nprefix);
+				else
+					Write(file, "checkValueType(l,{2}{0},out {1});", n, v, nprefix);
+			}
 			else if (t.IsArray)
+				Write(file, "checkArray(l,{2}{0},out {1});", n, v, nprefix);
+			else if (IsSpanArray(t))
 				Write(file, "checkArray(l,{2}{0},out {1});", n, v, nprefix);
 			else
 				Write(file, "checkType(l,{2}{0},out {1});", n, v, nprefix);
@@ -1968,16 +1980,40 @@ namespace SLua
 			}
 			return false;
 		}
-		
-		bool DontExport(MemberInfo mi)
+
+        bool DontExportDelegate(Type t)
+        {
+			if (t.BaseType != typeof(MulticastDelegate))
+				return true;
+            MethodInfo mi = t.GetMethod("Invoke");
+			if (mi == null) return true;
+
+			if (mi.ReturnType.FullName.Contains("*"))
+				return true;
+
+            foreach (ParameterInfo p in mi.GetParameters())
+            {
+                if (p.ParameterType.FullName.Contains('*') 
+					//|| p.ParameterType.FullName.Contains('&')
+					)//参数带*， Native
+                    return true;
+                //if (IsUsedByNativeCode(p.ParameterType))
+                //    return true;
+            }
+
+            return false;
+		}
+
+
+        bool DontExport(MemberInfo mi)
 		{
 		    var methodString = string.Format("{0}.{1}", mi.DeclaringType, mi.Name);
-			if (methodString.Contains("LoadResource"))
+			if (methodString.Contains("CacheRaycastHit") || methodString.Contains("EnableKeyword"))
 			{
 				Debug.Log("method:" + methodString);
 			}
 
-		    if (CustomExport.FunctionFilterList.Contains(methodString))
+            if (CustomExport.FunctionFilterList.Contains(methodString))
 		        return true;
             // directly ignore any components .ctor
             if (mi.DeclaringType != null && mi.DeclaringType.IsSubclassOf(typeof(UnityEngine.Component)))
@@ -2025,30 +2061,30 @@ namespace SLua
             if (mi.MemberType == MemberTypes.Method)
 			{
                 var methodInfo = mi as MethodInfo;
-                if (IsUsedByNativeCode(mi.DeclaringType))
-				{
-					return true;
-				}
-                if (IsUsedByNativeCode(methodInfo.ReturnType))
-                {
-                    return true;
-                }
+    //            if (IsUsedByNativeCode(mi.DeclaringType))
+				//{
+				//	return true;
+				//}
+    //            if (IsUsedByNativeCode(methodInfo.ReturnType))
+    //            {
+    //                return true;
+    //            }
 
 
-                if (methodInfo.IsDefined(typeof(MethodImplAttribute), false))
-				{
-                    MethodImplAttribute[] attris = methodInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
-					if(attris != null)
-					{
-						foreach(MethodImplAttribute attr in attris)
-						{
-                            if (attr.Value == MethodImplOptions.InternalCall)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
+    //            if (methodInfo.IsDefined(typeof(MethodImplAttribute), false))
+				//{
+    //                MethodImplAttribute[] attris = methodInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+				//	if(attris != null)
+				//	{
+				//		foreach(MethodImplAttribute attr in attris)
+				//		{
+    //                        if (attr.Value == MethodImplOptions.InternalCall)
+    //                        {
+    //                            return true;
+    //                        }
+    //                    }
+    //                }
+    //            }
 
                 if (methodInfo.ReturnType != null && methodInfo.ReturnType.ToString().Contains('*'))
                 {//返回值带*， Native
@@ -2056,11 +2092,13 @@ namespace SLua
                 }
                 foreach (var p in methodInfo.GetParameters())
 	            {
-					if(IsUsedByNativeCode(p.ParameterType))
-					{
-						return true;
-					}
-                    if (p.ParameterType.ToString().Contains('*') || p.ParameterType.ToString().Contains('&'))
+					//if(IsUsedByNativeCode(p.ParameterType))
+					//{
+					//	return true;
+					//}
+                    if (p.ParameterType.ToString().Contains('*') 
+						//|| p.ParameterType.ToString().Contains('&')
+						)
                     {//参数带*， Native
                         return true;
                     }
@@ -2069,10 +2107,10 @@ namespace SLua
 			else if(mi.MemberType == MemberTypes.Field)
 			{
 				var fieldInfo = mi as FieldInfo;
-                if (IsUsedByNativeCode(fieldInfo.DeclaringType))
-                {
-                    return true;
-                }
+                //if (IsUsedByNativeCode(fieldInfo.DeclaringType))
+                //{
+                //    return true;
+                //}
                 if (fieldInfo.DeclaringType != null && fieldInfo.DeclaringType.ToString().Contains('*'))
                 {
                     return true;
@@ -2082,51 +2120,47 @@ namespace SLua
 					return true;
 				}
 
-                if (fieldInfo.IsDefined(typeof(MethodImplAttribute), false))
-                {
-                    MethodImplAttribute[] attris = fieldInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
-                    if (attris != null)
-                    {
-                        foreach (MethodImplAttribute attr in attris)
-                        {
-                            if (attr.Value == MethodImplOptions.InternalCall)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
+                //if (fieldInfo.IsDefined(typeof(MethodImplAttribute), false))
+                //{
+                //    MethodImplAttribute[] attris = fieldInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+                //    if (attris != null)
+                //    {
+                //        foreach (MethodImplAttribute attr in attris)
+                //        {
+                //            if (attr.Value == MethodImplOptions.InternalCall)
+                //            {
+                //                return true;
+                //            }
+                //        }
+                //    }
+                //}
             }
             else if (mi.MemberType == MemberTypes.Property)
 			{
 				var propInfo = mi as PropertyInfo;
-                if (IsUsedByNativeCode(propInfo.DeclaringType))
-                {
-                    return true;
-                }
-                if (propInfo.DeclaringType != null && propInfo.DeclaringType.ToString().Contains('*'))
-                {
-                    return true;
-                }
+                //if (IsUsedByNativeCode(propInfo.DeclaringType))
+                //{
+                //    return true;
+                //}
                 if (propInfo.PropertyType != null && propInfo.PropertyType.ToString().Contains('*'))
                 {
                     return true;
                 }
 
-                if (propInfo.IsDefined(typeof(MethodImplAttribute), false))
-                {
-                    MethodImplAttribute[] attris = propInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
-                    if (attris != null)
-                    {
-                        foreach (MethodImplAttribute attr in attris)
-                        {
-                            if (attr.Value == MethodImplOptions.InternalCall)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
+                //if (propInfo.IsDefined(typeof(MethodImplAttribute), false))
+                //{
+                //    MethodImplAttribute[] attris = propInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+                //    if (attris != null)
+                //    {
+                //        foreach (MethodImplAttribute attr in attris)
+                //        {
+                //            if (attr.Value == MethodImplOptions.InternalCall)
+                //            {
+                //                return true;
+                //            }
+                //        }
+                //    }
+                //}
             }
 
            return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
@@ -2584,7 +2618,7 @@ namespace SLua
 			{
 				ParameterInfo p = pars[n];
 				string pn = p.ParameterType.Name;
-				if (pn.EndsWith("&"))
+				if (pn.EndsWith("&") && !p.IsIn)
 				{
 					hasref = true;
 				}
@@ -2735,8 +2769,11 @@ namespace SLua
 		private void CheckArgument(StreamWriter file, Type t, int n, int argstart, bool isout, bool isparams)
 		{
             Write(file, "{0} a{1} = default({0});", TypeDecl(t), n + 1);
-			
-			if (!isout)
+            if (t.ToString().Contains("RotateUV"))
+            {
+                Debug.Log("222");
+            }
+            if (!isout)
 			{
 				string customCheckType = GetCustomCheckType(t);
 				if(!string.IsNullOrEmpty(customCheckType))
@@ -2746,11 +2783,7 @@ namespace SLua
 				else if (t.BaseType == typeof(System.MulticastDelegate))
 				{
                     //tryMake(t);
-                    if (t.ToString().Contains("MemoryUsageChangedCallback"))
-                    {
-                        Debug.Log("222");
-                    }
-                    if (!delegateFields.ContainsKey(t) && !IsObsolete(t) && !DontExport(t))
+                    if (!delegateFields.ContainsKey(t) && !DontExportDelegate(t))
                 		delegateFields.Add(t, true);
 					Write(file, "checkDelegate(l,{0},out a{1});", n + argstart, n + 1);
 				}
@@ -2763,7 +2796,9 @@ namespace SLua
 				}
 				else if(t.IsArray)
 					Write(file, "checkArray(l,{0},out a{1});", n + argstart, n + 1);
-				else if (IsValueType(t)) {
+                else if (IsSpanArray(t))
+                    Write(file, "checkArray(l,{0},out a{1});", n + argstart, n + 1);
+                else if (IsValueTypeNew(t)) {
 					if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 						Write(file, "checkNullable(l,{0},out a{1});", n + argstart, n + 1);
 					else if(IsSpanArray(t))
@@ -2779,6 +2814,17 @@ namespace SLua
 		bool IsValueType(Type t)
 		{
             return t.BaseType == typeof(ValueType) && !IsBaseType(t);
+		}
+		bool IsValueTypeNew(Type t)
+		{
+			if (IsValueType(t))
+				return true;
+			if(t.BaseType == null && t.IsByRef)
+			{
+                t = t.GetElementType();
+				return IsValueType(t);
+            }
+			return false;
 		}
 
 		bool IsBaseType(Type t)
@@ -2894,7 +2940,7 @@ namespace SLua
 				ParameterInfo p = pars[n];
 				if (p.ParameterType.IsByRef && p.IsOut)
 					str += string.Format("out a{0}", n + 1);
-				else if (p.ParameterType.IsByRef)
+				else if (p.ParameterType.IsByRef && !p.IsIn)
 					str += string.Format("ref a{0}", n + 1);
 				else
 					str += string.Format("a{0}", n + 1);
