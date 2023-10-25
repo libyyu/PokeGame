@@ -1220,6 +1220,8 @@ namespace SLua
             {
                 if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
                     return string.Format("checkNullable(l,{2}{0},out {1});", n, v, prefix);
+                else if(IsSpanArray(t))
+	                return string.Format("checkArray(l,{2}{0},out {1});", n, v, prefix);
                 else
                     return string.Format("checkValueType(l,{2}{0},out {1});", n, v, prefix);
             }
@@ -1417,7 +1419,7 @@ namespace SLua
         {
             return t.IsDefined(typeof(ComVisibleAttribute), false);
         }
-
+        
         bool HasCustomMethod(Type t)
         {
             List<Type> list = new List<Type>();
@@ -1890,6 +1892,8 @@ namespace SLua
 			else if (IsValueType(t))
                 if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
                     Write(file, "checkNullable(l,{2}{0},out {1});", n, v, nprefix);
+                else if(IsSpanArray(t))
+	                Write(file, "checkArray(l,{2}{0},out {1});", n, v, nprefix);
                 else
                     Write(file, "checkValueType(l,{2}{0},out {1});", n, v, nprefix);
 			else if (t.IsArray)
@@ -1944,26 +1948,34 @@ namespace SLua
 		bool DontExport(MemberInfo mi)
 		{
 		    var methodString = string.Format("{0}.{1}", mi.DeclaringType, mi.Name);
-            Debug.Log("method:" + methodString);
+            //Debug.Log("method:" + methodString);
 
-            var test = methodString;
-            if (mi.MemberType == MemberTypes.Method)
-            {
-                var methodInfo = mi as MethodInfo;
-                foreach(var p in methodInfo.GetParameters())
-                {
-                    test += ";" + p.Name;
-                }
-            }
+            //var test = methodString;
+            //if (mi.MemberType == MemberTypes.Method)
+            //{
+	        //    test += "(";
+            //    var methodInfo = mi as MethodInfo;
+            //    foreach(var p in methodInfo.GetParameters())
+            //    {
+            //        test += p.ParameterType.FullName + " " + p.ParameterType.Name + ",";
+			//
+            //        if (p.ParameterType.IsGenericType)
+            //        {
+	        //            test += p.ParameterType.GetGenericTypeDefinition().ToString();
+            //        }
+            //    }
+            //    test += ")";
+            //}
 
-            FileStream fs = new FileStream("./test.txt", FileMode.Append);
-            //获得字节数组
-            byte[] data = System.Text.Encoding.Default.GetBytes(test+"\n");
-            //开始写入
-            fs.Write(data, 0, data.Length);
-            //清空缓冲区、关闭流
-            fs.Flush();
-            fs.Close();
+            //FileStream fs = new FileStream("./test.txt", FileMode.Append);
+            ////获得字节数组
+            //byte[] data = System.Text.Encoding.Default.GetBytes(test+"\n");
+            ////开始写入
+            //fs.Write(data, 0, data.Length);
+            ////清空缓冲区、关闭流
+            //fs.Flush();
+            //fs.Close();
+            //Debug.Log(test);
 
 		    if (CustomExport.FunctionFilterList.Contains(methodString))
 		        return true;
@@ -2010,7 +2022,16 @@ namespace SLua
                 }
             }
 
-			return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
+            if (mi.MemberType == MemberTypes.Method)
+            {
+	            var methodInfo = mi as MethodInfo;
+	            foreach (var p in methodInfo.GetParameters())
+	            {
+
+	            }
+            }
+
+            return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
 		}
 		
 		
@@ -2424,6 +2445,8 @@ namespace SLua
 				Write(file, "{0} self;", TypeDecl(t));
 				if(IsBaseType(t))
 					Write(file, "checkType(l,1,out self);");
+				else if(IsSpanArray(t))
+					Write(file, "checkArray(l,1,out self);");
 				else
 					Write(file, "checkValueType(l,1,out self);");
 			}
@@ -2630,6 +2653,8 @@ namespace SLua
 				else if (IsValueType(t)) {
 					if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 						Write(file, "checkNullable(l,{0},out a{1});", n + argstart, n + 1);
+					else if(IsSpanArray(t))
+						Write(file, "checkArray(l,{0},out a{1});", n + argstart, n + 1);
 					else
 						Write(file, "checkValueType(l,{0},out a{1});", n + argstart, n + 1);
 				}
@@ -2649,6 +2674,15 @@ namespace SLua
 				t = t.GetElementType();
 			}
 			return t.IsPrimitive || LuaObject.isImplByLua(t);
+		}
+
+		bool IsSpanArray(Type t)
+		{
+			return t.Name.Contains("Span`");
+		}
+		bool IsSpanReadOnlyArray(Type t)
+		{
+			return t.Name.Contains("ReadOnlySpan`");
 		}
 		
 		string FullName(string str)

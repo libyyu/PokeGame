@@ -985,6 +985,29 @@ namespace SLua
             }
         }
 
+        static public bool checkArray<T>(IntPtr l, int p, out System.Span<T> ta)
+        {
+	        ta = default(System.Span<T>);
+	        T[] a1 = default(T[]);
+	        bool ret = checkArray(l, p, out a1);
+	        if (ret)
+		        ta = new System.Span<T>(a1);
+	        else
+		        ta = null;
+	        return ret;
+        }
+        static public bool checkArray<T>(IntPtr l, int p, out System.ReadOnlySpan<T> ta)
+        {
+	        T[] a1 = default(T[]);
+	        bool ret = checkArray(l, p, out a1);
+	        if (ret)
+		        ta = new System.ReadOnlySpan<T>(a1);
+	        else
+		        ta = null;
+	        return ret;
+        }
+
+        
         static public bool checkParams<T>(IntPtr l, int p, out T[] pars) where T:class
 		{
 			int top = LuaDLL.lua_gettop(l);
