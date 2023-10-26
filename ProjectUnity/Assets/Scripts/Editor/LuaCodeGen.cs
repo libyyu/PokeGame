@@ -34,7 +34,6 @@ namespace SLua
     using System.Text.RegularExpressions;
     using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
-    using System.Runtime.Serialization.Formatters;
 
     public interface ICustomExportPost { }
 
@@ -907,7 +906,7 @@ namespace SLua
                     || (t.DeclaringType.IsNested && t.DeclaringType.IsNestedPublic == false)))
                     return false;
 
-				if (t.IsEnum)
+				if (IsEnumType(t))
 				{
 					StreamWriter file = Begin(t);
 					WriteHead(t, file);
@@ -1229,7 +1228,7 @@ namespace SLua
             string customCheckType = GetCustomCheckType(t);
             if (!string.IsNullOrEmpty(customCheckType))
                 return string.Format("{3}(l,{2}{0},out {1});", n, v, prefix, customCheckType);
-            else if (t.IsEnum || t.BaseType == typeof(System.Enum))
+            else if (IsEnumType(t))
             {
                 return string.Format("checkEnum(l,{2}{0},out {1});", n, v, prefix);
             }
@@ -1551,7 +1550,8 @@ namespace SLua
 				PropPair pp = propname[f];
                 trygetOverloadedVersion(t, ref pp.get);
                 trygetOverloadedVersion(t, ref pp.set);
-				Write(file, "addMember(l,\"{0}\",{1},{2},{3});", f, pp.get, pp.set, pp.isInstance ? "true" : "false");
+				if(!string.IsNullOrEmpty(pp.get) || !string.IsNullOrEmpty(pp.set))
+					Write(file, "addMember(l,\"{0}\",{1},{2},{3});", f, pp.get, pp.set, pp.isInstance ? "true" : "false");
 			}
 
 			if (t.BaseType != null && !CutBase(t.BaseType))
@@ -1917,7 +1917,7 @@ namespace SLua
             string customCheckType = GetCustomCheckType(t);
 			if (!string.IsNullOrEmpty(customCheckType))
 				Write(file, "{3}(l,{2}{0},out {1});", n, v, nprefix, customCheckType);
-			else if (t.IsEnum || t.BaseType == typeof(System.Enum))
+			else if (IsEnumType(t))
 				Write(file, "checkEnum(l,{2}{0},out {1});", n, v, nprefix);
 			else if (t.BaseType == typeof(System.MulticastDelegate))
 				Write(file, "int op=checkDelegate(l,{2}{0},out {1});", n, v, nprefix);
@@ -2061,30 +2061,7 @@ namespace SLua
             if (mi.MemberType == MemberTypes.Method)
 			{
                 var methodInfo = mi as MethodInfo;
-    //            if (IsUsedByNativeCode(mi.DeclaringType))
-				//{
-				//	return true;
-				//}
-    //            if (IsUsedByNativeCode(methodInfo.ReturnType))
-    //            {
-    //                return true;
-    //            }
 
-
-    //            if (methodInfo.IsDefined(typeof(MethodImplAttribute), false))
-				//{
-    //                MethodImplAttribute[] attris = methodInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
-				//	if(attris != null)
-				//	{
-				//		foreach(MethodImplAttribute attr in attris)
-				//		{
-    //                        if (attr.Value == MethodImplOptions.InternalCall)
-    //                        {
-    //                            return true;
-    //                        }
-    //                    }
-    //                }
-    //            }
 
                 if (methodInfo.ReturnType != null && methodInfo.ReturnType.ToString().Contains('*'))
                 {//返回值带*， Native
@@ -2092,10 +2069,6 @@ namespace SLua
                 }
                 foreach (var p in methodInfo.GetParameters())
 	            {
-					//if(IsUsedByNativeCode(p.ParameterType))
-					//{
-					//	return true;
-					//}
                     if (p.ParameterType.ToString().Contains('*') 
 						//|| p.ParameterType.ToString().Contains('&')
 						)
@@ -2103,67 +2076,176 @@ namespace SLua
                         return true;
                     }
                 }
+#if UNITY_WEBGL
+                Attribute[] v = methodInfo.GetCustomAttributes(false) as Attribute[];
+                if (v != null)
+                {
+                    foreach (Attribute a in v)
+                    {
+                        if (a.ToString().Contains("UsedByNativeCodeAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeHeaderAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeTypeAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeConditionalAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeMethodAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeNameAttribute"))
+                        {
+                            return true;
+                        }
+						else if(a.ToString().Contains("MethodImplAttribute"))
+						{
+							MethodImplAttribute[] arr = methodInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+							if(arr != null)
+							{
+								foreach(MethodImplAttribute aa in arr)
+								{
+									if (aa.Value == MethodImplOptions.InternalCall)
+									{
+										return true;
+									}
+								}
+							}
+
+                        }
+                    }
+                }
+#endif
             }
-			else if(mi.MemberType == MemberTypes.Field)
+            else if(mi.MemberType == MemberTypes.Field)
 			{
 				var fieldInfo = mi as FieldInfo;
-                //if (IsUsedByNativeCode(fieldInfo.DeclaringType))
-                //{
-                //    return true;
-                //}
+
                 if (fieldInfo.DeclaringType != null && fieldInfo.DeclaringType.ToString().Contains('*'))
                 {
                     return true;
                 }
                 if (fieldInfo.FieldType != null && fieldInfo.FieldType.ToString().Contains('*'))
-				{
-					return true;
+                {
+                    return true;
 				}
 
-                //if (fieldInfo.IsDefined(typeof(MethodImplAttribute), false))
-                //{
-                //    MethodImplAttribute[] attris = fieldInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
-                //    if (attris != null)
-                //    {
-                //        foreach (MethodImplAttribute attr in attris)
-                //        {
-                //            if (attr.Value == MethodImplOptions.InternalCall)
-                //            {
-                //                return true;
-                //            }
-                //        }
-                //    }
-                //}
+#if UNITY_WEBGL
+                Attribute[] v = fieldInfo.GetCustomAttributes(false) as Attribute[];
+                if (v != null)
+                {
+                    foreach (Attribute a in v)
+                    {
+                        if (a.ToString().Contains("UsedByNativeCodeAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeHeaderAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeTypeAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeConditionalAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeMethodAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeNameAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("MethodImplAttribute"))
+                        {
+                            MethodImplAttribute[] arr = fieldInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+                            if (arr != null)
+                            {
+                                foreach (MethodImplAttribute aa in arr)
+                                {
+                                    if (aa.Value == MethodImplOptions.InternalCall)
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+#endif
             }
             else if (mi.MemberType == MemberTypes.Property)
 			{
 				var propInfo = mi as PropertyInfo;
-                //if (IsUsedByNativeCode(propInfo.DeclaringType))
-                //{
-                //    return true;
-                //}
+
                 if (propInfo.PropertyType != null && propInfo.PropertyType.ToString().Contains('*'))
                 {
                     return true;
                 }
 
-                //if (propInfo.IsDefined(typeof(MethodImplAttribute), false))
-                //{
-                //    MethodImplAttribute[] attris = propInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
-                //    if (attris != null)
-                //    {
-                //        foreach (MethodImplAttribute attr in attris)
-                //        {
-                //            if (attr.Value == MethodImplOptions.InternalCall)
-                //            {
-                //                return true;
-                //            }
-                //        }
-                //    }
-                //}
+#if UNITY_WEBGL
+                Attribute[] v = propInfo.GetCustomAttributes(false) as Attribute[];
+                if (v != null)
+                {
+                    foreach (Attribute a in v)
+                    {
+                        if (a.ToString().Contains("UsedByNativeCodeAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeHeaderAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeTypeAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeConditionalAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeMethodAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("NativeNameAttribute"))
+                        {
+                            return true;
+                        }
+                        else if (a.ToString().Contains("MethodImplAttribute"))
+                        {
+                            MethodImplAttribute[] arr = propInfo.GetCustomAttributes(typeof(MethodImplAttribute), false) as MethodImplAttribute[];
+                            if (arr != null)
+                            {
+                                foreach (MethodImplAttribute aa in arr)
+                                {
+                                    if (aa.Value == MethodImplOptions.InternalCall)
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+#endif
             }
 
-           return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
+            return mi.IsDefined(typeof(DoNotToLuaAttribute), false);
 		}
 		
 		string GetCustomCheckType(Type t)
@@ -2726,7 +2808,7 @@ namespace SLua
 		
 		void WritePushValue(Type t, StreamWriter file)
 		{
-			if (t.IsEnum)
+			if (IsEnumType(t))
 				Write(file, "pushEnum(l,(int)ret);");
             else if (t.IsInterface && t.IsDefined(typeof(CustomLuaClassAttribute), false))
                 Write(file, "pushInterface(l,ret, typeof({0}));", TypeDecl(t));
@@ -2736,7 +2818,7 @@ namespace SLua
 		
 		void WritePushValue(Type t, StreamWriter file, string ret)
 		{
-			if (t.IsEnum)
+			if (IsEnumType(t))
 				Write(file, "pushEnum(l,(int){0});", ret);
             else if (t.IsInterface && t.IsDefined(typeof(CustomLuaClassAttribute),false))
                 Write(file, "pushInterface(l,{0}, typeof({1}));", ret,TypeDecl(t));
@@ -2778,7 +2860,7 @@ namespace SLua
 				string customCheckType = GetCustomCheckType(t);
 				if(!string.IsNullOrEmpty(customCheckType))
                     Write(file, "{2}(l,{0},out a{1});", n + argstart, n + 1, customCheckType);
-                else if (t.IsEnum || t.BaseType == typeof(System.Enum))
+                else if (IsEnumType(t))
 					Write(file, "checkEnum(l,{0},out a{1});", n + argstart, n + 1);
 				else if (t.BaseType == typeof(System.MulticastDelegate))
 				{
@@ -2826,6 +2908,19 @@ namespace SLua
             }
 			return false;
 		}
+		bool IsEnumType(Type t)
+		{
+			if (t.IsEnum || t.BaseType == typeof(System.Enum))
+				return true;
+
+			if(t.BaseType == null && t.IsByRef)
+			{
+                t = t.GetElementType();
+				return t.IsEnum || t.BaseType == typeof(System.Enum);
+            }
+
+			return false;
+        }
 
 		bool IsBaseType(Type t)
 		{
@@ -2859,6 +2954,10 @@ namespace SLua
 						return true;
 					}
 					else if(a.ToString().Contains("NativeTypeAttribute"))
+					{
+						return true;
+					}
+					else if(a.ToString().Contains("NativeConditionalAttribute"))
 					{
 						return true;
 					}

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
+#if !UNITY_WEBGL
 using System.Threading;
+#endif
 using UnityEngine;
 using SLua;
 /// <summary>
@@ -23,11 +25,16 @@ public class MainThreadTask : MonoBehaviour
 	{
 		if (m_inited)
 			return;
-		m_mainThreadID = Thread.CurrentThread.ManagedThreadId;
+		m_mainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 		var obj = new GameObject("MainThreadTask");
 		obj.AddComponent<MainThreadTask>();
 		m_inited = true;
 	}
+
+	static bool IsCurrentMainThread()
+	{
+		return m_mainThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+    }
 
 	static IEnumerator _InnerCall_(Action action)
 	{
@@ -55,7 +62,7 @@ public class MainThreadTask : MonoBehaviour
 		}
 	}
 
-	public static IEnumerator _WaitCall_(Func<bool> condition, Action action)
+    private static IEnumerator _WaitCall_(Func<bool> condition, Action action)
 	{
 		yield return new WaitUntil (condition);
 
@@ -77,7 +84,7 @@ public class MainThreadTask : MonoBehaviour
 	private void Update()
 	{
 		//start all queued task
-		while (true)
+		while (!m_stopped)
 		{
 			Boolean hasMore = false;
 			IEnumerator coroutine = null;

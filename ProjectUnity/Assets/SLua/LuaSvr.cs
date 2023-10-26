@@ -27,13 +27,11 @@
 namespace SLua
 {
 	using System;
-	using System.Threading;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Reflection;
 	#if !SLUA_STANDALONE
 	using UnityEngine;
-	using Debug = UnityEngine.Debug;
 	#endif
 
 	public class LuaSvr 

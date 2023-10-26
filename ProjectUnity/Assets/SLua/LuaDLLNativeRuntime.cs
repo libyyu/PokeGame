@@ -45,19 +45,19 @@
             switch(logType)
             {
                 case LogType.Log:
-					LogUtil.Log("["+LUADLL+"]"+message);
+                    Logger.Log("["+LUADLL+"]"+message);
                     break;
                 case LogType.Warning:
-					LogUtil.LogWarning("["+LUADLL+"]"+message);
+                    Logger.LogWarning("["+LUADLL+"]"+message);
                     break;
                 case LogType.Error:
-                    LogUtil.LogError("["+LUADLL+"]"+message);
+                    Logger.LogError("["+LUADLL+"]"+message);
                     break;
                 case LogType.Exception:
-					LogUtil.LogException(new Exception("["+LUADLL+"]"+message));
+                    Logger.LogException(new Exception("["+LUADLL+"]"+message));
                     break;
                 case LogType.Assert:
-					LogUtil.LogError("["+LUADLL+"]"+message);
+                    Logger.LogError("["+LUADLL+"]"+message);
                     break;
             }
         }

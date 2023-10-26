@@ -24,12 +24,7 @@
 namespace SLua
 {
 	using UnityEngine;
-	using System.Collections;
-	using SLua;
 	using System;
-	using System.Net;
-	using System.Net.Sockets;
-	using System.IO;
 
 	public class LuaSvrGameObject : MonoBehaviour
 	{

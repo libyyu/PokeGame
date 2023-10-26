@@ -103,10 +103,10 @@ namespace SLua
     public class LuaDLL
     {
         public static int LUA_MULTRET = -1;
-#if UNITY_IPHONE && !UNITY_EDITOR
+#if (UNITY_IPHONE || UNITY_WEBGL) && !UNITY_EDITOR
 		public const string LUADLL = "__Internal";
 #else
-		public const string LUADLL = "FengEngine";
+        public const string LUADLL = "FengEngine";
 #endif
 
         [DllImport(LUADLL, CallingConvention = CallingConvention.Cdecl)]
