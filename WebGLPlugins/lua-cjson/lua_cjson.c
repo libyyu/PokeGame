@@ -42,9 +42,9 @@
 #include <limits.h>
 #define LUA_LIB
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "../lua51/lua.h"
+#include "../lua51/lualib.h"
+#include "../lua51/lauxlib.h"
 
 #include "strbuf.h"
 #include "fpconv.h"

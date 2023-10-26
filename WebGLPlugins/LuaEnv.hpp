@@ -1,7 +1,7 @@
 #ifndef _LUA_ENV_HPP
 #define _LUA_ENV_HPP
 
-#include "lua.hpp"
+#include "lua51/lua.hpp"
 #include <string>
 #include <assert.h>
 #include <iostream>

@@ -52,8 +52,8 @@ do
 	    camobj.transform.localScale = Vector3(1, 1, 1);
 	    local cam = camobj:AddComponent(UnityEngine.Camera)
 	    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
-	    camobj:AddComponent(UnityEngine.FlareLayer)
-        camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
+	    --camobj:AddComponent(UnityEngine.FlareLayer)
+	    --camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
         camobj.tag = "MainCamera"
         self.m_MainCam = camobj	    
 	    --AudioListener

@@ -31,9 +31,9 @@
 #define LUA_LIB
 #endif
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "lua51/lua.h"
+#include "lua51/lualib.h"
+#include "lua51/lauxlib.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -69,7 +69,8 @@ static const char *luaS_findtable(lua_State *L, int idx,
 		e = strchr(fname, '.');
 		if (e == NULL) e = fname + strlen(fname);
 		lua_pushlstring(L, fname, e - fname);
-		if (lua_rawget(L, -2) == LUA_TNIL) {  /* no such field? */
+		lua_rawget(L, -2);
+		if (lua_isnil(L, -1)) {  /* no such field? */
 			lua_pop(L, 1);  /* remove this nil */
 			lua_createtable(L, 0, (*e == '.' ? 1 : szhint)); /* new table for field */
 			lua_pushlstring(L, fname, e - fname);
@@ -510,19 +511,19 @@ LUA_API int luaS_subclassof(lua_State *l, int p, const char* t) {
 }
 
 
-//#if LUA_VERSION_NUM>=502
+#if LUA_VERSION_NUM>=502
 LUALIB_API int luaS_rawlen(lua_State *L, int idx)
 {
 	size_t ret = lua_rawlen(L, idx);
 	return (int)ret;
 }
-//#else
+#else
 LUALIB_API int luaS_objlen(lua_State *L, int idx)
 {
 	size_t ret = lua_objlen(L, idx);
 	return (int)ret;
 }
-//#endif
+#endif
 
 
 LUALIB_API void  luaS_pushlstring(lua_State *L, const char *s, int l)

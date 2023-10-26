@@ -365,9 +365,9 @@ static int int64_tostring(lua_State* L) {
     char temp[72];
 	Integer64 lhs = lua_checkinteger64(L, 1); 
 	if (lhs.type == UInt) {
-		sprintf(temp, "%"PRIu64"U", lhs.data.u64);
+		sprintf(temp, "%" PRIu64 "U", lhs.data.u64);
 	} else {
-		sprintf(temp, "%"PRId64, lhs.data.i64);
+		sprintf(temp, "%" PRId64, lhs.data.i64);
 	}		
     lua_pushstring(L, temp);
     return 1;

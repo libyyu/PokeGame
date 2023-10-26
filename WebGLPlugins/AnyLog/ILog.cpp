@@ -49,10 +49,3 @@ void ILog::LogFormatInner(LOG_TYPE logType, const char* format, va_list va)
 	}
 }
 
-void FLog::LogImpl(LOG_TYPE logType, const char* message)
-{
-    if (_log_message != NULL)
-    {
-        _log_message((int)logType, message);
-    }
-}

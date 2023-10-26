@@ -8,10 +8,8 @@
 #define MODULE_NAME "FengEngine"
 #define MODULE_VERSION "1.0.1"
 
-LuaEnv* glb_GetLuaEnv();
-void glb_SetLuaEnv(LuaEnv*);
-AnyLog::ILog* glb_GetAnyLog();
-void glb_SetAnyLog(AnyLog::ILog*);
+static LuaEnv* glb_GetLuaEnv();
+static AnyLog::ILog* glb_GetAnyLog();
 
 #define  log_info(fmt,...)    \
 if(glb_GetAnyLog() != NULL) \
@@ -46,7 +44,7 @@ if(glb_GetAnyLog() != NULL) \
 #define SAFE_RELEASE(p) { if(p){ (p)->Release();  (p)=NULL;} }
 #endif
 
-void formatString(std::string& str, const char* fmt, ...);
+static void formatString(std::string& str, const char* fmt, ...);
 
 typedef enum ErrRet
 {
@@ -56,7 +54,7 @@ typedef enum ErrRet
 	ERRRET_ABORT
 }ErrRet;
 
-ErrRet NotifyAssert(const char* condition, const char* fileName, int lineNumber, const char* formats, ...);
+static ErrRet NotifyAssert(const char* condition, const char* fileName, int lineNumber, const char* formats, ...);
 
 #if defined( _DEBUG ) || defined( DEBUG )
 #if FLIB_COMPILER_MSVC

@@ -43,35 +43,5 @@ namespace AnyLog
 	typedef ILog *PLOG;
 }
 
-class FLog : public AnyLog::ILog
-{
-private:
-	PLogFunc _log_message;
-public:
-	FLog() : _log_message(NULL) {}
-	void SetLogCall(PLogFunc pFunc)
-	{
-		assert(pFunc && "AnyLog::PLogFunc must not be null.");
-		_log_message = pFunc;
-	}
-	static AnyLog::PLOG CreateILog(void* pfunc)
-	{
-		FLog* pLog = new FLog();
-		pLog->SetLogCall((PLogFunc)pfunc);
-		return pLog;
-	}
-	static void DestroyILog(AnyLog::PLOG pLog)
-	{
-        FLog* plog = static_cast<FLog*>(pLog);
-		if(NULL != plog)
-		{
-			delete plog;
-			pLog = NULL;
-		}
-	}
-protected:
-    void LogImpl(LOG_TYPE logType, const char* message);
-};
-
 
 #endif//__ILOG_H__

@@ -148,6 +148,7 @@ namespace SLua
             "UnityEngine.Material.SetPropertyLock",
             "UnityEngine.Material.ApplyPropertyOverride",
             "UnityEngine.Material.RevertPropertyOverride",
+            "UnityEngine.Material.IsChildOf",
             "UnityEngine.Material.get_parent",
             "UnityEngine.Material.set_parent",
             "UnityEngine.Material.get_isVariant",

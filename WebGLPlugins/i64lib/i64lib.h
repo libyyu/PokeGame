@@ -10,9 +10,9 @@
 #define I64LIB_H
 
 #include <stdint.h>
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+#include "../lua51/lua.h"
+#include "../lua51/lauxlib.h"
+#include "../lua51/lualib.h"
 
 #ifdef __cplusplus
 #if __cplusplus

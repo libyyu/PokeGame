@@ -18,7 +18,6 @@ AnyLog::ILog* glb_GetAnyLog()
 }
 void glb_SetAnyLog(AnyLog::ILog* pLog)
 {
-    FLog::DestroyILog(g_theLog);
 	g_theLog = pLog;
 }
 
@@ -39,7 +38,7 @@ ErrRet DisplayError(const char* errorTitle,
 	const char* fileName,
 	int lineNumber)
 {
-#if FLIB_COMPILER_MSVC
+#ifdef _WIN32
 	const int MODULE_NAME_SIZE = 255;
 	char moduleName[MODULE_NAME_SIZE] = {0};
 	// attempt to get the module name

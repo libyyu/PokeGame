@@ -23,9 +23,9 @@
 #include <string.h>
 
 #define LUA_LIB
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "lua51/lua.h"
+#include "lua51/lualib.h"
+#include "lua51/lauxlib.h"
 
 #ifdef _ALLBSD_SOURCE
 #include <machine/endian.h>
