@@ -147,20 +147,23 @@ public class AssetExport
 		UnityLog.Log("AssetBundle打包完成");
 	}
 
-	[MenuItem("ExportAssets/步骤1.导出AssetBundle", false, 11)]
-	public static void ExportAllAssets()
-	{
+    [MenuItem("ExportAssets/步骤0.导入Lua脚本", false, 10)]
+    public static void ImportLuaScript()
+    {
         string src_res = Application.dataPath + "/../../Output";
-        string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
 
-        CopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String filepath) => {
+		CopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String filepath) =>
+		{
 			File.Delete(filepath + ".bytes");
 			File.Move(filepath, filepath + ".bytes");
 		});
+    }
 
-		MyListenPostprocessor.ListenCallback(() => {
-            ExportAssets(dst_path);
-        });
+    [MenuItem("ExportAssets/步骤1.导出AssetBundle", false, 11)]
+	public static void ExportAllAssets()
+	{
+        string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
+        ExportAssets(dst_path);
 	}
 
 	[MenuItem("ExportAssets/步骤2.打包所有资源(使用Lua源码)", false, 12)]

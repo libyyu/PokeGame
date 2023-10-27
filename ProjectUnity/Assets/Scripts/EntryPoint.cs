@@ -80,10 +80,13 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         {
             if (string.IsNullOrEmpty(EntryLuaScript))
                 return;
-
+#if UNITY_WEBGL && !UNITY_EDITOR
             ResourceManager.Instance.LoadBundle("lua", (AssetBundle ab) => {
                 lua.start(EntryLuaScript);
             });
+#else
+            lua.start(EntryLuaScript);
+#endif
         });        
     }
 		
