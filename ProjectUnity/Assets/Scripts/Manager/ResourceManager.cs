@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 using SLua;
+using UnityEngine.Networking;
 
 namespace FGame
 {
@@ -86,6 +87,15 @@ namespace FGame
 			}
 		}
 
+		public string FixABName(string abName)
+		{
+			string outName = abName.ToLower();
+			if (outName.StartsWith('/')) outName = outName.Substring(1);
+			if (!outName.StartsWith("assets/")) outName = "assets/" + outName;
+			if (!outName.EndsWith(BundleExt)) outName = outName + BundleExt;
+			return outName;
+        }
+
 		[DoNotToLua]
 		public void LoadAsset(string abName, string[] assetNames, Action<UObject[]> action)
 		{
@@ -126,9 +136,14 @@ namespace FGame
 		// Load AssetBundleManifest.
 		void Initialize(Action onInitCallback) {
 			LoadAsset<AssetBundleManifest>(ManifestName, new string[] { "AssetBundleManifest" }, delegate(UObject[] objs) {
-				if (objs.Length > 0) {
-					m_AssetBundleManifest = objs[0] as AssetBundleManifest;
+                if (objs.Length > 0) {
+                    LogUtil.Log("AssetBundleManifest Load Finished.");
+                    m_AssetBundleManifest = objs[0] as AssetBundleManifest;
 					m_AllManifest = m_AssetBundleManifest.GetAllAssetBundles();
+				}
+				else
+				{
+					LogUtil.LogWarning("AssetBundleManifest Load Finished but no AssetBundleManifest.");
 				}
 				if (onInitCallback != null) onInitCallback();
 			});
@@ -139,8 +154,7 @@ namespace FGame
 		/// </summary>
 		void LoadAsset<T>(string abName, string[] assetNames, Action<UObject[]> action = null) where T : UObject {
 			if (typeof(T) != typeof(AssetBundleManifest)) {
-				abName = abName.ToLower ();
-				abName = abName + BundleExt;
+				abName = FixABName(abName);
 			}
 			LoadAssetRequest request = new LoadAssetRequest();
 			request.assetType = typeof(T);
@@ -171,6 +185,10 @@ namespace FGame
 					else
 						LogUtil.LogWarning("OnLoadAsset Failed --->>> " + abName);
 					yield break;
+				}
+				else
+				{
+					LogUtil.Log("OnLoadAsset Success --->>> " + abName);
 				}
 			}
 
@@ -218,14 +236,74 @@ namespace FGame
 		}
 
 		IEnumerator OnLoadAssetBundle(string abName, Type type) {
-			string url;
-			if(EnableSepFile && File.Exists(GameUtil.MakePathFromWWW(SepDownloadURL) + "/" + abName))
+#if UNITY_WEBGL && !UNITY_EDITOR
+			var uri = new System.Uri(Path.Combine(Application.streamingAssetsPath, abName));
+            LogUtil.Log(string.Format("load asset {0}", uri.ToString()));
+            
+            if (type == typeof(AssetBundleManifest))
+            {
+                UnityWebRequest request = UnityWebRequest.Get(uri);
+                yield return request.SendWebRequest();
+                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    LogUtil.LogWarning(request.error);
+                }
+                else
+                {
+                    AssetBundle assetObj = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+                    if (assetObj != null)
+                    {
+                        m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetObj));
+                    }
+                }
+            }
+            else
+            {
+                string[] dependencies = m_AssetBundleManifest.GetAllDependencies(abName);
+                if (dependencies.Length > 0)
+                {
+                    m_Dependencies.Add(abName, dependencies);
+                    for (int i = 0; i < dependencies.Length; i++)
+                    {
+						LogUtil.Log (string.Format ("load dependent asset {0}", dependencies[i]));
+                        string depName = dependencies[i];
+                        AssetBundleInfo bundleInfo = null;
+                        if (m_LoadedAssetBundles.TryGetValue(depName, out bundleInfo))
+                        {
+                            bundleInfo.m_ReferencedCount++;
+                        }
+                        else if (!m_LoadRequests.ContainsKey(depName))
+                        {
+                            yield return StartCoroutine(OnLoadAssetBundle(depName, type));
+                        }
+                    }
+                }
+                WWW download = WWW.LoadFromCacheOrDownload(uri.ToString(), m_AssetBundleManifest.GetAssetBundleHash(abName), 0);
+                yield return download;
+
+                if (download.isDone && download.error == null)
+                {
+                    AssetBundle assetObj = download.assetBundle;
+                    if (assetObj != null)
+                    {
+                        m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetObj));
+                    }
+                }
+                else if (download.error != null)
+                {
+                    LogUtil.LogWarning(download.error);
+                }
+            }
+#else
+            string url;
+            if (EnableSepFile && File.Exists(GameUtil.MakePathFromWWW(SepDownloadURL) + "/" + abName))
 				url = GameUtil.MakePathForWWW(SepDownloadURL) + "/" + abName;
 			else if(File.Exists(GameUtil.MakePathFromWWW(UpdateDownloadURL + "/" + abName)))
 				url = GameUtil.MakePathForWWW(UpdateDownloadURL) + "/" + abName;
 			else
 				url = GameUtil.MakePathForWWW(BaseDownloadingURL) + "/" + abName;
-			LogUtil.Log (string.Format ("load asset {0}", url));
+
+            LogUtil.Log (string.Format ("load asset {0}", url));
 			WWW download = null;
 
 			if (type == typeof(AssetBundleManifest))
@@ -257,10 +335,11 @@ namespace FGame
 			else if(download.error != null){
 				LogUtil.LogWarning(download.error);
 			}
-		}
+#endif
+        }
 
-		AssetBundleInfo GetLoadedAssetBundle(string abName) {
-			AssetBundleInfo bundle = null;
+        public AssetBundleInfo GetLoadedAssetBundle(string abName) {
+            AssetBundleInfo bundle = null;
 			m_LoadedAssetBundles.TryGetValue(abName, out bundle);
 			if (bundle == null) return null;
 

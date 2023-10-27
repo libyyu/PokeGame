@@ -5,6 +5,7 @@ using System.IO;
 using FGame;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public class EntryPoint : PersistentSingleton<EntryPoint>
 {
@@ -61,7 +62,8 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 
     void SetupPath()
     {
-		LogUtil.Log("dataPath:" + Application.dataPath);
+        LogUtil.Log("streamingAssetsPath:" + Application.streamingAssetsPath);
+        LogUtil.Log("dataPath:" + Application.dataPath);
 		LogUtil.Log("resBasePath:" + GameUtil.BaseStreamAssetPath);
         LogUtil.Log("AssetRoot:" + GameUtil.AssetRoot);
         LogUtil.Log("AssetsPath:" + GameUtil.AssetPath);
@@ -78,12 +80,51 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         {
             if (string.IsNullOrEmpty(EntryLuaScript))
                 return;
-			lua.start(EntryLuaScript);
+
+            ResourceManager.Instance.LoadBundle("lua", (AssetBundle ab) => {
+                lua.start(EntryLuaScript);
+            });
         });        
     }
 		
     byte[] loadLuaFile(string f)
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        string name = f;
+        if (name.EndsWith(".lua"))
+        {
+            int index = f.LastIndexOf('.');
+            name = f.Substring(0, index);
+        }
+        name = name.Replace('.', '/');
+        name += ".lua";
+        
+        string bundlename = ResourceManager.Instance.FixABName("lua");
+        AssetBundleInfo abInfo = ResourceManager.Instance.GetLoadedAssetBundle(bundlename);
+        if (abInfo == null || abInfo.m_AssetBundle == null) {
+            LogUtil.LogWarning(string.Format("bundle '{0}' not found.", bundlename));
+            return null;
+        }
+
+//#if UNITY_4_6 || UNITY_4_7
+//        TextAsset luaCode = abInfo.m_AssetBundle.Load(name, typeof(TextAsset)) as TextAsset;
+//#else
+        TextAsset luaCode = abInfo.m_AssetBundle.LoadAsset<TextAsset>("Assets/Lua/" + name + ".bytes");
+//#endif
+
+        if (luaCode != null)
+        {
+            byte[] buffer = luaCode.bytes;
+            Resources.UnloadAsset(luaCode);
+            return buffer;
+        }
+        else
+        {
+            LogUtil.LogWarning(string.Format("lua file '{0}' not found.", "Assets/Lua/" + name));
+        }
+
+        return null;
+#else
         string luafilepath = GameUtil.MakePathForLua(f);
         try
         {
@@ -93,6 +134,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         {
             return null;
         }
+#endif
     }
 
     protected override void Awake()
@@ -165,5 +207,31 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         {
             //LogUtil.Log("OnApplicationQuit");
         }
+    }
+
+    void InitLuaBundle(Action onComplete)
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        StartCoroutine(_AddBundle("lua/lua.unity3d", onComplete));
+#endif
+    }
+
+    IEnumerator _AddBundle(string bundleName, Action onComplete)
+    {
+        yield return 0;
+        var uri = new System.Uri(Path.Combine(Application.streamingAssetsPath, bundleName));
+        UnityWebRequest request = UnityWebRequest.Get(uri);
+        yield return request.SendWebRequest();
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            LogUtil.LogError(request.error);
+        }
+        else
+        {
+            AssetBundle ab = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+            //loader.AddBundle(bundleName, ab);
+        }
+
+        onComplete.Invoke();
     }
 }

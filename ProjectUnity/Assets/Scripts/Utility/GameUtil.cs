@@ -362,6 +362,10 @@ public class GameUtil
 
     public static byte[] ReadAssetFile(string filePath)
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        
+#endif
+
 #if UNITY_ANDROID
         if (filePath.IndexOf("://") != -1)
         {

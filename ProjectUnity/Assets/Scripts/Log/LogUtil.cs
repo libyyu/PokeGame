@@ -118,18 +118,24 @@ public static class LogUtil
 
     public static void AttachUnityLogHandle()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+#else
 #if !SLUA_STANDALONE
 		Application.logMessageReceived += LogCallback;
 #else
 		SLua.Logger.logMessageReceived += LogCallback;
 #endif
+#endif
     }
     public static void DetachUnityLogHandle()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+#else
 #if !SLUA_STANDALONE
-		Application.logMessageReceived -= LogCallback;
+        Application.logMessageReceived -= LogCallback;
 #else
 		SLua.Logger.logMessageReceived -= LogCallback;
+#endif
 #endif
     }
 

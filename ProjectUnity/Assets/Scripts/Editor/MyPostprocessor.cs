@@ -1,6 +1,37 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System;
+
+public static class MyListenPostprocessor
+{
+    public delegate void OnPostCallback();
+    public static OnPostCallback Callback = null;
+    public static bool IsImporting = false;
+
+    public static void ListenCallback(OnPostCallback callback)
+    {
+        if (!IsImporting)
+        {
+            callback();
+            return;
+        }
+
+        Callback = new OnPostCallback(callback);
+    }
+
+    public static void InvokeFinish()
+    {
+        if (IsImporting && Callback != null)
+        {
+            Callback();
+        }
+        IsImporting = false;
+        Callback = null;
+    }
+
+}
+
 
 public class MyPostprocessor : AssetPostprocessor
 {
@@ -28,6 +59,10 @@ public class MyPostprocessor : AssetPostprocessor
     /// </summary>  
     private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
+        if(importedAssets.Length > 0)
+        {
+            MyListenPostprocessor.IsImporting = true;
+        }
         //当移动资源的时候  也就是重新导入资源  
        /* for (int i = 0; i < movedAssets.Length; i++  )  
         {
@@ -47,6 +82,7 @@ public class MyPostprocessor : AssetPostprocessor
         for (int i = 0; i < importedAssets.Length; ++i)
         {
             string abName = importedAssets[i].ToLower().Replace("\\", "/");
+            UnityEngine.Debug.Log("importedAsset: " + abName);
             AssetImporter import = AssetImporter.GetAtPath(importedAssets[i]);
             string name = GameUtil.FileNameWithoutExt(abName);
             string path = GameUtil.GetFilePath(abName);
@@ -59,6 +95,18 @@ public class MyPostprocessor : AssetPostprocessor
 
                 UnityEngine.Debug.Log("aaa=" + bundleName);
             }
+            else if(abName.StartsWith("assets/lua/"))
+            {
+                string bundleName = "assets/lua" + bundleExt;
+
+                import.assetBundleName = bundleName.ToLower().Replace("\\", "/");
+
+                UnityEngine.Debug.Log("aaa=" + bundleName);
+            }
+        }
+        if (importedAssets.Length > 0)
+        {
+            MyListenPostprocessor.InvokeFinish();
         }
     }
 }

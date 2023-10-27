@@ -47,6 +47,7 @@ public class LogFile {
 #else
 		SLua.Logger.logMessageReceived += LogCallback;
 #endif
+#if UNITY_WEBGL && !UNITY_EDITOR
 		if (File.Exists(Path.Combine(LogPath, LogFileName)))
 			File.Delete(Path.Combine(LogPath, LogFileName));
 		if (File.Exists(Path.Combine(LogPath, ErrorFlag)))
@@ -65,6 +66,7 @@ public class LogFile {
 
         }
         LogUtil.Log("LogPath:" + LogPath);
+#endif
     }
 
     public void UnInit()
@@ -81,27 +83,9 @@ public class LogFile {
         switch(type)
         {
             case LogType.Error:
-				if (!File.Exists(Path.Combine(LogPath, LogFileName)))
-                {
-					using (StreamWriter sw = File.CreateText(Path.Combine(LogPath, LogFileName)))
-                    {
-						sw.WriteLine (GetTimeStamp ());
-                        sw.WriteLine(string.Format("{0}:{1}",condition, stackTrace));
-                        sw.Flush();
-                    }
-                }
                 WriteToFile(string.Format("[error]{0}:{1}",condition, stackTrace));
                 break;
             case LogType.Exception:
-				if (!File.Exists(Path.Combine(LogPath, LogFileName)))
-                {
-					using (StreamWriter sw = File.CreateText(Path.Combine(LogPath, LogFileName)))
-                    {
-						sw.WriteLine (GetTimeStamp ());
-                        sw.WriteLine(string.Format("{0}:{1}", condition, stackTrace));
-                        sw.Flush();
-                    }
-                }
                 WriteToFile(string.Format("[exception]{0}:{1}", condition, stackTrace));
                 break;
             case LogType.Assert:
@@ -118,11 +102,15 @@ public class LogFile {
 
     void WriteToFile(string message)
     {
-		using (StreamWriter sw = File.AppendText(Path.Combine(LogPath, LogFileName)))
+#if UNITY_WEBGL && !UNITY_EDITOR
+        //WebCommon.logToWeb("[Unity]" + message); //不需要，wegbl时候unity会输出到网页
+#else
+        using (StreamWriter sw = File.AppendText(Path.Combine(LogPath, LogFileName)))
         {
-			sw.WriteLine(GetTimeStamp() + "-" + message);
+            sw.WriteLine(GetTimeStamp() + "-" + message);
             sw.Flush();
         }
+#endif
     }
 
 	string GetTimeStamp()

@@ -109,7 +109,7 @@ public class AssetExport
 		return true;
 	}
 
-	static void CopyDirectorys(string src, string dst)
+	static void CopyDirectorys(string src, string dst, Action<string> call = null)
 	{
 		if (!Directory.Exists (src))
 			return;
@@ -120,7 +120,8 @@ public class AssetExport
 			string foutname = dst + fname;
 			Directory.CreateDirectory (Path.GetDirectoryName(foutname));
 			File.Copy (filename, foutname, true);
-		}
+			if (call != null) call(foutname);
+        }
 	}
 
 	[MenuItem("ExportAssets/测试")]
@@ -149,9 +150,17 @@ public class AssetExport
 	[MenuItem("ExportAssets/步骤1.导出AssetBundle", false, 11)]
 	public static void ExportAllAssets()
 	{
-		string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
+        string src_res = Application.dataPath + "/../../Output";
+        string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
 
-		ExportAssets (dst_path);
+        CopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String filepath) => {
+			File.Delete(filepath + ".bytes");
+			File.Move(filepath, filepath + ".bytes");
+		});
+
+		MyListenPostprocessor.ListenCallback(() => {
+            ExportAssets(dst_path);
+        });
 	}
 
 	[MenuItem("ExportAssets/步骤2.打包所有资源(使用Lua源码)", false, 12)]
