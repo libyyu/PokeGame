@@ -713,6 +713,10 @@ Module.fetchWithProgress = function () {
 
     var aburl = "/static/webgl/StreamingAssets/assets/lua.assetbundle"
     var dataPromise = downloadBinary("dataUrl");
+    var abList = Module.baseABList
+    for(var i in abList) {
+      progressUpdate(abList[i]);
+    }
     Module.preRun.push(function () {
       Module.addRunDependency("dataUrl");
       dataPromise.then(function (data) {
