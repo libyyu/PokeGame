@@ -181,9 +181,9 @@ end
 
 function NewByteBuffer(data)
 	if not data then
-		return ByteBuffer()
+		return FByteBuffer()
 	else
-		return ByteBuffer(data)
+		return FByteBuffer(data)
 	end
 end
 

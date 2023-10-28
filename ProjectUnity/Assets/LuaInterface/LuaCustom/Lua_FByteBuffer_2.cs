@@ -4,14 +4,14 @@ using SLua;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-public class Lua_ByteBuffer_2 : LuaObject {
+public class Lua_FByteBuffer_2 : LuaObject {
 
     [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
     static public int WriteBytesString(IntPtr l)
     {
         try
         {
-            ByteBuffer self = (ByteBuffer)checkSelf(l);
+            FByteBuffer self = (FByteBuffer)checkSelf(l);
             int len = 0;
             IntPtr buffer = LuaDLL.lua_tolstring(l, 2, out len);
             byte[] b = new byte[len];
@@ -31,7 +31,7 @@ public class Lua_ByteBuffer_2 : LuaObject {
     {
         try
         {
-            ByteBuffer self = (ByteBuffer)checkSelf(l);
+            FByteBuffer self = (FByteBuffer)checkSelf(l);
             Byte[] b = self.ReadBytes();
 
             pushValue(l, true);

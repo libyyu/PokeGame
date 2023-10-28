@@ -25,7 +25,6 @@ do
 	end
 
 	function FGame:InitGame()
-		--NetworkManager
 		self.m_LogicNetwork = FLogicSession.Instance()
 		self.m_LogicNetwork:InitNetwork()
 		self:InitGameObject()
@@ -94,7 +93,7 @@ do
 
 	function FGame:EnterGameLogic()
 		local musicGo = NewGameObject("BackgroundMusic")
-		local backgroundMusic = musicGo:AddComponent(LuaHelper.GetClsType("BackgroundMusic"))
+		local backgroundMusic = musicGo:AddComponent(LuaHelper.GetClsType("FBackgroundMusic"))
 		DontDestroyOnLoad(musicGo)
 		--测试背景音
 		AsyncLoad(ResPathReader.BackgroundMusic, ResPathReader.BackgroundMusic, function(obj)

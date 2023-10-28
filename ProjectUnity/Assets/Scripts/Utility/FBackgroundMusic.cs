@@ -5,7 +5,7 @@ using System.Collections;
 /// Add this class to a GameObject to have it play a background music when instanciated.
 /// Careful : only one background music will be played at a time.
 /// </summary>
-public class BackgroundMusic : PersistentHumbleSingleton<BackgroundMusic>
+public class FBackgroundMusic : PersistentHumbleSingleton<FBackgroundMusic>
 {
 	public AudioClip SoundClip ;
     protected AudioSource _source;
@@ -33,7 +33,7 @@ public class BackgroundMusic : PersistentHumbleSingleton<BackgroundMusic>
 
 		_source.clip = SoundClip;
 
-		SoundManager.Instance.PlayBackgroundMusic(_source);
+		FSoundManager.Instance.PlayBackgroundMusic(_source);
 	}
 
     protected virtual void OnEnable()

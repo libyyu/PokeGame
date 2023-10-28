@@ -19,7 +19,7 @@ do
 			return
 		end
 		self.m_GoNetwork = NewGameObject(self.m_netName)
-		self.m_Network = self.m_GoNetwork:AddComponent(NetworkManager)
+		self.m_Network = self.m_GoNetwork:AddComponent(FTcpSocketNetworkComponent)
 		self.m_Network:SetMsgHandle(self)
 		DontDestroyOnLoad(self.m_GoNetwork)
 	end
@@ -117,7 +117,7 @@ do
 		warn(text)
 	end
 
-	local Protocal = NetworkManager.Protocal
+	local Protocal = FTcpSocketNetworkComponent.FProtocal
 	function FNetwork:OnReceiveMessage(protocal,buffer)
 		warn(self.m_netName .. ".OnReceiveMessage", protocal, buffer)
 		if protocal == Protocal.Connect then

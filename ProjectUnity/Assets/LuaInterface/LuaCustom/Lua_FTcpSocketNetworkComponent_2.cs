@@ -3,14 +3,14 @@ using SLua;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-public class Lua_NetworkManager_2 : LuaObject {
+public class Lua_FTcpSocketNetworkComponent_2 : LuaObject {
 
 	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
     static public int SendPbMessage(IntPtr l)
     {
         try
         {
-			NetworkManager self=(NetworkManager)checkSelf(l);
+            FTcpSocketNetworkComponent self =(FTcpSocketNetworkComponent)checkSelf(l);
 			int len = 0;
 			IntPtr buffer = LuaDLL.lua_tolstring(l, 2, out len);
 			byte[] b = new byte[len];

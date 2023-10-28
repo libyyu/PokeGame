@@ -11,8 +11,9 @@ do
 		end
 		return l_instance
 	end
+
 	function FAssetBundleUtil:InitAssetBundle()
-		self.m_AssetsMgr = ResourceLoader.Instance
+		self.m_AssetsMgr = FResourceLoader.Instance
 	end
 
 	function FAssetBundleUtil:AsyncLoad(assetBundleName, assetName, cb)

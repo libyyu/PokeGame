@@ -47,7 +47,7 @@ namespace SLua
             add(typeof(BestHTTP.HTTPRequest), "HTTPRequest");
             add(typeof(BestHTTP.HTTPResponse), "HTTPResponse");
             add(typeof(BestHTTP.HTTPRequestStates), "HTTPRequestStates");
-			add(typeof(BackgroundMusic), "BackgroundMusic");
+			add(typeof(FBackgroundMusic), "FBackgroundMusic");
 
             // add your custom class here
             // add( type, typename)
@@ -61,8 +61,8 @@ namespace SLua
             {
                 typeof(BinaryReader),
                 typeof(BinaryWriter),
-                typeof(ByteBuffer),
-				typeof(NetworkManager),
+                typeof(FByteBuffer),
+				typeof(FTcpSocketNetworkComponent),
             };
         }
 

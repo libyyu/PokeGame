@@ -4,7 +4,7 @@ using System.Collections;
 /// This persistent singleton handles sound playing
 /// </summary>
 
-public class SoundManager : PersistentSingleton<SoundManager>
+public class FSoundManager : PersistentSingleton<FSoundManager>
 {	
 	/// true if the music is enabled	
 	public bool MusicOn=true;

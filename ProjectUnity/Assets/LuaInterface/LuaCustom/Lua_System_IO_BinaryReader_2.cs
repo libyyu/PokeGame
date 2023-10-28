@@ -21,9 +21,9 @@ public class Lua_System_IO_BinaryReader_2 : LuaObject {
                 pushValue(l, o);
                 return 2;
             }
-            else if (matchType(l, 1, typeof(ByteBuffer)))
+            else if (matchType(l, 1, typeof(FByteBuffer)))
             {
-                ByteBuffer a1;
+                FByteBuffer a1;
                 checkType(l, 1, out a1);
                 MemoryStream buff = new MemoryStream(a1.ToBytes());
                 o = new BinaryReader(buff);

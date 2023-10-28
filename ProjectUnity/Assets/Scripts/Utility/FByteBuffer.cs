@@ -6,17 +6,17 @@ using System;
 using SLua;
 
 [CustomLuaClass]
-public class ByteBuffer {
+public class FByteBuffer {
     MemoryStream stream = null;
     BinaryWriter writer = null;
     BinaryReader reader = null;
 
-    public ByteBuffer() {
+    public FByteBuffer() {
         stream = new MemoryStream();
         writer = new BinaryWriter(stream);
     }
 
-    public ByteBuffer(byte[] data) {
+    public FByteBuffer(byte[] data) {
         if (data != null) {
             stream = new MemoryStream(data);
             reader = new BinaryReader(stream);

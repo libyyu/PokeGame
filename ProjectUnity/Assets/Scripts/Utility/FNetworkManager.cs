@@ -6,10 +6,10 @@ using SLua;
 
    
 [CustomLuaClass]
-public class NetworkManager : MonoBehaviour {
+public class FTcpSocketNetworkComponent : MonoBehaviour {
 
     [CustomLuaClass]
-    public enum Protocal
+    public enum FProtocal
     {
         Connect = 1,    //连接服务器
         Exception,              //异常掉线
@@ -20,7 +20,7 @@ public class NetworkManager : MonoBehaviour {
     }
 
     private object lockobj = new object();
-    private Queue<KeyValuePair<Protocal, ByteBuffer>> sEvents = new Queue<KeyValuePair<Protocal, ByteBuffer>>();
+    private Queue<KeyValuePair<FProtocal, FByteBuffer>> sEvents = new Queue<KeyValuePair<FProtocal, FByteBuffer>>();
 
     private FSuperSocket m_SuperSocket;
     public FSuperSocket LogicSocket
@@ -48,11 +48,11 @@ public class NetworkManager : MonoBehaviour {
     }
 
     [DoNotToLua]
-    public void AddEvent(Protocal id, ByteBuffer data)
+    public void AddEvent(FProtocal id, FByteBuffer data)
     {
         lock(lockobj)
         {
-            sEvents.Enqueue(new KeyValuePair<Protocal, ByteBuffer>(id, data));
+            sEvents.Enqueue(new KeyValuePair<FProtocal, FByteBuffer>(id, data));
         }
     }
 
@@ -83,7 +83,7 @@ public class NetworkManager : MonoBehaviour {
             {
                 while (sEvents.Count > 0)
                 {
-                    KeyValuePair<Protocal, ByteBuffer> _event = sEvents.Dequeue();
+                    KeyValuePair<FProtocal, FByteBuffer> _event = sEvents.Dequeue();
 					CallMethod("OnReceiveMessage", new object[] { _event.Key, _event.Value });
                 }
             }
@@ -130,9 +130,9 @@ public class NetworkManager : MonoBehaviour {
                     {
                         if(e.Error != null)
                         {
-                            ByteBuffer buffer2 = new ByteBuffer();
+                            FByteBuffer buffer2 = new FByteBuffer();
                             buffer2.WriteString(string.Format("Ping:{0},Error:{1}", ip,e.Error.Message));
-                            AddEvent(Protocal.Ping, new ByteBuffer(buffer2.ToBytes()));
+                            AddEvent(FProtocal.Ping, new FByteBuffer(buffer2.ToBytes()));
                         }
                         System.Net.NetworkInformation.PingReply reply = e.Reply;
                         if (reply != null && reply.Status == System.Net.NetworkInformation.IPStatus.Success)
@@ -143,31 +143,31 @@ public class NetworkManager : MonoBehaviour {
                             sb.AppendFormat("TTL:{0}", reply.Options.Ttl);
                             sb.AppendFormat("DontFragment:{0}", reply.Options.DontFragment);
                             sb.AppendFormat("Length:{0}", reply.Buffer.Length);
-                            ByteBuffer buffer2 = new ByteBuffer();
+                            FByteBuffer buffer2 = new FByteBuffer();
                             buffer2.WriteString(sb.ToString());
-                            AddEvent(Protocal.Ping, new ByteBuffer(buffer2.ToBytes()));
+                            AddEvent(FProtocal.Ping, new FByteBuffer(buffer2.ToBytes()));
                         }
                         else
                         {
-                            ByteBuffer buffer2 = new ByteBuffer();
+                            FByteBuffer buffer2 = new FByteBuffer();
                             buffer2.WriteString(string.Format("Ping:{0},Cannot Reachable", ip));
-                            AddEvent(Protocal.Ping, new ByteBuffer(buffer2.ToBytes()));
+                            AddEvent(FProtocal.Ping, new FByteBuffer(buffer2.ToBytes()));
                         }
                     }
                     catch (Exception ex)
                     {
-                        ByteBuffer buffer2 = new ByteBuffer();
+                        FByteBuffer buffer2 = new FByteBuffer();
                         buffer2.WriteString(string.Format("Ping:{0},Error:{1}", ip, ex.Message));
-                        AddEvent(Protocal.Ping, new ByteBuffer(buffer2.ToBytes()));
+                        AddEvent(FProtocal.Ping, new FByteBuffer(buffer2.ToBytes()));
                     }
                 });
                 p.SendAsync(ip, timeout, buffer, null);
             }
             catch (Exception ex)
             {
-                ByteBuffer buffer2 = new ByteBuffer();
+                FByteBuffer buffer2 = new FByteBuffer();
                 buffer2.WriteString(string.Format("Ping:{0},Error:{1}", ip, ex.Message));
-                AddEvent(Protocal.Ping, new ByteBuffer(buffer2.ToBytes()));
+                AddEvent(FProtocal.Ping, new FByteBuffer(buffer2.ToBytes()));
             }
         }).Start();
     }

@@ -4,12 +4,12 @@ using SuperSocket.ProtoBase;
 using System;
 using FGame;
 using System.IO;
-using NetProtocol = NetworkManager.Protocal;
+using NetProtocol = FTcpSocketNetworkComponent.FProtocal;
 using SSCEngine = SuperSocket.ClientEngine;
 public class FSuperSocket : SSCEngine.EasyClient
 {
-    NetworkManager NetMgr;
-    public FSuperSocket(NetworkManager mgr)
+    FTcpSocketNetworkComponent NetMgr;
+    public FSuperSocket(FTcpSocketNetworkComponent mgr)
     {
         NetMgr = mgr;
         this.Initialize<FPackageInfo>(new FReceiveFilter(), HandlePackage);
@@ -48,15 +48,15 @@ public class FSuperSocket : SSCEngine.EasyClient
 
     void onConnect(object sender, EventArgs arg)
     {
-        if (null != NetMgr) NetMgr.AddEvent(NetProtocol.Connect, new ByteBuffer());
+        if (null != NetMgr) NetMgr.AddEvent(NetProtocol.Connect, new FByteBuffer());
     }   
 
     void onClosed(object sender,EventArgs arg)
     {
 		if (null != NetMgr) {
-			ByteBuffer buffer = new ByteBuffer();
+			FByteBuffer buffer = new FByteBuffer();
 			buffer.WriteString("Socket Link Is Broken!");
-			NetMgr.AddEvent (NetProtocol.Disconnect, new ByteBuffer(buffer.ToBytes()));
+			NetMgr.AddEvent (NetProtocol.Disconnect, new FByteBuffer(buffer.ToBytes()));
 		}
         else
 			LogUtil.LogWarning("Socket Link Is Broken!");
@@ -67,10 +67,10 @@ public class FSuperSocket : SSCEngine.EasyClient
 		System.Net.Sockets.SocketException ex = e.Exception as System.Net.Sockets.SocketException;
         if (null != NetMgr)
         {
-            ByteBuffer buffer = new ByteBuffer();
+            FByteBuffer buffer = new FByteBuffer();
 			buffer.WriteInt (ex.ErrorCode);
             buffer.WriteString(ex.Message);
-            NetMgr.AddEvent(NetProtocol.Exception, new ByteBuffer(buffer.ToBytes()));
+            NetMgr.AddEvent(NetProtocol.Exception, new FByteBuffer(buffer.ToBytes()));
         }
 		else
 			LogUtil.LogWarning("Socket Error {0}:{1}",ex.ErrorCode,ex.Message);
@@ -80,9 +80,9 @@ public class FSuperSocket : SSCEngine.EasyClient
     {
         if (null != NetMgr)
         {
-			ByteBuffer buffer = new ByteBuffer();
+			FByteBuffer buffer = new FByteBuffer();
 			buffer.WriteBytes (data);
-			NetMgr.AddEvent(NetProtocol.GameData, new ByteBuffer(buffer.ToBytes()));
+			NetMgr.AddEvent(NetProtocol.GameData, new FByteBuffer(buffer.ToBytes()));
 			buffer.Close ();
         }
         else

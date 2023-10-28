@@ -81,7 +81,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
             if (string.IsNullOrEmpty(EntryLuaScript))
                 return;
 #if UNITY_WEBGL && !UNITY_EDITOR
-            ResourceLoader.Instance.LoadABundleAsync("lua", (AssetBundle ab) => {
+            FResourceLoader.Instance.LoadABundleAsync("lua", (AssetBundle ab) => {
                 lua.start(EntryLuaScript);
             });
 #else
@@ -108,7 +108,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #endif
         try
         {
-            return ResourceLoader.Instance.ReadFileBytes("lua", name);
+            return FResourceLoader.Instance.ReadFileBytes("lua", name);
         }
         catch(Exception e)
         {
@@ -119,7 +119,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     protected override void Awake()
     {
         base.Awake();
-        ResourceLoader.Instance.Init(this);
+        //FResourceLoader.Instance.Init();
         RunApp();
     }
 #if TEST_EASYSOCKET

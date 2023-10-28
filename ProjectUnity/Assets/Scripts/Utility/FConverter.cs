@@ -22,7 +22,7 @@
 
 using System;
 
-public class Converter {
+public class FConverter {
     public static Int32 GetBigEndian(Int32 value) {
         if (BitConverter.IsLittleEndian) {
             return swapByteOrder(value);
