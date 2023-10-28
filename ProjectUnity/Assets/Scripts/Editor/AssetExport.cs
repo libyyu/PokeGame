@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
 using System;
 using System.IO;
@@ -11,30 +12,57 @@ using UObject = UnityEngine.Object;
 public class AssetExport
 {
 	const string password = "LuaGame";
-	const string bundleExt = ".assetbundle";
+	public static string bundleExt = ".ab";
 
-	static void SetAssetBundleName(UObject[] o)
+    public static void AutoSetAssetBundleName(string sp)
+    {
+        string abName = sp.ToLower().Replace("\\", "/");
+
+        AssetImporter import = AssetImporter.GetAtPath(sp);
+        string name = GameUtil.FileNameWithoutExt(abName);
+        string path = GameUtil.GetFilePath(abName);
+        var arr = name.Split('_');
+        if (arr.Length >= 2 && abName.Contains("/fairygui/"))
+        {
+            string bundleName = Path.Combine(path, arr[0] + bundleExt);
+            import.assetBundleName = bundleName.ToLower().Replace("\\", "/");
+        }
+        else if (abName.Contains("/lua/"))
+        {
+			int pos = abName.IndexOf("/lua/");
+			string prefix = abName.Substring(0, pos);
+            string bundleName = prefix + "/lua" + bundleExt;
+            import.assetBundleName = bundleName.ToLower().Replace("\\", "/");
+        }
+        else
+        {
+            string bundleName = Path.Combine(path, name + bundleExt);
+            import.assetBundleName = bundleName.ToLower().Replace("\\", "/");
+        }
+
+        UnityLog.Log(string.Format("set {0} bundleName: {1}", sp, import.assetBundleName));
+    }
+
+    public static void AutoSetAssetBundleName(UObject o)
+	{
+        string sp = AssetDatabase.GetAssetPath(o);
+		AutoSetAssetBundleName(sp);
+    }
+
+	static void SetAssetsBundleName(UObject[] o)
 	{
         if (o.Length == 0)
             return;
-        string sp = AssetDatabase.GetAssetPath(o[0]);
-        string abName = sp.ToLower().Replace("\\", "/");
-        string bundleName = abName;
 
-        AssetImporter import = null;
+ 
 		foreach (UObject s in o) {
-			sp = AssetDatabase.GetAssetPath (s);
-			abName = sp.ToLower ().Replace ("\\", "/");
-
-            import = AssetImporter.GetAtPath (sp);
-            import.assetBundleName = abName + bundleExt;
-            LogUtil.Log(abName);
-		}
+            AutoSetAssetBundleName(s);
+        }
 
 		AssetDatabase.Refresh();
 	}
 
-	static void UnSetAssetBundleName(UObject[] o)
+	static void UnSetAssetsBundleName(UObject[] o)
 	{
 		AssetImporter import = null;
 		foreach (UObject s in o){
@@ -109,7 +137,7 @@ public class AssetExport
 		return true;
 	}
 
-	static void CopyDirectorys(string src, string dst, Action<string> call = null)
+	static void CopyDirectorys(string src, string dst, Action<string, string> call = null)
 	{
 		if (!Directory.Exists (src))
 			return;
@@ -118,9 +146,12 @@ public class AssetExport
 		{
 			string fname = filename.Replace (src, "");
 			string foutname = dst + fname;
-			Directory.CreateDirectory (Path.GetDirectoryName(foutname));
-			File.Copy (filename, foutname, true);
-			if (call != null) call(foutname);
+            Directory.CreateDirectory(Path.GetDirectoryName(foutname));
+            if (call == null)
+			{
+				File.Copy(filename, foutname, true);
+			}
+			else call(filename, foutname);
         }
 	}
 
@@ -152,11 +183,11 @@ public class AssetExport
     {
         string src_res = Application.dataPath + "/../../Output";
 
-		CopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String filepath) =>
+		CopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String srcPath, String filepath) =>
 		{
-			File.Delete(filepath + ".bytes");
-			File.Move(filepath, filepath + ".bytes");
-		});
+            File.Copy(srcPath, filepath + ".bytes", true);
+        });
+		UnityLog.Log("lua脚本导入完成");
     }
 
     [MenuItem("ExportAssets/步骤1.导出AssetBundle", false, 11)]
@@ -308,18 +339,19 @@ public class AssetExport
 	}*/
 
 	[MenuItem("Assets/BundleName/SetBundleName", false, 15)]
-	public static void SetAssetBundleName()
+	public static void SetAssetsBundleName()
 	{
 		UObject[] SelectedAsset = Selection.GetFiltered(typeof(UObject), SelectionMode.DeepAssets);
-		SetAssetBundleName (SelectedAsset);
+		SetAssetsBundleName (SelectedAsset);
 	}
 
 	[MenuItem("Assets/BundleName/UnSetBundleName", false, 16)]
-	public static void ClearAssetBundleName()
+	public static void ClearAssetsBundleName()
 	{
 		UObject[] SelectedAsset = Selection.GetFiltered(typeof(UObject), SelectionMode.DeepAssets);
-		UnSetAssetBundleName (SelectedAsset);
+		UnSetAssetsBundleName (SelectedAsset);
 	}
 
 }
 
+#endif

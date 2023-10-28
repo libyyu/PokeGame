@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: b594ce32e8be7463d9909decb45e12ac
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - FZZhunYuan-M02S
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: assets/testprojname/fonts/mjfont.ab
+  assetBundleVariant: 

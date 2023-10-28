@@ -732,7 +732,9 @@ local function index(ud,k)
         end
         t = rawget(t,'__parent')
     until t==nil
-    error('Can not find '..k)
+    if not ignore_strict_access_check then
+        error('Can not find '..k)
+    end
 end
 
 return index

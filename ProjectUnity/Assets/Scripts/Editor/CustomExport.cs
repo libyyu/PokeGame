@@ -118,6 +118,9 @@ namespace SLua
             "UnityEngine.QualitySettings.get_streamingMipmapsRenderersPerFrame",
 			"UnityEngine.QualitySettings.set_streamingMipmapsRenderersPerFrame",
             "UnityEngine.QualitySettings.streamingMipmapsRenderersPerFrame",
+            "UnityEngine.QualitySettings.IsPlatformIncluded",
+            "UnityEngine.QualitySettings.GetActiveQualityLevelsForPlatform",
+            "UnityEngine.QualitySettings.GetActiveQualityLevelsForPlatformCount",
             "UnityEngine.Playables.PlayableGraph.GetEditorName",
             "UnityEngine.LightProbeGroup.set_probePositions",
             "UnityEngine.Light.shadowAngle",
@@ -141,13 +144,13 @@ namespace SLua
             "UnityEngine.AudioSource.SetGamepadSpeakerRestrictedAudio",
             "UnityEngine.AudioSource.GamepadSpeakerSupportsOutputType",
             "UnityEngine.ArticulationBody.set_jointAcceleration",
-#if UNITY_WEBGL
             "UnityEngine.Material.IsPropertyOverriden",
             "UnityEngine.Material.IsPropertyLocked",
             "UnityEngine.Material.IsPropertyLockedByAncestor",
             "UnityEngine.Material.SetPropertyLock",
             "UnityEngine.Material.ApplyPropertyOverride",
             "UnityEngine.Material.RevertPropertyOverride",
+            "UnityEngine.Material.RevertAllPropertyOverrides",
             "UnityEngine.Material.IsChildOf",
             "UnityEngine.Material.get_parent",
             "UnityEngine.Material.set_parent",
@@ -156,7 +159,8 @@ namespace SLua
             "UnityEngine.QualitySettings.TryExcludePlatformAt",
             "UnityEngine.QualitySettings.GetRenderPipelineAssetsForPlatform",
             "UnityEngine.QualitySettings.GetAllRenderPipelineAssetsForPlatform",
-#endif
+            "UnityEngine.TextureMipmapLimitGroups.CreateGroup",
+            "UnityEngine.TextureMipmapLimitGroups.RemoveGroup",
         };
         // black list if white list not given
         public static void OnGetNoUseList(out List<string> list)

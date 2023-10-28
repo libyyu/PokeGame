@@ -81,7 +81,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
             if (string.IsNullOrEmpty(EntryLuaScript))
                 return;
 #if UNITY_WEBGL && !UNITY_EDITOR
-            ResourceManager.Instance.LoadBundle("lua", (AssetBundle ab) => {
+            ResourceLoader.Instance.LoadABundleAsync("lua", (AssetBundle ab) => {
                 lua.start(EntryLuaScript);
             });
 #else
@@ -92,57 +92,34 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 		
     byte[] loadLuaFile(string f)
     {
-#if UNITY_WEBGL && !UNITY_EDITOR
         string name = f;
         if (name.EndsWith(".lua"))
         {
-            int index = f.LastIndexOf('.');
-            name = f.Substring(0, index);
+            name = f.Substring(0, name.Length - (".lua").Length);
+        }
+        else if (name.EndsWith(".lua.bytes"))
+        {
+            name = f.Substring(0, name.Length - (".lua.bytes").Length);
         }
         name = name.Replace('.', '/');
         name += ".lua";
-        
-        string bundlename = ResourceManager.Instance.FixABName("lua");
-        AssetBundleInfo abInfo = ResourceManager.Instance.GetLoadedAssetBundle(bundlename);
-        if (abInfo == null || abInfo.m_AssetBundle == null) {
-            LogUtil.LogWarning(string.Format("bundle '{0}' not found.", bundlename));
-            return null;
-        }
-
-//#if UNITY_4_6 || UNITY_4_7
-//        TextAsset luaCode = abInfo.m_AssetBundle.Load(name, typeof(TextAsset)) as TextAsset;
-//#else
-        TextAsset luaCode = abInfo.m_AssetBundle.LoadAsset<TextAsset>("Assets/Lua/" + name + ".bytes");
-//#endif
-
-        if (luaCode != null)
-        {
-            byte[] buffer = luaCode.bytes;
-            Resources.UnloadAsset(luaCode);
-            return buffer;
-        }
-        else
-        {
-            LogUtil.LogWarning(string.Format("lua file '{0}' not found.", "Assets/Lua/" + name));
-        }
-
-        return null;
-#else
-        string luafilepath = GameUtil.MakePathForLua(f);
+#if !UNITY_EDITOR
+        name += ".bytes";
+#endif
         try
         {
-            return GameUtil.ReadAssetFile(luafilepath);
+            return ResourceLoader.Instance.ReadFileBytes("lua", name);
         }
-        catch (Exception)
+        catch(Exception e)
         {
             return null;
         }
-#endif
     }
 
     protected override void Awake()
     {
         base.Awake();
+        ResourceLoader.Instance.Init(this);
         RunApp();
     }
 #if TEST_EASYSOCKET

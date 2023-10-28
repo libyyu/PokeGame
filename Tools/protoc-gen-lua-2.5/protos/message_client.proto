@@ -1,0 +1,20 @@
+syntax = "proto2";
+import "message_common.proto";
+
+package pb;
+
+message TestMessage {
+	optional NET_TYPE type          = 1 [ default = NET_TYPE_TESTMESSAGE1 ];
+	optional int32 id      = 2;
+	optional bytes buff    = 3;
+	optional DirInfo info  = 4;
+}
+
+message TestMessage2 {
+	optional NET_TYPE type          = 1 [ default = NET_TYPE_TESTMESSAGE2 ];
+	optional int32 id      = 2;
+	optional bytes buff    = 3;
+	optional TestMessage info = 4;
+}
+
+

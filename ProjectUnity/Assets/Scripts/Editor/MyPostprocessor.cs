@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
 using System.IO;
-using System;
 
 public class MyPostprocessor : AssetPostprocessor
 {
@@ -44,31 +44,11 @@ public class MyPostprocessor : AssetPostprocessor
             UnityEngine.Debug.Log("Moved Asset: " +  movedAssets[i]  + " from: " +  movedFromAssetPaths[i]);
         }
         */
-        const string bundleExt = ".assetbundle";
         for (int i = 0; i < importedAssets.Length; ++i)
         {
-            string abName = importedAssets[i].ToLower().Replace("\\", "/");
-            UnityEngine.Debug.Log("importedAsset: " + abName);
-            AssetImporter import = AssetImporter.GetAtPath(importedAssets[i]);
-            string name = GameUtil.FileNameWithoutExt(abName);
-            string path = GameUtil.GetFilePath(abName);
-            var arr = name.Split('_');
-            if(arr.Length >= 2 && abName.StartsWith("assets/arts/fairygui"))
-            {
-                string bundleName = Path.Combine(path, arr[0] + bundleExt);
-
-                import.assetBundleName = bundleName.ToLower().Replace("\\", "/");
-
-                UnityEngine.Debug.Log("aaa=" + bundleName);
-            }
-            else if(abName.StartsWith("assets/lua/"))
-            {
-                string bundleName = "assets/lua" + bundleExt;
-
-                import.assetBundleName = bundleName.ToLower().Replace("\\", "/");
-
-                UnityEngine.Debug.Log("aaa=" + bundleName);
-            }
+            AssetExport.AutoSetAssetBundleName(importedAssets[i]);
         }
     }
 }
+
+#endif

@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
+#if UNITY_EDITOR
 namespace SLua
 {
     using UnityEngine;
@@ -2076,7 +2076,7 @@ namespace SLua
                         return true;
                     }
                 }
-#if UNITY_WEBGL
+#if false //UNITY_WEBGL
                 Attribute[] v = methodInfo.GetCustomAttributes(false) as Attribute[];
                 if (v != null)
                 {
@@ -2138,7 +2138,7 @@ namespace SLua
                     return true;
 				}
 
-#if UNITY_WEBGL
+#if false //UNITY_WEBGL
                 Attribute[] v = fieldInfo.GetCustomAttributes(false) as Attribute[];
                 if (v != null)
                 {
@@ -2196,7 +2196,7 @@ namespace SLua
                     return true;
                 }
 
-#if UNITY_WEBGL
+#if false //UNITY_WEBGL
                 Attribute[] v = propInfo.GetCustomAttributes(false) as Attribute[];
                 if (v != null)
                 {
@@ -3051,3 +3051,4 @@ namespace SLua
 		
 	}
 }
+#endif 

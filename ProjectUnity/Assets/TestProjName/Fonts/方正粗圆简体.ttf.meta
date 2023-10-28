@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 554d04f8f047dcb4ebd2a95606c7a7b2
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - FZCuYuan-M03S
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: "assets/testprojname/fonts/\u65B9\u6B63\u7C97\u5706\u7B80\u4F53.ab"
+  assetBundleVariant: 

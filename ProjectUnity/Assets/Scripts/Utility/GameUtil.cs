@@ -12,7 +12,10 @@ using UnityEngine;
 [CustomLuaClass]
 public class GameUtil
 {
-	const string STREAMASSET_DIR = "StreamingAssets";
+    public const string BundleExt = ".ab";
+    public const string ManifestName = "StreamingAssets";
+
+    const string STREAMASSET_DIR = "StreamingAssets";
 	const string LUA_DIR = "Lua";
 	const string SEP_PCK_DIR = "pck";
 	const string CACHE_DIR = "Cache";

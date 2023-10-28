@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+package pb;
+
+enum NET_TYPE {
+	NET_TYPE_BEGIN = 0;
+
+	NET_TYPE_MESSAGE = 1;
+	NET_TYPE_DIRINFO = 2;
+	NET_TYPE_TESTMESSAGE1 = 3;
+	NET_TYPE_TESTMESSAGE2 = 4;
+	NET_TYPE_TESTMESSAGE_RE = 5;
+
+	NET_TYPE_END = 999;
+}
+
+message Message {
+	optional NET_TYPE type          = 1 [ default = NET_TYPE_MESSAGE ];
+	required NET_TYPE message_type 	= 2;
+	optional bytes message_body    	= 3;
+}
+
+message DirInfo {
+	optional NET_TYPE type          = 1 [ default = NET_TYPE_DIRINFO ];
+	optional bytes version			= 2;
+	optional bytes patches			= 3;
+}
+

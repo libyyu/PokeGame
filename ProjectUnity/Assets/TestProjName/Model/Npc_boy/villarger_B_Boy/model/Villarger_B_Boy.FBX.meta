@@ -1,0 +1,1091 @@
+fileFormatVersion: 2
+guid: c705588cdeccd5c4a897cc4f77158f93
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Boy R Finger11
+  - first:
+      1: 100002
+    second: Boy R Finger1
+  - first:
+      1: 100004
+    second: Scult_End
+  - first:
+      1: 100006
+    second: Scult_03
+  - first:
+      1: 100008
+    second: Boy R Forearm
+  - first:
+      1: 100010
+    second: Boy R UpperArm
+  - first:
+      1: 100012
+    second: Boy R Clavicle
+  - first:
+      1: 100014
+    second: Boy L Finger21
+  - first:
+      1: 100016
+    second: Boy R Finger0
+  - first:
+      1: 100018
+    second: Boy R Hand
+  - first:
+      1: 100020
+    second: Boy R Finger2
+  - first:
+      1: 100022
+    second: Boy R Finger21
+  - first:
+      1: 100024
+    second: Boy L Finger2
+  - first:
+      1: 100026
+    second: Boy L Finger11
+  - first:
+      1: 100028
+    second: Boy L Finger1
+  - first:
+      1: 100030
+    second: Object004
+  - first:
+      1: 100032
+    second: scff
+  - first:
+      1: 100034
+    second: boy_body
+  - first:
+      1: 100036
+    second: Boy R Finger2Nub
+  - first:
+      1: 100038
+    second: Boy R Finger1Nub
+  - first:
+      1: 100040
+    second: Boy R Foot
+  - first:
+      1: 100042
+    second: Boy R Calf
+  - first:
+      1: 100044
+    second: Boy L Finger01
+  - first:
+      1: 100046
+    second: Boy L Finger0
+  - first:
+      1: 100048
+    second: Boy L Hand
+  - first:
+      1: 100050
+    second: Boy L Forearm
+  - first:
+      1: 100052
+    second: Side_Bag01
+  - first:
+      1: 100054
+    second: Boy L UpperArm
+  - first:
+      1: 100056
+    second: Boy L Clavicle
+  - first:
+      1: 100058
+    second: Boy Neck
+  - first:
+      1: 100060
+    second: Boy Spine2
+  - first:
+      1: 100062
+    second: Boy L Calf
+  - first:
+      1: 100064
+    second: Boy L Thigh
+  - first:
+      1: 100066
+    second: Boy L Toe0
+  - first:
+      1: 100068
+    second: Boy L Foot
+  - first:
+      1: 100070
+    second: Boy R Finger01
+  - first:
+      1: 100072
+    second: Boy HeadNub
+  - first:
+      1: 100074
+    second: Boy Head
+  - first:
+      1: 100076
+    second: Boy Spine1
+  - first:
+      1: 100078
+    second: Boy Spine
+  - first:
+      1: 100080
+    second: Boy Pelvis
+  - first:
+      1: 100082
+    second: Boy Footsteps
+  - first:
+      1: 100084
+    second: Boy
+  - first:
+      1: 100086
+    second: Object005
+  - first:
+      1: 100088
+    second: Scult_02
+  - first:
+      1: 100090
+    second: Scult_01
+  - first:
+      1: 100092
+    second: Side_Bag_End
+  - first:
+      1: 100094
+    second: Boy R Finger0Nub
+  - first:
+      1: 100096
+    second: Boy L Finger2Nub
+  - first:
+      1: 100098
+    second: Boy L Finger1Nub
+  - first:
+      1: 100100
+    second: Boy L Finger0Nub
+  - first:
+      1: 100102
+    second: Boy R Toe0Nub
+  - first:
+      1: 100104
+    second: Boy R Thigh
+  - first:
+      1: 100106
+    second: Boy L Toe0Nub
+  - first:
+      1: 100108
+    second: Boy R Toe0
+  - first:
+      1: 100110
+    second: //RootNode
+  - first:
+      1: 100112
+    second: Weapon
+  - first:
+      1: 100114
+    second: Darger
+  - first:
+      4: 400000
+    second: Boy R Finger11
+  - first:
+      4: 400002
+    second: Boy R Finger1
+  - first:
+      4: 400004
+    second: Scult_End
+  - first:
+      4: 400006
+    second: Scult_03
+  - first:
+      4: 400008
+    second: Boy R Forearm
+  - first:
+      4: 400010
+    second: Boy R UpperArm
+  - first:
+      4: 400012
+    second: Boy R Clavicle
+  - first:
+      4: 400014
+    second: Boy L Finger21
+  - first:
+      4: 400016
+    second: Boy R Finger0
+  - first:
+      4: 400018
+    second: Boy R Hand
+  - first:
+      4: 400020
+    second: Boy R Finger2
+  - first:
+      4: 400022
+    second: Boy R Finger21
+  - first:
+      4: 400024
+    second: Boy L Finger2
+  - first:
+      4: 400026
+    second: Boy L Finger11
+  - first:
+      4: 400028
+    second: Boy L Finger1
+  - first:
+      4: 400030
+    second: Object004
+  - first:
+      4: 400032
+    second: scff
+  - first:
+      4: 400034
+    second: boy_body
+  - first:
+      4: 400036
+    second: Boy R Finger2Nub
+  - first:
+      4: 400038
+    second: Boy R Finger1Nub
+  - first:
+      4: 400040
+    second: Boy R Foot
+  - first:
+      4: 400042
+    second: Boy R Calf
+  - first:
+      4: 400044
+    second: Boy L Finger01
+  - first:
+      4: 400046
+    second: Boy L Finger0
+  - first:
+      4: 400048
+    second: Boy L Hand
+  - first:
+      4: 400050
+    second: Boy L Forearm
+  - first:
+      4: 400052
+    second: Side_Bag01
+  - first:
+      4: 400054
+    second: Boy L UpperArm
+  - first:
+      4: 400056
+    second: Boy L Clavicle
+  - first:
+      4: 400058
+    second: Boy Neck
+  - first:
+      4: 400060
+    second: Boy Spine2
+  - first:
+      4: 400062
+    second: Boy L Calf
+  - first:
+      4: 400064
+    second: Boy L Thigh
+  - first:
+      4: 400066
+    second: Boy L Toe0
+  - first:
+      4: 400068
+    second: Boy L Foot
+  - first:
+      4: 400070
+    second: Boy R Finger01
+  - first:
+      4: 400072
+    second: Boy HeadNub
+  - first:
+      4: 400074
+    second: Boy Head
+  - first:
+      4: 400076
+    second: Boy Spine1
+  - first:
+      4: 400078
+    second: Boy Spine
+  - first:
+      4: 400080
+    second: Boy Pelvis
+  - first:
+      4: 400082
+    second: Boy Footsteps
+  - first:
+      4: 400084
+    second: Boy
+  - first:
+      4: 400086
+    second: Object005
+  - first:
+      4: 400088
+    second: Scult_02
+  - first:
+      4: 400090
+    second: Scult_01
+  - first:
+      4: 400092
+    second: Side_Bag_End
+  - first:
+      4: 400094
+    second: Boy R Finger0Nub
+  - first:
+      4: 400096
+    second: Boy L Finger2Nub
+  - first:
+      4: 400098
+    second: Boy L Finger1Nub
+  - first:
+      4: 400100
+    second: Boy L Finger0Nub
+  - first:
+      4: 400102
+    second: Boy R Toe0Nub
+  - first:
+      4: 400104
+    second: Boy R Thigh
+  - first:
+      4: 400106
+    second: Boy L Toe0Nub
+  - first:
+      4: 400108
+    second: Boy R Toe0
+  - first:
+      4: 400110
+    second: //RootNode
+  - first:
+      4: 400112
+    second: Weapon
+  - first:
+      4: 400114
+    second: Darger
+  - first:
+      43: 4300000
+    second: boy_body
+  - first:
+      43: 4300002
+    second: scff
+  - first:
+      43: 4300004
+    second: Object004
+  - first:
+      43: 4300006
+    second: Object005
+  - first:
+      43: 4300008
+    second: Darger
+  - first:
+      74: 7400000
+    second: Take 001
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      111: 11100000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: Object004
+  - first:
+      137: 13700002
+    second: scff
+  - first:
+      137: 13700004
+    second: boy_body
+  - first:
+      137: 13700006
+    second: Object005
+  - first:
+      137: 13700008
+    second: Darger
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: default
+    second: {fileID: 2100000, guid: 2c09d8e0bf4fc3e4689ce674f6851257, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: "\uC5BC\uAD74"
+    second: {fileID: 2100000, guid: c4aad4d2393776444b9dff29108f94c7, type: 2}
+  materials:
+    materialImportMode: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.01
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 0
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 4
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips:
+  - aad85b59880acf94d9bc2cb501baab34
+  - 5b18a810aec710842a0b8428344276b2
+  - fab648f4a5656d2489f21b6f25c632d9
+  - 502d2f753001b7347bcc6ff9c81bfc6f
+  - 5b7e62b9a0844174b9755472ffd82d99
+  - 4b0fe43320379a24b8dc7ca0d72131ae
+  - 1b980a864e014794b809810492219117
+  - a99ec16d65e0e7d4b8419142ea2efa91
+  - db2ec176f8ee57441ac9b29cf0221e60
+  - 16918695c2070b4418547fb359e92c5c
+  - 592100ff287e2db4aa8cede980e8be80
+  - 9e2815fb4a847d446925da0c97d64890
+  - a59dc19f4bf066a41a7623cefc7a5ec6
+  - a9340d8c13418cc4fba41a7aab0b75d9
+  - a388e917326ddcd4c8172a1a24d84d57
+  - e6724c6f7ff033948a0d01c0537a584f
+  - 47ccf325c76d51947a74e51375b2b959
+  - 2fea13ceef3fe2d47b8b6c79e8e39678
+  - 6c06a3719f82dce4e86d0ae72889fcda
+  - 34d34fa861e0b1040906fc45172bef94
+  - 69f6784e06e9d78499a37953b945cd66
+  - f3dc1948ec48b0844931f9fb49a31226
+  - 1f59f6a7153566e44840c1f1803c6827
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human:
+    - boneName: Boy Pelvis
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Thigh
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Thigh
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Calf
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Calf
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Foot
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Foot
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy Spine
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy Spine1
+      humanName: Chest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy Neck
+      humanName: Neck
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy Head
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Clavicle
+      humanName: LeftShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Clavicle
+      humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L UpperArm
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R UpperArm
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Forearm
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Forearm
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Hand
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Hand
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Toe0
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Toe0
+      humanName: RightToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Finger0
+      humanName: Left Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Finger01
+      humanName: Left Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Finger1
+      humanName: Left Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Finger11
+      humanName: Left Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Finger2
+      humanName: Left Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy L Finger21
+      humanName: Left Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Finger0
+      humanName: Right Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Finger01
+      humanName: Right Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Finger1
+      humanName: Right Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Finger11
+      humanName: Right Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Finger2
+      humanName: Right Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy R Finger21
+      humanName: Right Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Boy Spine2
+      humanName: UpperChest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    skeleton:
+    - name: Villarger_B_Boy(Clone)
+      parentName: 
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0.0000008672654, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: boy_body
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Darger
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0.7030931, y: 0.9523795, z: -0.10360934}
+      rotation: {x: -0.7071051, y: 0.0015637734, z: -0.0015637734, w: 0.7071051}
+      scale: {x: 0.30102348, y: 0.30102348, z: 0.30102348}
+    - name: Object004
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Object005
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
+      scale: {x: 1, y: 1, z: 1}
+    - name: scff
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Boy
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0, y: 0.837525, z: -0.062229842}
+      rotation: {x: -0.50000006, y: 0.5, z: 0.5, w: 0.5}
+      scale: {x: 0.99999994, y: 0.99999994, z: 1}
+    - name: Boy Footsteps
+      parentName: Boy
+      position: {x: -0, y: 0, z: -0.83169335}
+      rotation: {x: 0, y: 0, z: -0.7071063, w: 0.70710725}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Boy Pelvis
+      parentName: Boy
+      position: {x: -0.0000000020235869, y: -0.0000000037252907, z: 0.03395015}
+      rotation: {x: 0.5, y: -0.5, z: -0.5, w: -0.5}
+      scale: {x: 1.0000001, y: 1, z: 1}
+    - name: Side_Bag01
+      parentName: Boy Pelvis
+      position: {x: -0.06942314, y: -0.00000020503997, z: 0.017552566}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.9283062, y: 1.6529725, z: 3.1900969}
+    - name: Side_Bag_End
+      parentName: Side_Bag01
+      position: {x: -0.19999973, y: 0.000000038146972, z: -0.00000000834465}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 2.1264188, y: 1.8274297, z: 0.9999998}
+    - name: Boy Spine
+      parentName: Boy Pelvis
+      position: {x: -0.086651154, y: -0.00007202148, z: 0.0000001202678}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 0.9999999}
+    - name: Boy Spine1
+      parentName: Boy Spine
+      position: {x: -0.09048615, y: -0.000089902875, z: -2.4934707e-10}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000005, y: 1.0000002, z: 1.0000001}
+    - name: Boy Spine2
+      parentName: Boy Spine1
+      position: {x: -0.11364502, y: -0.000085196494, z: -2.362867e-10}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000017, y: 1.0000014, z: 1.0000012}
+    - name: Scult_01
+      parentName: Boy Spine2
+      position: {x: -0.13046883, y: -0.05498497, z: 0.06473754}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000005, y: 3.536129, z: 1.2954764}
+    - name: Scult_02
+      parentName: Scult_01
+      position: {x: -0.19999984, y: 0.000000017881392, z: -0.00000015258789}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.9999278, y: 1, z: 1.0002218}
+    - name: Scult_03
+      parentName: Scult_02
+      position: {x: -0.19999999, y: 0.0000000011920929, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.9992846, y: 1.0000005, z: 1.0010581}
+    - name: Scult_End
+      parentName: Scult_03
+      position: {x: -0.20000008, y: 0.0000000011920929, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000005, y: 1.0000005, z: 1}
+    - name: Boy Neck
+      parentName: Boy Spine2
+      position: {x: -0.14263129, y: -0.00006459236, z: -1.7913407e-10}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000006, y: 1.0000008, z: 1.0000007}
+    - name: Boy Head
+      parentName: Boy Neck
+      position: {x: -0.08349853, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.000001, y: 1.0000015, z: 1.0000006}
+    - name: Boy HeadNub
+      parentName: Boy Head
+      position: {x: -0.25973922, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 0.99999994}
+    - name: Boy R Clavicle
+      parentName: Boy Neck
+      position: {x: 0.034469526, y: 0.008488884, z: -0.027632536}
+      rotation: {x: 0.7071068, y: -0.000000030908623, z: 0.7071068, w: -0.000000030908623}
+      scale: {x: 1.0000025, y: 1.0000014, z: 1.0000005}
+    - name: Boy R UpperArm
+      parentName: Boy R Clavicle
+      position: {x: -0.09527378, y: 0.000000009536743, z: 0.000000076293944}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.99999994, y: 0.99999994, z: 1.0000002}
+    - name: Boy R Forearm
+      parentName: Boy R UpperArm
+      position: {x: -0.16671203, y: 0.000000038146972, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000006, y: 1.0000004, z: 1.0000002}
+    - name: Boy R Hand
+      parentName: Boy R Forearm
+      position: {x: -0.19615623, y: -0.000000009536743, z: 0}
+      rotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+      scale: {x: 1, y: 1.0000006, z: 1}
+    - name: Boy R Finger1
+      parentName: Boy R Hand
+      position: {x: -0.09868759, y: -0.01410759, z: 0.045396786}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000008, y: 1.0000006, z: 1}
+    - name: Boy R Finger11
+      parentName: Boy R Finger1
+      position: {x: -0.063102685, y: 0.000000076293944, z: -0.000000009536743}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000011, y: 1.0000002, z: 1}
+    - name: Boy R Finger1Nub
+      parentName: Boy R Finger11
+      position: {x: -0.055782318, y: 0.000000038146972, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: -1.0000001, y: -1, z: -1.0000001}
+    - name: Boy R Finger2
+      parentName: Boy R Hand
+      position: {x: -0.09874015, y: -0.0055889892, z: -0.0040437505}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000001, y: 0.9999999, z: 0.9999997}
+    - name: Boy R Finger21
+      parentName: Boy R Finger2
+      position: {x: -0.06057373, y: 0, z: -0.000000009536743}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000001}
+    - name: Boy R Finger2Nub
+      parentName: Boy R Finger21
+      position: {x: -0.0538253, y: 0.000000038146972, z: 0.0000000023841857}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: -1.0000001, y: -1, z: -1.0000001}
+    - name: Boy R Finger0
+      parentName: Boy R Hand
+      position: {x: -0.03044033, y: 0.0013344574, z: 0.058268737}
+      rotation: {x: 0, y: 0.38268346, z: 0, w: 0.9238795}
+      scale: {x: 1.0000008, y: 1.0000006, z: 1.0000001}
+    - name: Boy R Finger01
+      parentName: Boy R Finger0
+      position: {x: -0.06325081, y: -0.000000019073486, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000004, y: 1.0000007, z: 1.0000004}
+    - name: Boy R Finger0Nub
+      parentName: Boy R Finger01
+      position: {x: -0.0668573, y: -0.0000000047683715, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: -1, y: -1, z: -1.0000001}
+    - name: Boy L Clavicle
+      parentName: Boy Neck
+      position: {x: 0.034469526, y: 0.008488731, z: 0.027632585}
+      rotation: {x: 0.7071068, y: -0.000000030908623, z: -0.7071068, w: 0.000000030908623}
+      scale: {x: 1.0000002, y: 1.0000005, z: 0.9999999}
+    - name: Boy L UpperArm
+      parentName: Boy L Clavicle
+      position: {x: -0.0952738, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.9999999, y: 1.0000005, z: 1.0000007}
+    - name: Boy L Forearm
+      parentName: Boy L UpperArm
+      position: {x: -0.16671203, y: 0.000000038146972, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000005, y: 1.0000006, z: 1.0000008}
+    - name: Boy L Hand
+      parentName: Boy L Forearm
+      position: {x: -0.19615631, y: -0.000000019073486, z: 0}
+      rotation: {x: 0.7071068, y: 0, z: 0, w: -0.7071068}
+      scale: {x: 1.0000002, y: 1.0000004, z: 1.000001}
+    - name: Boy L Finger1
+      parentName: Boy L Hand
+      position: {x: -0.09868759, y: -0.01410759, z: -0.045396794}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.9999997, y: 1.0000008, z: 1.000001}
+    - name: Boy L Finger11
+      parentName: Boy L Finger1
+      position: {x: -0.063102685, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000004, y: 0.99999976, z: 0.99999994}
+    - name: Boy L Finger1Nub
+      parentName: Boy L Finger11
+      position: {x: -0.055782355, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000001, y: 1, z: 1.0000001}
+    - name: Boy L Finger2
+      parentName: Boy L Hand
+      position: {x: -0.098740235, y: -0.0055890656, z: 0.0040437505}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.9999997, y: 1.0000007, z: 1.0000006}
+    - name: Boy L Finger21
+      parentName: Boy L Finger2
+      position: {x: -0.06057369, y: 0, z: 0.000000014305114}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000004, y: 1.0000005, z: 1.0000005}
+    - name: Boy L Finger2Nub
+      parentName: Boy L Finger21
+      position: {x: -0.053825226, y: -0.000000038146972, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Boy L Finger0
+      parentName: Boy L Hand
+      position: {x: -0.030440368, y: 0.001334381, z: -0.058268726}
+      rotation: {x: 0, y: 0.3826835, z: 0, w: -0.9238795}
+      scale: {x: 1.0000001, y: 1.0000006, z: 1.000001}
+    - name: Boy L Finger01
+      parentName: Boy L Finger0
+      position: {x: -0.06325065, y: -0.000000057220458, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000002, y: 0.9999992, z: 0.9999998}
+    - name: Boy L Finger0Nub
+      parentName: Boy L Finger01
+      position: {x: -0.06685726, y: 0, z: 0.000000038146972}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000001, y: 1.0000001, z: 1}
+    - name: Boy R Thigh
+      parentName: Boy Spine
+      position: {x: 0.08665107, y: 0.00014128209, z: -0.08002666}
+      rotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+      scale: {x: 1.0000012, y: 1.000001, z: 1.000001}
+    - name: Boy R Calf
+      parentName: Boy R Thigh
+      position: {x: -0.30608544, y: -0.0000000047683715, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000002, y: 1.0000005, z: 1.0000002}
+    - name: Boy R Foot
+      parentName: Boy R Calf
+      position: {x: -0.39475074, y: 0.000000009536743, z: -0.000000019073486}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000006, y: 1.0000004, z: 1.0000006}
+    - name: Boy R Toe0
+      parentName: Boy R Foot
+      position: {x: -0.14525464, y: 0.13930966, z: 0}
+      rotation: {x: 0, y: 0, z: 0.7071068, w: -0.7071068}
+      scale: {x: 1.0000011, y: 1.0000002, z: 1.0000007}
+    - name: Boy R Toe0Nub
+      parentName: Boy R Toe0
+      position: {x: -0.10791329, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 0.99999994, y: 1, z: 0.99999994}
+    - name: Boy L Thigh
+      parentName: Boy Spine
+      position: {x: 0.08665107, y: 0.00014083386, z: 0.08002666}
+      rotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+      scale: {x: 1.0000018, y: 1.0000011, z: 1.0000019}
+    - name: Boy L Calf
+      parentName: Boy L Thigh
+      position: {x: -0.30608547, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000005, y: 1.0000008, z: 1.0000004}
+    - name: Boy L Foot
+      parentName: Boy L Calf
+      position: {x: -0.3947507, y: 0, z: -0.000000019073486}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1.0000005, y: 1.0000005, z: 1.0000005}
+    - name: Boy L Toe0
+      parentName: Boy L Foot
+      position: {x: -0.14525464, y: 0.13930966, z: 0}
+      rotation: {x: 0, y: 0, z: 0.7071068, w: -0.7071068}
+      scale: {x: 1.0000008, y: 1.0000002, z: 1.0000005}
+    - name: Boy L Toe0Nub
+      parentName: Boy L Toe0
+      position: {x: -0.10791329, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: -0.99999994, y: -1, z: -0.99999994}
+    - name: Weapon
+      parentName: Villarger_B_Boy(Clone)
+      position: {x: -0.7001363, y: 0.96155113, z: -0.1008215}
+      rotation: {x: 0.00000010958229, y: -0.00000019387598, z: -0.7071068, w: 0.7071068}
+      scale: {x: 1.059493, y: 4.4902782, z: 1}
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 0.01
+    rootMotionBoneName: 
+    hasTranslationDoF: 1
+    hasExtraRoot: 1
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 3
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: assets/testprojname/model/npc_boy/villarger_b_boy/model/villarger_b_boy.fbx.ab
+  assetBundleVariant: 
