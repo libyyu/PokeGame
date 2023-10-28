@@ -606,7 +606,7 @@ public class UnityAssetBundleLoader : IAssetLoader
 }
 
 [CustomLuaClass]
-public class ResourceLoader //: MonoBehaviour
+public class ResourceLoader : MonoBehaviour
 {
     static ResourceLoader l_instance;
     public static ResourceLoader Instance
@@ -615,10 +615,10 @@ public class ResourceLoader //: MonoBehaviour
         {
             if (l_instance == null)
             {
-                //var go = new GameObject("ResourceLoader");
-                //DontDestroyOnLoad(go);
-                //l_instance = go.AddComponent<ResourceLoader>();
-                l_instance = new ResourceLoader();
+                var go = new GameObject("ResourceLoader");
+                DontDestroyOnLoad(go);
+                l_instance = go.AddComponent<ResourceLoader>();
+                //l_instance = new ResourceLoader();
             }
             return l_instance;
         }
@@ -627,10 +627,10 @@ public class ResourceLoader //: MonoBehaviour
     IAssetLoader loader = null;
     public void Init(MonoBehaviour mh)
     {
-#if UNITY_EDITOR
-        loader = new UnityEditorResourceLoader(mh);
+#if false//UNITY_EDITOR
+        loader = new UnityEditorResourceLoader(this);
 #else
-        loader = new UnityAssetBundleLoader(mh);
+        loader = new UnityAssetBundleLoader(this);
 #endif
     }
 

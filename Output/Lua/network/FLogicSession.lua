@@ -5,15 +5,15 @@
 --comment: 游戏逻辑网络处理类
 local FNetwork = require "network.FNetwork"
 local l_instance = nil
-local FLogicSession = FLua.Class("FLogicSession", FNetwork)
+local FLogicSession = FLua.Class(FNetwork, "FLogicSession")
 do
-	function FLogicSession:_ctor()
+	function FLogicSession:__constructor()
 		self.m_UserInfo = nil
 		self.m_netName = "LogicSession"
 	end
 	function FLogicSession.Instance()
 		if not l_instance then
-			l_instance = FLogicSession.new()
+			l_instance = FLogicSession()
 		end
 		return l_instance
 	end

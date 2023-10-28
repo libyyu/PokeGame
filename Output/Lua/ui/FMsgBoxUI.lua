@@ -1,18 +1,18 @@
 local FBaseUI = require "ui.FBaseUI"
 local FGUITools = require "utility.FGUITools"
 
-local FMsgBoxUI = FLua.Class("FMsgBoxUI",FBaseUI)
+local FMsgBoxUI = FLua.Class(FBaseUI, "FMsgBoxUI")
 do
 	local OBJPATH = 
 	{
-		Content = "n0",
-		Ok = "n2",
-		Cancel = "n1"
+		Content = "Label",
+		Ok = "ButtonGroups/IDOK",
+		Cancel = "ButtonGroups/IDCANCEL"
 	}
 
 	local _UniqueID = 0
 
-	function FMsgBoxUI:_ctor()
+	function FMsgBoxUI:__constructor()
 		_UniqueID = _UniqueID + 1
 		self.m_sender = nil
 		self.m_title = "MsgBox"
@@ -47,25 +47,23 @@ do
 		local okObj = self:FindChildObj(OBJPATH.Ok)
 		local cancelObj = self:FindChildObj(OBJPATH.Cancel)
 
-		--FGUITools.setActive(okObj,isShowOk)
-		--FGUITools.setActive(cancelObj,isShowCancel)
+		FGUITools.setActive(okObj,isShowOk)
+		FGUITools.setActive(cancelObj,isShowCancel)
 	end
 
 	function FMsgBoxUI:OnCreate()
-		self:Center()
 		self:FillInfo()
-
-		local okObj = self:FindChildObj(OBJPATH.Ok)
-		local cancelObj = self:FindChildObj(OBJPATH.Cancel)
-		okObj.onClick:Add(function()
-			self:OnOK()
-		end)
-		cancelObj.onClick:Add(function()
-			self:OnCancel()
-		end)
 	end
 
 	function FMsgBoxUI:OnDestroy()
+	end
+	
+	function FMsgBoxUI:OnClick(go)
+		if go.name == "IDOK" then
+			self:OnOK()
+		elseif go.name == "IDCANCEL" then
+			self:OnCancel()
+		end
 	end
 
 	function FMsgBoxUI:OnOK()

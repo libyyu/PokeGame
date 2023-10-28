@@ -3,6 +3,7 @@ theGame = nil
 local FLogicSession = require "network.FLogicSession"
 local FAssetBundleUtil = require "utility.FAssetBundleUtil"
 local FLibEvent = require "utility.FLibEvent"
+local FConsoleUI = require "ui.FConsoleUI"
 local FCommand = require "game.FCommand"
 
 local FGame = FLua.Class("FGame")
@@ -11,10 +12,10 @@ do
 		return theGame
 	end
 
-	function FGame:_ctor()
+	function FGame:__constructor()
 		self.m_LogicNetwork = nil
 		self.m_AssetBundle = nil
-		self.m_LogicEvent = FLibEvent.new("LogicEvent")
+		self.m_LogicEvent = FLibEvent("LogicEvent")
 		self.m_LogList = {}
 		self.m_MainCam = nil
 		self.m_HostPlayer = nil
@@ -50,6 +51,7 @@ do
 	    camobj.transform.localPosition = Vector3(85, 18, 20);
 	    camobj.transform.localRotation = Quaternion(0.1, -0.9, 0.4, 0.2);
 	    camobj.transform.localScale = Vector3(1, 1, 1);
+	    camobj:AddComponent(LuaHelper.GetClsType("FSmootFollow"))
 	    local cam = camobj:AddComponent(UnityEngine.Camera)
 	    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
 	    --camobj:AddComponent(UnityEngine.FlareLayer)
@@ -91,7 +93,6 @@ do
 	end
 
 	function FGame:EnterGameLogic()
-		self:LeaveLoginState()
 		local musicGo = NewGameObject("BackgroundMusic")
 		local backgroundMusic = musicGo:AddComponent(LuaHelper.GetClsType("BackgroundMusic"))
 		DontDestroyOnLoad(musicGo)
@@ -105,19 +106,19 @@ do
 
 		local FWaitingUI = require "ui.FWaitingUI"
 		FWaitingUI.Instance():DestroyPanel()
+		self:LeaveLoginState()
 		self.m_isGameLogic = true
-		-- --加载世界
-		-- AsyncLoad("Map","x1",function(asset)
-		-- 	local goMap = Instantiate(asset)
-		-- 	goMap.transform.localPosition = Vector3(-121.6,-44.2,-241.3)
-		-- 	goMap.transform.localScale = Vector3(1, 1, 1)
+		--加载世界
+		AsyncLoad("Map","x1",function(asset)
+			local goMap = Instantiate(asset)
+			goMap.transform.localPosition = Vector3(-121.6,-44.2,-241.3)
+			goMap.transform.localScale = Vector3(1, 1, 1)
 
-		-- 	local player = require "player.FHostPlayer"
-		-- 	local p = player.new()
-		-- 	p:Init({})
-		-- 	self.m_HostPlayer = p
-		-- end)
-		require "ui.FPockerMainUI".Instance():ShowPanel(true)
+			local player = require "player.FHostPlayer"
+			local p = player()
+			p:Init({})
+			self.m_HostPlayer = p
+		end)
 	end
 	function FGame:LeaveGameLogic()
 		self.m_isGameLogic = false
@@ -125,16 +126,14 @@ do
 
 
 	function FGame:ToggleConsole()
-		local FConsoleUI = require "ui.FConsoleUI"
 		FConsoleUI.Instance():ToggleConsole()
 	end
 	function FGame:ForceCloseConsole()
-		local FConsoleUI = require "ui.FConsoleUI"
 		FConsoleUI.Instance():DestroyPanel()
 	end
 	function FGame:OnUnityLog(t,str)
-		table.insert(self.m_LogList,{type=t,str=str})
-		FireEvent(EventDef.UnityLog,{type=t,str=str})
+		--table.insert(self.m_LogList,{type=t,str=str})
+		--FireEvent(EventDef.UnityLog,{type=t,str=str})
 	end
 	function FGame:GetAllLogs()
 		return self.m_LogList
@@ -170,6 +169,6 @@ do
 	end
 end
 
-theGame = FGame.new()
+theGame = FGame()
 
 return FGame

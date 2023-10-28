@@ -5,7 +5,7 @@ _G.FLua = FLua
 _G.warn = print
 local FLibEvent = require "FLibEvent"
 
-local Event = FLibEvent.new()
+local Event = FLibEvent()
 
 local Cat = FLua.Class("Cat")
 do

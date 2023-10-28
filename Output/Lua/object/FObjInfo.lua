@@ -1,6 +1,6 @@
 local FObjInfo = FLua.Class("FObjInfo")
 do
-	function FObjInfo:_ctor()
+	function FObjInfo:__constructor()
 		self.ID = 0 
 		self.Name = ""
 	end

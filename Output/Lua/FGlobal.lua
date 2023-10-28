@@ -1,19 +1,14 @@
 import "UnityEngine"
 
-ResourceManager = FGame.ResourceManager
-NetworkManager = FGame.NetworkManager
-ByteBuffer = FGame.ByteBuffer
-LuaBehaviour = FGame.LuaBehaviour
-
 GameObject = UnityEngine.GameObject
 Vector2 = UnityEngine.Vector2
 Vector3 = UnityEngine.Vector3
 Quaternion = UnityEngine.Quaternion
 
 function OnUnityLog(t,str)
-	-- local game = require "game.FGame"
-	-- game.Instance():OnUnityLog(t,str)
-	if theGame then theGame:OnUnityLog(t,str) end
+	local game = require "game.FGame"
+	game.Instance():OnUnityLog(t,str)
+	--theGame:OnUnityLog(t,str)
 end
 
 function OnHotKeyCodeMap()
@@ -35,7 +30,6 @@ function OnHotKeyInput( key, down )
 	elseif key == KeyCode.Escape then
 		theGame:ForceCloseConsole()
 	elseif key == KeyCode.UpArrow then
-		print(".........")
 		if theGame.m_HostPlayer then
 			theGame.m_HostPlayer:Play("Run",UnityEngine.WrapMode.Loop)
 		end
@@ -54,46 +48,62 @@ function OnHotKeyInput( key, down )
 	end
 end
 
-function AsyncLoad(assetBundleName,assetName,cb)
-	if type(assetName) ~= "string" then
-		error(("argument #%d expected string, but got %s"):format(2, type(assetName)))
+function TransformABName(assetName)
+	local abName = assetName:lower()
+	if abName:sub(1, 7) ~= 'assets/' then
+		abName = "assets/" .. abName
 	end
+	if abName:sub(-12) ~= ".ab" then
+		abName = abName .. ".ab"
+	end
+	return abName
+end
+
+function AsyncLoadWithAB(abName, assetName, cb)
 	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
-	FAssetBundleUtil.Instance():AsyncLoad(assetBundleName,{assetName},function(objs)
-		cb(objs[1])
+	FAssetBundleUtil.Instance():AsyncLoad(abName, assetName, function(obj)
+		cb(obj)
 	end)
 end
 
-function AsyncLoadArray(assetBundleName, assetNames, cb)
+function AsyncLoad(assetName, cb)
+	if type(assetName) ~= "string" then
+		error(("argument #%d expected string, but got %s"):format(1, type(assetName)))
+	end
+	local abName = TransformABName(assetName)
+	AsyncLoadWithAB(abName, assetName, cb)
+end
+
+function AsyncLoadArray(assetNames, cb)
 	if type(assetName) ~= "table" then
 		error(("argument #%d expected table, but got %s"):format(2, type(assetName)))
 	end
-	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
-	FAssetBundleUtil.Instance():AsyncLoad(assetBundleName,assetNames,cb)
-end
 
-function AsyncLoadBundle(assetBundleName, cb)
-	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
-	FAssetBundleUtil.Instance():AsyncLoadBundle(assetBundleName,cb)
-end
-
-function AsyncLoadBundleArray(assetBundleNames, cb)
 	local results = {}
-	local count = #assetBundleNames
-	for i=1, #assetBundleNames do
-		AsyncLoadBundle(assetBundleNames[i], function(bundle)
-			results[i] = bundle
+	local count = #assetNames
+	local finishnum = 0
+	for i=1, #assetNames do
+		AsyncLoad(assetNames[i], function(obj)
+			results[i] = obj
+			finishnum = finishnum + 1
 
-			if #results == count then
+			if finishnum == count then
 				cb(results)
 			end
 		end)
 	end
 end
 
-function UnloadAssetBundle(assetBundleName,unload)
+function AsyncLoadABundle(assetBundleName)
 	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
-	FAssetBundleUtil.Instance():UnloadAssetBundle(assetBundleName,unload)
+	FAssetBundleUtil.Instance():AsyncLoadABundle(assetBundleName, function(ab)
+		cb(ab)
+	end)
+end
+
+function UnloadAssetBundle(assetBundleName, unload)
+	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
+	FAssetBundleUtil.Instance():UnloadABundle(assetBundleName, unload)
 end
 
 function MsgBox(hwnd,content,title,mask,click_cb)
@@ -169,17 +179,6 @@ function PrintTable(t)
 	print(str)
 end
 
-function string:split(sep)
-	local sep, fields = sep or ",", {}
-	local pattern = string.format("([^%s]+)", sep)
-	self:gsub(pattern, function(c) table.insert(fields, c) end)
-	return fields
-end
-
-function table:append(s)
-	table.insert(self, s)
-end
-
 function NewByteBuffer(data)
 	if not data then
 		return ByteBuffer()
@@ -202,4 +201,36 @@ function ReadFileContent(filename)
 	else
 		return nil
 	end
+end
+
+function IsWebGLRuntime()
+	return UnityEngine.RuntimePlatform.WebGLPlayer == UnityEngine.Application.platform
+end
+
+
+local function mask_to_index_func()
+    local c = 1
+    local t = {}
+    for i = 0, 31 do
+        t[c] = i
+        c = c * 2
+    end
+    return t
+end
+
+_G.mask_to_index = mask_to_index_func()
+_G.mask_to_string = function(mask)
+	local str = ""
+	for i = 0, 31 do
+		if mask == 0 then break end
+		if mask % 2 == 1 then
+			str = str..tostring(i)..";"
+		end
+		mask = math.floor( mask/2)
+	end
+	return str
+end
+
+function _G.index_to_mask (index)
+	return bit.lshift(1, index - 1)
 end

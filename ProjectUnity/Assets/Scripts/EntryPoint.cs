@@ -138,9 +138,31 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     }
 
     // Update is called once per frame
-    void Update () {
-		
-	}
+    void Update () 
+    {
+        if (!LuaSvr.inited || null == LuaSvr.mainState)
+            return;
+        LuaState l = LuaSvr.mainState;
+        LuaFunction func = l.getFunction("TickGame");
+        if (null != func)
+        {
+            func.call(Time.deltaTime);
+            func.Dispose();
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (!LuaSvr.inited || null == LuaSvr.mainState)
+            return;
+        LuaState l = LuaSvr.mainState;
+        LuaFunction func = l.getFunction("LateTickGame");
+        if (null != func)
+        {
+            func.call();
+            func.Dispose();
+        }
+    }
 
     void Cleanup()
     {
@@ -187,31 +209,5 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         {
             //LogUtil.Log("OnApplicationQuit");
         }
-    }
-
-    void InitLuaBundle(Action onComplete)
-    {
-#if UNITY_WEBGL && !UNITY_EDITOR
-        StartCoroutine(_AddBundle("lua/lua.unity3d", onComplete));
-#endif
-    }
-
-    IEnumerator _AddBundle(string bundleName, Action onComplete)
-    {
-        yield return 0;
-        var uri = new System.Uri(Path.Combine(Application.streamingAssetsPath, bundleName));
-        UnityWebRequest request = UnityWebRequest.Get(uri);
-        yield return request.SendWebRequest();
-        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-        {
-            LogUtil.LogError(request.error);
-        }
-        else
-        {
-            AssetBundle ab = AssetBundle.LoadFromMemory(request.downloadHandler.data);
-            //loader.AddBundle(bundleName, ab);
-        }
-
-        onComplete.Invoke();
     }
 }

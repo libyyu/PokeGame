@@ -15,7 +15,7 @@ _G.CardType = {
  }
 
 do
-	function FCardInfo:__ctor()
+	function FCardInfo:__constructor()
 		self.cardName = "" --卡片图片名
 		self.cardType = 0  --卡片类型
 		self.cardIndex = 0 --牌在所在类型的索引3-10,J,Q,K,A,2(0-12)

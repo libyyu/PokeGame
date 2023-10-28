@@ -61,8 +61,8 @@ namespace SLua
             {
                 typeof(BinaryReader),
                 typeof(BinaryWriter),
-                typeof(FGame.ByteBuffer),
-				typeof(FGame.NetworkManager),
+                typeof(ByteBuffer),
+				typeof(NetworkManager),
             };
         }
 

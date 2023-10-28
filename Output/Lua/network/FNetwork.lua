@@ -5,7 +5,7 @@
 --comment: 网络处理基础类
 local FNetwork = FLua.Class("FNetwork")
 do
-	function FNetwork:_ctor()
+	function FNetwork:__constructor()
 		self.m_GoNetwork = nil
 		self.m_Network = nil
 		self.m_status = "broken"
@@ -117,9 +117,9 @@ do
 		warn(text)
 	end
 
+	local Protocal = NetworkManager.Protocal
 	function FNetwork:OnReceiveMessage(protocal,buffer)
 		warn(self.m_netName .. ".OnReceiveMessage", protocal, buffer)
-		local Protocal = FGame.Protocal
 		if protocal == Protocal.Connect then
 			self:OnConnected()
 		elseif protocal == Protocal.Exception then

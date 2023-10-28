@@ -2,22 +2,21 @@ local FBaseUI = require "ui.FBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FLoadingUI = FLua.Class("FLoadingUI",FBaseUI)
+local FLoadingUI = FLua.Class(FBaseUI, "FLoadingUI")
 do
 	local OBJPATH = 
 	{
-		progress = "n15",
-		tip = "tip",
+		progress = "load_progress",
+		tip = "load_tip/Text",
 	}
-	function FLoadingUI:_ctor()
+	function FLoadingUI:__constructor()
 		self.m_progress = nil
 		self.m_tip = nil
-		self.callback = nil
 	end
 
 	function FLoadingUI.Instance()
 		if not l_instance then
-			l_instance = FLoadingUI.new()
+			l_instance = FLoadingUI()
 		end
 		return l_instance
 	end
@@ -33,19 +32,14 @@ do
 	end
 
 	function FLoadingUI:OnCreate()		
-		self.m_progress = self:FindChildObj(OBJPATH.progress)
+		self.m_progress = self:FindChildObj(OBJPATH.progress):GetComponent("Slider")
 		self.m_tip = self:FindChildObj(OBJPATH.tip)
-		self.m_progress.value = 0
 
 		LuaTimer.Add(0,1,function(t,b)
 			if self.m_panel then
 				self.m_progress.value = self.m_progress.value + 0.5*10/100
 				FGUITools.setText(self.m_tip,"已加载" .. ("%d%%"):format(self.m_progress.value*100))
 				if self.m_progress.value >= 1.0 then
-					if self.callback then
-						self.callback()
-						self.callback = nil
-					end
 					return false
 				else
 					return true
@@ -56,9 +50,10 @@ do
 		end)
 	end
 
-	function FLoadingUI:StartLoading(callback)
-		self.callback = callback
-		self:ShowPanel(true)
+	function FLoadingUI:onScrollFinished(go)
+		warn("onScrollFinished",go.name)
+		self:DestroyPanel()
+		theGame:EnterGameLogic()
 	end
 end
 

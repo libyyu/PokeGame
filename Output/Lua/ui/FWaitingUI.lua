@@ -2,20 +2,20 @@ local FBaseUI = require "ui.FBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FWaitingUI = FLua.Class("FWaitingUI",FBaseUI)
+local FWaitingUI = FLua.Class(FBaseUI, "FWaitingUI")
 do
 	local OBJPATH = 
 	{
-		text = "desc",	
+		text = "context",
 	}
 
-	function FWaitingUI:_ctor()
+	function FWaitingUI:__constructor()
 		self.context = ""
 	end
 
 	function FWaitingUI.Instance()
 		if not l_instance then
-			l_instance = FWaitingUI.new()
+			l_instance = FWaitingUI()
 		end
 		return l_instance
 	end

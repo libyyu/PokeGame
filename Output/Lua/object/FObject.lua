@@ -4,14 +4,14 @@ local FObjInfo = require "object.FObjInfo"
 local FObject = FLua.Class("FObject")
 
 do
-	function FObject:_ctor()
+	function FObject:__constructor()
 		self.m_InfoData = nil
 		self.m_Model = nil 
 		self.OnLoadedCallbacks = {}
 	end
 
 	function FObject:LoadModel(abName,resName,cb)
-		local m = FModel.new()
+		local m = FModel()
 		m:Load(abName,resName,function(ret)
 			if ret then
 				self.m_Model = ret

@@ -2,20 +2,20 @@ local FBaseUI = require "ui.FBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FFlashTipUI = FLua.Class("FFlashTipUI",FBaseUI)
+local FFlashTipUI = FLua.Class(FBaseUI, "FFlashTipUI")
 do
 	local OBJPATH = 
 	{
 		text = "Text",
 	}
 
-	function FFlashTipUI:_ctor()
+	function FFlashTipUI:__constructor()
 		self.context = ""
 	end
 
 	function FFlashTipUI.Instance()
 		if not l_instance then
-			l_instance = FFlashTipUI.new()
+			l_instance = FFlashTipUI()
 		end
 		return l_instance
 	end

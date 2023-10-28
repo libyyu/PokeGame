@@ -2,16 +2,16 @@ local FBaseUI = require "ui.FBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FUpdateUI = FLua.Class("FUpdateUI",FBaseUI)
+local FUpdateUI = FLua.Class(FBaseUI, "FUpdateUI")
 do
 	local OBJPATH = 
 	{
-		progress = "n15",
-		tip = "tip",
-		localversion = "local_version",
-		remoteversion = "remote_version",
+		progress = "load_progress",
+		tip = "load_tip/Text",
+		localversion = "local_version/version",
+		remoteversion = "remote_version/version",
 	}
-	function FUpdateUI:_ctor()
+	function FUpdateUI:__constructor()
 		self.m_progress = nil
 		self.m_tip = nil
 		self.m_localversion = nil
@@ -22,7 +22,7 @@ do
 
 	function FUpdateUI.Instance()
 		if not l_instance then
-			l_instance = FUpdateUI.new()
+			l_instance = FUpdateUI()
 		end
 		return l_instance
 	end
@@ -30,7 +30,7 @@ do
 	function FUpdateUI:ShowPanel(show)
 		if show then
 			if not self.m_panel then
-				self:CreatePanel(ResPathReader.PokerUpdateUI)
+				self:CreatePanel(ResPathReader.UpdateUI)
 			end
 		else
 			self:DestroyPanel()
@@ -38,10 +38,11 @@ do
 	end
 
 	function FUpdateUI:OnCreate()		
-		self.m_progress = self:FindChildObj(OBJPATH.progress)
+		self.m_progress = self:FindChildObj(OBJPATH.progress):GetComponent("Slider")
 		self.m_tip = self:FindChildObj(OBJPATH.tip)
 		self.m_localversion = self:FindChildObj(OBJPATH.localversion)
 		self.m_remoteversion = self:FindChildObj(OBJPATH.remoteversion)
+		self.m_progress.interactable = false
 
 		self:SetLoaclVersion(self.localverionVal)
 		self:SetRemoteVersion(self.remoteverionVal)

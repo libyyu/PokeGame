@@ -2,7 +2,7 @@ local FObject = require "object.FObject"
 local FPlayer = FLua.Class("FPlayer",FObject)
 
 do
-	function FPlayer:_ctor()
+	function FPlayer:__constructor()
 		self.m_IsHost = false
 		self.m_IsReady = false
 	end

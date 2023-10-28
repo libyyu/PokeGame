@@ -1,6 +1,6 @@
 local FTask = FLua.Class("FTask")
 do
-	function FTask._ctor( )
+	function FTask.__constructor( )
 		self.m_action = function(...) end
 		self.m_cancelCallback = function(...) end
 		self.finishTask = function(...) end
@@ -17,7 +17,7 @@ do
 		return FTask.createEx(action,nil)
 	end
 	function FTask.createEx(action,cancelCallback)
-		local obj = FTask.new()
+		local obj = FTask()
 		obj.m_action = action
 		obj.m_cancelCallback = cancelCallback
 		return obj

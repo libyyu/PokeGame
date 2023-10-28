@@ -193,7 +193,7 @@ do
         end
     end
 
-    function FGameUpdate:_ctor()
+    function FGameUpdate:__constructor()
         self.m_UpdateSession = nil
         self.m_UpdateFinished = false
         self.m_EntryConfig = nil
@@ -205,7 +205,7 @@ do
     end
     function FGameUpdate.Instance()
         if not l_instance then
-            l_instance = FGameUpdate.new()
+            l_instance = FGameUpdate()
             l_instance:Init()
         end
         return l_instance

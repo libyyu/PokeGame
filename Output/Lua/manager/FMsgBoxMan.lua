@@ -3,11 +3,11 @@ local FMsgBoxMan = FLua.Class("FMsgBoxMan")
 do
 	function FMsgBoxMan.Instance()
 		if not l_instance then
-			l_instance = FMsgBoxMan.new()
+			l_instance = FMsgBoxMan()
 		end
 		return l_instance
 	end
-	function FMsgBoxMan:_ctor()
+	function FMsgBoxMan:__constructor()
 		self.m_boxList = {}
 		self.m_curBox = nil
 	end
@@ -61,7 +61,7 @@ do
 
 	function FMsgBoxMan:ShowMsgBox(hwnd,content,title,mask,click_cb)
 		local FMsgBoxUI = require "ui.FMsgBoxUI"
-		local msgbox = FMsgBoxUI.new()
+		local msgbox = FMsgBoxUI()
 		msgbox:SetInfo(hwnd,content,title,mask,click_cb)
 		msgbox:AttachDestroyFunc(OnMsgBoxDestroy)
 		self:TryPopup(msgbox)

@@ -2,7 +2,7 @@ local FBaseUI = require "ui.FBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FPockerTableUI = FLua.Class("FPockerTableUI",FBaseUI)
+local FPockerTableUI = FLua.Class(FBaseUI, "FPockerTableUI")
 do
 	local OBJPATH = 
 	{
@@ -10,7 +10,7 @@ do
 	}
 	function FPockerTableUI.Instance()
 		if not l_instance then
-			l_instance = FPockerTableUI.new()
+			l_instance = FPockerTableUI()
 			l_instance.m_UnloadBundleWhenDestroy = true
 			l_instance.m_TriggerGCWhenDestroy = true
 		end

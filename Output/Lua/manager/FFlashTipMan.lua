@@ -2,7 +2,7 @@ local FFlashTipMan = FLua.Class("FFlashTipMan")
 do
 	local MAX_CACHE = 10
 	local MAX_TIPS = 3
-	function FFlashTipMan:_ctor()
+	function FFlashTipMan:__constructor()
 		self.m_root = nil
 		self.m_cached = {}
 		self.m_used = {}
@@ -22,7 +22,7 @@ do
 		self:DoWhileTipMax()
 
 		local FFlashTipUI = require "ui.FFlashTipUI"
-		local flashTipUI = FFlashTipUI.new()
+		local flashTipUI = FFlashTipUI()
 		local flash = self:NewFlashTip()
 		if flash then
 			flashTipUI:FillText(tip)
@@ -48,6 +48,6 @@ do
 	end
 end
 
-FlashTipMan = FFlashTipMan.new()
+FlashTipMan = FFlashTipMan()
 
 return FFlashTipMan

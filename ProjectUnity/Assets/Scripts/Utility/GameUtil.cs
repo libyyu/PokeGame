@@ -575,7 +575,7 @@ public class GameUtil
 
 	public static void UnZip(string zipFileName,string directory,string password = null,LuaFunction handle = null)
 	{
-		UnZipUtil.XSharpUnZip.UnZipDirectory(zipFileName,directory,password,(entryName,progress,streamSize,entryLength) =>{
+		XSharpUnZip.UnZipDirectory(zipFileName,directory,password,(entryName,progress,streamSize,entryLength) =>{
 			if(handle != null)
 				handle.call(entryName,progress,streamSize,entryLength);
 		});

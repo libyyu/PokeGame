@@ -1,10 +1,9 @@
 local FBaseUI = require "ui.FBaseUI"
-local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FConsoleUI = FLua.Class("FConsoleUI",FBaseUI)
+local FConsoleUI = FLua.Class(FBaseUI, "FConsoleUI")
 do
-	function FConsoleUI:_ctor()
+	function FConsoleUI:__constructor()
 		self.m_Toggled = false
 		self.m_consoleText = nil
 		self.m_inputText = nil
@@ -13,7 +12,7 @@ do
 	end
 	function FConsoleUI.Instance()
 		if not l_instance then
-			l_instance = FConsoleUI.new()
+			l_instance = FConsoleUI()
 		end
 		return l_instance
 	end
@@ -35,14 +34,10 @@ do
 
 	function FConsoleUI:OnCreate()
 		AddEvent(onUnityLog,EventDef.UnityLog)
-		self:SetActive(true)
-        self.m_consoleText = self:FindChildObj("n0")
-        self.m_inputText = self:FindChildObj("n3")
-       -- self.m_inputText:ActivateInputField()
-        self.m_inputText.onSubmit:Add(function()
-        	local text = FGUITools.getInputText(self.m_inputText)
-        	self:OnSubmit(self.m_inputText, text)
-        end)
+		self.m_panel:SetActive(true)
+        self.m_consoleText = self:FindChildObj("OutputArea/ScrollingMask/Text"):GetComponent("Text")
+        self.m_inputText = self:FindChildObj("InputArea"):GetComponent("InputField")
+        self.m_inputText:ActivateInputField()
         self.m_Toggled = true
 
         self:RefreshLog(true)
@@ -77,8 +72,8 @@ do
 		if not text or #text == 0 then return end
 		local userName = theGame.m_LoginInfo and theGame.m_LoginInfo.name and theGame.m_LoginInfo.name..">>" or ">>"
 		print(userName..text)
-		FGUITools.setInputText(self.m_inputText, "")
-		--self.m_inputText:ActivateInputField()
+		self.m_inputText.text = ""
+		self.m_inputText:ActivateInputField()
 		self.m_inputHistory[#self.m_inputHistory+1] = text
 		theGame:ExecuteDebugString(text)
 	end
@@ -87,8 +82,8 @@ do
 		if not self.m_panel then
 			return
 		end
-		--local scrollObj = self:FindChildObj("Scrollbar"):GetComponent("Scrollbar")
-		--scrollObj.value = 0
+		local scrollObj = self:FindChildObj("Scrollbar"):GetComponent("Scrollbar")
+		scrollObj.value = 0
 	end
 
 	function FConsoleUI:AppendLog(t,str)
@@ -109,7 +104,6 @@ do
 	function FConsoleUI:RefreshLog(rebuild)
 		local logs = theGame:GetAllLogs()
 		if rebuild then
-			self.m_consoleText.text = ""
 			for i,log in ipairs(logs) do
 	        	self:AppendLog(log.type,log.str)
 	        end

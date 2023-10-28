@@ -4,7 +4,7 @@ do
 	local ModelStatus = { NORMAL = 0, LOADING = 1, DESTROY = 2}
 
 
-	function FModel:_ctor()
+	function FModel:__constructor()
 		self.m_asset = nil
 		self.m_model = nil 
 		self.m_ani = nil

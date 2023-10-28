@@ -17,6 +17,10 @@ public class AssetExport
     public static void AutoSetAssetBundleName(string sp)
     {
         string abName = sp.ToLower().Replace("\\", "/");
+		if(abName.EndsWith(".cs"))
+		{
+			return;
+		}
 
         AssetImporter import = AssetImporter.GetAtPath(sp);
         string name = GameUtil.FileNameWithoutExt(abName);

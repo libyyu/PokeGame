@@ -5,9 +5,9 @@
 --comment: 游戏更新处理类
 local FNetwork = require "network.FNetwork"
 local l_instance = nil
-local FUpdateSession = FLua.Class("FUpdateSession", FNetwork)
+local FUpdateSession = FLua.Class(FNetwork, "FUpdateSession")
 do
-	function FUpdateSession:_ctor()
+	function FUpdateSession:__constructor()
 		self.m_netName = "UpdateSession"
 		self.m_VersionInfo = nil
 		self.m_PatchesInfo = nil
@@ -15,7 +15,7 @@ do
 	end
 	function FUpdateSession.Instance()
 		if not l_instance then
-			l_instance = FUpdateSession.new()
+			l_instance = FUpdateSession()
 		end
 		return l_instance
 	end

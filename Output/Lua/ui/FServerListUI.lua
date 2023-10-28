@@ -3,20 +3,20 @@ local FGUITools = require "utility.FGUITools"
 local server_list = dofile "configs.server_list"
 
 local l_instance = nil
-local FServerListUI = FLua.Class("FServerListUI",FBaseUI)
+local FServerListUI = FLua.Class(FBaseUI, "FServerListUI")
 do
 	local OBJPATH = 
 	{
 		Template = "ServerList/List/Template",
 		List = "ServerList/List"
 	}	
-	function FServerListUI:_ctor( )
+	function FServerListUI:__constructor( )
 		self.m_ListCtrl = nil
 		self.m_currentServerInfo = nil
 	end
 	function FServerListUI.Instance()
 		if not l_instance then
-			l_instance = FServerListUI.new()
+			l_instance = FServerListUI()
 		end
 		return l_instance
 	end

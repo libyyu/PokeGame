@@ -3,9 +3,7 @@ using System;
 using System.IO;
 using SharpZipLib = ICSharpCode.SharpZipLib;
 
-namespace UnZipUtil
-{
-    public class XSharpUnZip
+public class XSharpUnZip
     {
 		public static string _password = "LuaGame";
         
@@ -274,4 +272,4 @@ namespace UnZipUtil
             }
         }
     }
-}
+

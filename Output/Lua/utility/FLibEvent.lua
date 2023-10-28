@@ -1,8 +1,8 @@
 
 local FLibEvent = FLua.Class("FLibEvent")
 do
-	function FLibEvent:_ctor(name)
-		self.name = name
+	function FLibEvent:__constructor()
+		self.name = self.__ctor_args[1] or "<anonymous>"
 		self.events = {}
 	end
 
