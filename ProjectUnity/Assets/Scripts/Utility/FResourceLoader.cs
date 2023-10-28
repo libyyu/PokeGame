@@ -627,7 +627,7 @@ public class FResourceLoader : MonoBehaviour
     IAssetLoader loader = null;
     void Awake()
     {
-#if false//UNITY_EDITOR
+#if UNITY_EDITOR
         loader = new UnityEditorResourceLoader(this);
 #else
         loader = new UnityAssetBundleLoader(this);

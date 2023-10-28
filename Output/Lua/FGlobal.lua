@@ -6,9 +6,9 @@ Vector3 = UnityEngine.Vector3
 Quaternion = UnityEngine.Quaternion
 
 function OnUnityLog(t,str)
-	local game = require "game.FGame"
-	game.Instance():OnUnityLog(t,str)
-	--theGame:OnUnityLog(t,str)
+	if theGame then
+		theGame:OnUnityLog(t,str)
+	end
 end
 
 function OnHotKeyCodeMap()
@@ -206,6 +206,8 @@ end
 function IsWebGLRuntime()
 	return UnityEngine.RuntimePlatform.WebGLPlayer == UnityEngine.Application.platform
 end
+
+_G.PlatformSuffix = IsWebGLRuntime() and "WebGL" or "App"
 
 
 local function mask_to_index_func()

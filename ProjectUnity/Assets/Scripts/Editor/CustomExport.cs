@@ -42,13 +42,18 @@ namespace SLua
             // add(typeof(List<int>), "ListInt");
             // add(typeof(Dictionary<int, string>), "DictIntStr");
             // add(typeof(string), "String");
+            add(typeof(System.Uri), null);
             add(typeof(BinaryReader), "BinaryReader");
             add(typeof(BinaryWriter), "BinaryWriter");
             add(typeof(BestHTTP.HTTPRequest), "HTTPRequest");
             add(typeof(BestHTTP.HTTPResponse), "HTTPResponse");
             add(typeof(BestHTTP.HTTPRequestStates), "HTTPRequestStates");
 			add(typeof(FBackgroundMusic), "FBackgroundMusic");
+            add(typeof(UnityWebSocket.WebSocket), "UnityWebSocket.WebSocket");
+            add(typeof(UnityWebSocket.WebSocketState), "UnityWebSocket.WebSocketState");
 
+            add(typeof(UnityEngine.Networking.UnityWebRequest), null);
+            add(typeof(UnityEngine.Networking.UnityWebRequest.Result), "UnityEngine.Networking.UnityWebRequest.Result");
             // add your custom class here
             // add( type, typename)
             // type is what you want to export
@@ -98,7 +103,7 @@ namespace SLua
         {
             list = new List<string>
             {
-                //"UnityEngine.GameObject",
+                
             };
         }
 

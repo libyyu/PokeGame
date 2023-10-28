@@ -21,6 +21,14 @@ public class AssetExport
 		{
 			return;
 		}
+		else if(abName.Contains("/editor/"))
+		{
+			return;
+		}
+        else if (abName.Contains("/resource/"))
+        {
+            return;
+        }
 
         AssetImporter import = AssetImporter.GetAtPath(sp);
         string name = GameUtil.FileNameWithoutExt(abName);
