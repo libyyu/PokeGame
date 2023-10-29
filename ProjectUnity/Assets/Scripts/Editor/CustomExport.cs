@@ -51,6 +51,7 @@ namespace SLua
 			add(typeof(FBackgroundMusic), "FBackgroundMusic");
             add(typeof(UnityWebSocket.WebSocket), "UnityWebSocket.WebSocket");
             add(typeof(UnityWebSocket.WebSocketState), "UnityWebSocket.WebSocketState");
+            add(typeof(UnityWebSocket.MessageEventArgs), null);
 
             add(typeof(UnityEngine.Networking.UnityWebRequest), null);
             add(typeof(UnityEngine.Networking.UnityWebRequest.Result), "UnityEngine.Networking.UnityWebRequest.Result");
