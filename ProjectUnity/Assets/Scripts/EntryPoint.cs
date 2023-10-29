@@ -134,6 +134,9 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 
     protected override void Awake()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        LogUtil.Log(string.Format("isRunEnvWX: {0}, {1}", WebCommon.isRunEnvWX(), WebCommon.get_streamingAssetsUrl()));
+#endif
         base.Awake();
         //FResourceLoader.Instance.Init();
         RunApp();

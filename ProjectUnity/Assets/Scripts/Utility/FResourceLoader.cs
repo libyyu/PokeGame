@@ -155,6 +155,12 @@ public class UnityAssetBundleLoader : IAssetLoader
 			return "jar:file://" + Application.dataPath + "!/assets";
 #elif UNITY_IPHONE
 			return Application.dataPath + "/Raw";
+#elif UNITY_WEBGL && !UNITY_EDITOR
+            if(WebCommon.isRunEnvWX())
+            {
+                return WebCommon.get_streamingAssetsUrl();
+            }
+            return Application.streamingAssetsPath;
 #else
             return Application.streamingAssetsPath;
 #endif
@@ -449,7 +455,10 @@ public class UnityAssetBundleLoader : IAssetLoader
     IEnumerator OnLoadAssetBundle(string abName, Type type)
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
-        var uri = new System.Uri(Application.streamingAssetsPath + "/" + abName);
+        var streamingAssetsUrl = Application.streamingAssetsPath;
+        if(WebCommon.isRunEnvWX())
+            streamingAssetsUrl = WebCommon.get_streamingAssetsUrl();
+        var uri = new System.Uri(streamingAssetsUrl + "/" + abName);
         yield return OnLoadAssetBundleInner(uri, abName, type, null);
 #else
         bool bLoaded = false;
