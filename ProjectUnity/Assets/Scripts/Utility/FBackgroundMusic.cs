@@ -10,14 +10,18 @@ public class FBackgroundMusic : PersistentHumbleSingleton<FBackgroundMusic>
 	public AudioClip SoundClip ;
     protected AudioSource _source;
 
+    protected override void Awake()
+	{
+		base.Awake();
+        _source = gameObject.AddComponent<AudioSource>() as AudioSource;
+    }
+
     /// <summary>
     /// Gets the AudioSource associated to that GameObject, and asks the GameManager to play it.
     /// </summary>
     protected virtual void Start () 
 	{
-		_source = gameObject.AddComponent<AudioSource>() as AudioSource;	
 		PlayBackgroundMusic (SoundClip);
-
 	}
 
 	public void PlayBackgroundMusic(AudioClip clip)

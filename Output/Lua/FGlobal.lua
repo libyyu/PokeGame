@@ -53,7 +53,13 @@ function TransformABName(assetName)
 	if abName:sub(1, 7) ~= 'assets/' then
 		abName = "assets/" .. abName
 	end
-	if abName:sub(-12) ~= ".ab" then
+
+	local i = abName:find_last(".", true)
+    if i then
+        abName = abName:sub(1, i - 1)
+    end
+
+	if abName:sub(-3) ~= ".ab" then
 		abName = abName .. ".ab"
 	end
 	return abName

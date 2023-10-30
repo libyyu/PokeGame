@@ -19,6 +19,17 @@ mergeInto(LibraryManager.library, {
     stringToUTF8(streamingAssetsUrl, buffer, length);
     return buffer;
   },
+  getAssetBundleManifestName:function()
+  {
+    var ret = "StreamingAssets";
+    if(typeof GameGlobal === "object" && typeof GameGlobal.manager === "object" && typeof GameGlobal.manager.assetBundleManifestName == 'string') {
+      ret = GameGlobal.manager.assetBundleManifestName;
+    }
+    var length = lengthBytesUTF8(ret) + 1;
+    var buffer = _malloc(length);
+    stringToUTF8(ret, buffer, length);
+    return buffer;
+  },
   callJSMethod:function(method, jsonStr)
   {
     var M;

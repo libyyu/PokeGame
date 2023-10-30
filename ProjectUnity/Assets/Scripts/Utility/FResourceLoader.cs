@@ -227,6 +227,18 @@ public class UnityAssetBundleLoader : IAssetLoader
         }
     }
 
+    public string AssetBundleManifestName
+    {
+        get
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return WebCommon.getAssetBundleManifestName();
+#else
+            return GameUtil.ManifestName;
+#endif
+        }
+    }
+
 
     class AssetBundleInfo
     {
@@ -251,6 +263,10 @@ public class UnityAssetBundleLoader : IAssetLoader
     Dictionary<string, string[]> m_Dependencies = new Dictionary<string, string[]>();
     Dictionary<string, AssetBundleInfo> m_LoadedAssetBundles = new Dictionary<string, AssetBundleInfo>();
     Dictionary<string, List<LoadAssetRequest>> m_LoadRequests = new Dictionary<string, List<LoadAssetRequest>>();
+#if UNITY_WEBGL && !UNITY_EDITOR
+    Dictionary<string, string> m_BundleNameToHashBundleName = new Dictionary<string, string>();
+    Dictionary<string, string> m_HashBundleNameToBundleName = new Dictionary<string, string>();
+#endif
 
     string FixABName(string abName)
     {
@@ -260,6 +276,38 @@ public class UnityAssetBundleLoader : IAssetLoader
         if (!outName.EndsWith(GameUtil.BundleExt)) outName = outName + GameUtil.BundleExt;
         return outName;
     }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    string TransformABNameToHashABName(string abFullName)
+    {
+ 
+        if(abFullName.EndsWith(GameUtil.BundleExt))
+        {
+            string hashABName;
+            string noHashABName;
+            if (m_BundleNameToHashBundleName.TryGetValue(abFullName, out hashABName) && m_HashBundleNameToBundleName.TryGetValue(hashABName, out noHashABName) && noHashABName == abFullName)
+            {
+                return hashABName;
+            }
+        }
+        return abFullName;
+    }
+
+    string TransformHashABNameToABName(string abHashedFullName)
+    {
+        if (abHashedFullName.EndsWith(GameUtil.BundleExt))
+        {
+            string hashABName;
+            string noHashABName;
+            if (m_HashBundleNameToBundleName.TryGetValue(abHashedFullName, out noHashABName) && m_BundleNameToHashBundleName.TryGetValue(noHashABName, out hashABName) && hashABName == abHashedFullName)
+            {
+                return noHashABName;
+            }
+        }
+        return abHashedFullName;
+    }
+#endif
+
     AssetBundleInfo GetLoadedAssetBundle(string abName)
     {
         AssetBundleInfo bundle = null;
@@ -300,16 +348,29 @@ public class UnityAssetBundleLoader : IAssetLoader
             if (onInitCallback != null) onInitCallback();
             return;
         }
-        LoadAsset<AssetBundleManifest>(GameUtil.ManifestName, new string[] { "AssetBundleManifest" }, delegate (UObject[] objs) {
+
+        LogUtil.Log(string.Format("AssetBundleManifestName:{0}", AssetBundleManifestName));
+        LoadAsset<AssetBundleManifest>(AssetBundleManifestName, new string[] { "AssetBundleManifest" }, delegate (UObject[] objs) {
             if (objs.Length > 0)
             {
                 LogUtil.Log("AssetBundleManifest Load Finished.");
                 m_AssetBundleManifest = objs[0] as AssetBundleManifest;
                 m_AllManifest = m_AssetBundleManifest.GetAllAssetBundles();
+#if UNITY_WEBGL && !UNITY_EDITOR
+                m_BundleNameToHashBundleName.Clear();
+                m_HashBundleNameToBundleName.Clear();
+                foreach (var bundleName in m_AllManifest)
+                {
+                    var hash = m_AssetBundleManifest.GetAssetBundleHash(bundleName);
+                    var bundleNameNoHash = bundleName.Replace("_" + hash, "");
+                    m_BundleNameToHashBundleName.Add(bundleNameNoHash, bundleName);
+                    m_HashBundleNameToBundleName.Add(bundleName, bundleNameNoHash);
+                }
+#endif
             }
             else
             {
-                LogUtil.LogWarning("AssetBundleManifest Load Finished but no AssetBundleManifest.");
+                LogUtil.LogWarning("AssetBundleManifest Load Finished but no AssetBundleManifest. " + AssetBundleManifestName);
             }
             if (onInitCallback != null) onInitCallback();
         });
@@ -411,14 +472,35 @@ public class UnityAssetBundleLoader : IAssetLoader
         {
             if (m_AssetBundleManifest != null)
             {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                string abNameHashed = TransformABNameToHashABName(abName);
+                string[] dependencies = m_AssetBundleManifest.GetAllDependencies(abNameHashed);
+#else
                 string[] dependencies = m_AssetBundleManifest.GetAllDependencies(abName);
+#endif
+
                 if (dependencies.Length > 0)
                 {
-                    if(!m_Dependencies.ContainsKey(abName))
+                    if (!m_Dependencies.ContainsKey(abName))
+                    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                        List<string> fixedDepends = new List<string>();
+                        foreach (string dependency in dependencies) 
+                        {
+                            fixedDepends.Add(TransformHashABNameToABName(dependency));
+                        }
+                        m_Dependencies.Add(abName, fixedDepends.ToArray());
+#else
                         m_Dependencies.Add(abName, dependencies);
+#endif
+                    }
                     for (int i = 0; i < dependencies.Length; i++)
                     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                        string depName = TransformHashABNameToABName(dependencies[i]);
+#else
                         string depName = dependencies[i];
+#endif
                         AssetBundleInfo bundleInfo;
                         if (m_LoadedAssetBundles.TryGetValue(depName, out bundleInfo))
                         {
@@ -455,10 +537,11 @@ public class UnityAssetBundleLoader : IAssetLoader
     IEnumerator OnLoadAssetBundle(string abName, Type type)
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
+        string abNameHashed = TransformABNameToHashABName(abName);
         var streamingAssetsUrl = Application.streamingAssetsPath;
         if(WebCommon.isRunEnvWX())
             streamingAssetsUrl = WebCommon.get_streamingAssetsUrl();
-        var uri = new System.Uri(streamingAssetsUrl + "/" + abName);
+        var uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed);
         yield return OnLoadAssetBundleInner(uri, abName, type, null);
 #else
         bool bLoaded = false;

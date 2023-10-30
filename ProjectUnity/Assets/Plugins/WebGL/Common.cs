@@ -27,6 +27,9 @@ public class WebCommon
 	}
 
 	[DllImport("__Internal")]
+	public static extern string getAssetBundleManifestName();
+
+	[DllImport("__Internal")]
 	public static extern string callJSMethod(string method, string jsonParams);
 }
 

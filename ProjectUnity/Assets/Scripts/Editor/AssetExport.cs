@@ -181,10 +181,13 @@ public class AssetExport
 
 		if (!Directory.Exists(output))
 			Directory.CreateDirectory(output);
-		
-		BuildAssetBundleOptions options = BuildAssetBundleOptions.DeterministicAssetBundle | 
-			BuildAssetBundleOptions.UncompressedAssetBundle;
-		BuildPipeline.BuildAssetBundles(output, options, target);
+
+#if UNITY_WEBGL
+        BuildAssetBundleOptions options = BuildAssetBundleOptions.AppendHashToAssetBundleName | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
+#else
+		BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
+#endif
+        BuildPipeline.BuildAssetBundles(output, options, target);
 
 		AssetDatabase.Refresh();
 		UnityLog.Log("AssetBundle打包完成");
