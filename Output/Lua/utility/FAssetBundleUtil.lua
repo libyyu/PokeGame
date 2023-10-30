@@ -13,7 +13,7 @@ do
 	end
 
 	function FAssetBundleUtil:InitAssetBundle()
-		self.m_AssetsMgr = FResourceLoader.Instance
+		self.m_AssetsMgr = FResourceLoader.inst
 	end
 
 	function FAssetBundleUtil:AsyncLoad(assetBundleName, assetName, cb)

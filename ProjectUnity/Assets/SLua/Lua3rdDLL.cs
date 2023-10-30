@@ -16,8 +16,11 @@ namespace SLua{
             //LuaPBDLL.reg(DLLRegFuncs);
             //LuaJsonDLL.reg(DLLRegFuncs);
             //LuaLPegDLL.reg(DLLRegFuncs);
+#if UNITY_WEBGL && !UNITY_EDITOR && !SLUA_STANDALONE
+			LuaWx.reg(ref DLLRegFuncs);
+#endif
         }
-		
+
         public static void clear()
         {
             DLLRegFuncs.Clear();

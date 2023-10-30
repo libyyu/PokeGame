@@ -34,10 +34,6 @@ public class FTcpSocketNetworkComponent : MonoBehaviour {
         }
     }
 
-    void Awake() {
-        DontDestroyOnLoad(gameObject);
-    }
-
     void OnDestroy()
     {
         LogicSocket.Close();

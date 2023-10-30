@@ -83,6 +83,12 @@ namespace SLua
 #endif
     }
 
+    public sealed class LuaRefValue
+    {
+        public static int LUA_NOREF = -1;
+        public static int LUA_NILREF = -2;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct ReaderInfo
     {

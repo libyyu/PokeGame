@@ -629,6 +629,11 @@ public class FResourceLoader : PersistentSingleton<FResourceLoader>
 #endif
     }
 
+    public static FResourceLoader inst
+    {
+        get { return Instance; }
+    }
+
     public UObject LoadAsset(string bundleName, string assetPath) 
     {
         return loader.LoadAsset(bundleName, assetPath);
