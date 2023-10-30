@@ -139,7 +139,6 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         WebCommon.callJSMethod("testJS", "");
 #endif
         base.Awake();
-        //FResourceLoader.Instance.Init();
         RunApp();
     }
 #if TEST_EASYSOCKET
@@ -279,5 +278,10 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     {
         m_TimerList.ResetTimer(id);
         m_LateTimerList.ResetTimer(id);
+    }
+
+    public void OnReceivedWebGLMessage(string jsonStr)
+    {
+        LogUtil.Log("OnReceivedWebGLMessage:" + ", args:" + jsonStr);
     }
 }

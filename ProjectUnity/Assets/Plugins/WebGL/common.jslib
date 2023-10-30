@@ -21,10 +21,17 @@ mergeInto(LibraryManager.library, {
   },
   callJSMethod:function(method, jsonStr)
   {
-    if(typeof GameGlobal === "object" && typeof GameGlobal.callJSMethod === 'function'){
+    var M;
+    if (typeof GameGlobal === "object") {
+      M = GameGlobal;
+    }
+    else {
+      M = unityFramework;
+    }
+    if(typeof M === "object" && typeof M.callJSMethod === 'function'){
       var m = UTF8ToString(method);
       var a = UTF8ToString(jsonStr);
-      var ret = GameGlobal.callJSMethod(m, a);
+      var ret = M.callJSMethod(m, a);
       if(typeof ret === 'string') {
         var length = lengthBytesUTF8(ret) + 1;
         var buffer = _malloc(length);
