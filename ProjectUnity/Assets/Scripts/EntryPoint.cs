@@ -136,6 +136,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         LogUtil.Log(string.Format("isRunEnvWX: {0}, {1}", WebCommon.isRunEnvWX(), WebCommon.get_streamingAssetsUrl()));
+        WebCommon.callJSMethod("testJS", "");
 #endif
         base.Awake();
         //FResourceLoader.Instance.Init();

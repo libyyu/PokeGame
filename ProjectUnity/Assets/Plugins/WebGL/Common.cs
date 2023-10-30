@@ -25,6 +25,9 @@ public class WebCommon
 
 		return _streamingAssetsUrl;
 	}
+
+	[DllImport("__Internal")]
+	public static extern string callJSMethod(string method, string jsonParams);
 }
 
 #endif

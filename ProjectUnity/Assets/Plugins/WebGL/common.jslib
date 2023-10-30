@@ -18,5 +18,22 @@ mergeInto(LibraryManager.library, {
     var buffer = _malloc(length);
     stringToUTF8(streamingAssetsUrl, buffer, length);
     return buffer;
+  },
+  callJSMethod:function(method, jsonStr)
+  {
+    if(typeof GameGlobal === "object" && typeof GameGlobal.callJSMethod === 'function'){
+      var m = UTF8ToString(method);
+      var a = UTF8ToString(jsonStr);
+      var ret = GameGlobal.callJSMethod(m, a);
+      if(typeof ret === 'string') {
+        var length = lengthBytesUTF8(ret) + 1;
+        var buffer = _malloc(length);
+        stringToUTF8(ret, buffer, length);
+        return buffer;
+      }
+    } else {
+      console.log(UTF8ToString(method) , " method not found");
+    }
+    return null;
   }
 });
