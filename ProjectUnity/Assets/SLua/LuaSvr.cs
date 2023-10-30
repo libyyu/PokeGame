@@ -72,7 +72,10 @@ namespace SLua
 		{
 			if (mainState != null)
 				mainState.Dispose ();
-		}
+
+			mainState = null;
+			inited = false;
+        }
 
 		public LuaSvr()
 		{

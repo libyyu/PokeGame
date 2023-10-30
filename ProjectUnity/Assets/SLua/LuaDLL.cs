@@ -85,8 +85,8 @@ namespace SLua
 
     public sealed class LuaRefValue
     {
-        public static int LUA_NOREF = -1;
-        public static int LUA_NILREF = -2;
+        public static int LUA_NOREF = -2;
+        public static int LUA_REFNIL = -1;
     }
 
     [StructLayout(LayoutKind.Sequential)]

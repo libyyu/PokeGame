@@ -20,14 +20,25 @@ public class LogFile {
             return s_instance;
         }
     }
+    string CachePath
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return Application.dataPath + "/../Cache";
+#else
+            return Application.temporaryCachePath;
+#endif
+        }
+    }
 
     string LogPath
     {
-		get { return Path.Combine(GameUtil.CachePath, "logs"); }
+		get { return Path.Combine(CachePath, "logs"); }
     }
     string BackupPath
     {
-		get { return Path.Combine(GameUtil.CachePath, "logs/backup"); }
+		get { return Path.Combine(CachePath, "logs/backup"); }
     }
 
     public void Backup()
@@ -47,7 +58,7 @@ public class LogFile {
 #else
 		SLua.Logger.logMessageReceived += LogCallback;
 #endif
-#if UNITY_WEBGL && !UNITY_EDITOR
+
 		if (File.Exists(Path.Combine(LogPath, LogFileName)))
 			File.Delete(Path.Combine(LogPath, LogFileName));
 		if (File.Exists(Path.Combine(LogPath, ErrorFlag)))
@@ -66,7 +77,6 @@ public class LogFile {
 
         }
         LogUtil.Log("LogPath:" + LogPath);
-#endif
     }
 
     public void UnInit()
@@ -102,15 +112,11 @@ public class LogFile {
 
     void WriteToFile(string message)
     {
-#if UNITY_WEBGL && !UNITY_EDITOR
-        //WebCommon.logToWeb("[Unity]" + message); //不需要，wegbl时候unity会输出到网页
-#else
         using (StreamWriter sw = File.AppendText(Path.Combine(LogPath, LogFileName)))
         {
             sw.WriteLine(GetTimeStamp() + "-" + message);
             sw.Flush();
         }
-#endif
     }
 
 	string GetTimeStamp()

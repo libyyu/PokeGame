@@ -1,6 +1,3 @@
-
-
-using BestHTTP;
 using SLua;
 using System;
 using System.Collections;
@@ -8,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Networking;
+using static System.Collections.Specialized.BitVector32;
 
 [CustomLuaClass]
 public class GameUtil
@@ -15,180 +14,14 @@ public class GameUtil
     public const string BundleExt = ".ab";
     public const string ManifestName = "StreamingAssets";
 
-    const string STREAMASSET_DIR = "StreamingAssets";
-	const string LUA_DIR = "Lua";
-	const string SEP_PCK_DIR = "pck";
-	const string CACHE_DIR = "Cache";
-
-    public static string MakePathForWWW(string path)
+    //当前是否运行在微信小游戏环境
+    public static bool IsWXEnv()
     {
-        if (path.IndexOf("://") == -1)
-        {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-            return "file:///" + path;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return WebCommon.isRunEnvWX();
 #else
-            return "file://" + path;
+        return false;
 #endif
-        }
-        else
-            return path;
-    }
-
-	public static string MakePathFromWWW(string path)
-	{
-		if (path.IndexOf("://") != -1)
-		{
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-			string head = "file:///";
-			return path.Substring(head.Length,path.Length-head.Length);
-#else
-			string head = "file://";
-			return path.Substring(head.Length,path.Length-head.Length);
-#endif
-		}
-		else
-			return path;
-	}
-
-    public static string MakePathForLua(string name)
-    {
-        string lowerName = name.ToLower();
-        if (lowerName.EndsWith(".lua"))
-        {
-            int index = name.LastIndexOf('.');
-            name = name.Substring(0, index);
-        }
-        name = name.Replace('.', '/');
-        name += ".lua";
-		//如果资源分离文件存在，则使用该文件
-		if (CanSepAssets && Directory.Exists (SepLuaPath)) {
-			if (File.Exists (Path.Combine (SepLuaPath, name)))
-				return Path.Combine (SepLuaPath, name);
-		} 
-		//如果更新文件存在
-		else {
-			if(File.Exists(Path.Combine(LuaPath, name)))
-				return Path.Combine(LuaPath, name);
-		}
-        //从resbase中读取
-		return Path.Combine(BaseStreamAssetPath+"/res_base/" + LUA_DIR, name);
-    }
-
-	//资源主目录
-    private static string assetRoot;
-    public static string AssetRoot
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(assetRoot))
-                return assetRoot;
-#if UNITY_EDITOR && !USE_ZIPASSETS
-			return Application.dataPath +  "/../../Output";
-#elif UNITY_ANDROID
-			return Application.persistentDataPath + "/assets"; //该目录有读写权限
-#else
-            return Application.temporaryCachePath + "/assets"; //该目录有读写权限
-#endif
-        }
-        set
-        {
-            assetRoot = value;
-        }
-    }
-	//资源路径
-    public static string AssetPath
-    {
-        get
-        {
-			return AssetRoot + "/" + STREAMASSET_DIR;
-        }
-    }
-	//Lua路径
-    private static string luaPath;
-    public static string LuaPath
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(luaPath))
-                return luaPath;
-			return AssetRoot + "/" + LUA_DIR;
-        }
-        set
-        {
-            luaPath = value;
-        }
-    }
-	//资源分离相关
-	private static bool canSepAssets;
-	public static bool CanSepAssets
-	{
-		get { return canSepAssets; }
-		set { canSepAssets = value; }
-	}
-	
-    //分离目录
-    public static string SepPath 
-    {
-        get {
-#if UNITY_EDITOR
-			return Application.dataPath + "/../../" + SEP_PCK_DIR;
-#elif UNITY_ANDROID
-			return Application.persistentDataPath + "/" + SEP_PCK_DIR;
-#else
-			return Application.temporaryCachePath + "/" + SEP_PCK_DIR;
-#endif
-        }
-    }
-
-    public static string SepAssetPath
-    {
-		get { return SepPath + "/" + STREAMASSET_DIR; }
-    }
-    public static string SepLuaPath
-    {
-		get { return SepPath + "/" + LUA_DIR; }
-    }
-	//缓存相关
-    public static string CachePath
-    {
-        get
-        {
-#if UNITY_EDITOR && !USE_ZIPASSETS
-			return Application.dataPath+ "/../" + CACHE_DIR;
-#else
-			return Application.temporaryCachePath;
-#endif
-        }
-    }
-
-	public static string BaseStreamAssetPath
-	{
-		get
-		{
-#if UNITY_ANDROID
-			return "jar:file://" + Application.dataPath + "!/assets";
-#elif UNITY_IPHONE
-			return Application.dataPath + "/Raw";
-#else
-			return Application.streamingAssetsPath;
-#endif
-		}
-	}
-
-    //资源分离文件是否存在
-    public static bool IsSepFileExist(string f, out string filename)
-    {
-        string fn = f.ToLower();
-		if (File.Exists(Path.Combine(SepPath, fn)))
-        {
-			filename = Path.Combine(SepPath,fn);
-            return true;
-        }
-        else
-        {
-            filename = null;
-            return false;
-        }
     }
 
     public static void CreateDirectory(string dir)
@@ -200,7 +33,7 @@ public class GameUtil
     }
     public static void CreateDirectoryForFile(string filepath)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(filepath));
+        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filepath));
     }
     public static bool IsDirectoryExist(string dir)
     {
@@ -266,7 +99,7 @@ public class GameUtil
             string[] dirs = Directory.GetDirectories(path);
             foreach (string filename in names)
             {
-                string ext = Path.GetExtension(filename);
+                string ext = System.IO.Path.GetExtension(filename);
                 if (filters != null && ContainsFileExt(filters, ext)) continue;
                 files.Add(filename.Replace('\\', '/'));
             }
@@ -324,23 +157,22 @@ public class GameUtil
 
     static IEnumerator _ansy_open_file_(string path, System.Action<bool, object> cb)
     {
-        WWW www = new WWW(path);
-        yield return www;
-        if (www.isDone)
+        UnityWebRequest request = UnityWebRequest.Get(new System.Uri(path));
+        yield return request.SendWebRequest();
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            cb(true, www);
+            cb(false, request.error);
         }
         else
         {
-            cb(false, www.error);
+            cb(true, request.downloadHandler.data);
         }
     }
 	
 	//异步读取文件，比如Android包文件
     public static void AnsyOpenFile(string filePath, LuaFunction cb)
     {
-        string filename = MakePathForWWW(filePath);
-        EntryPoint.Instance.StartCoroutine(_ansy_open_file_(filename, (success, o) =>
+        EntryPoint.Instance.StartCoroutine(_ansy_open_file_(filePath, (success, o) =>
         {
             cb.call(success, o);
             cb.Dispose();
@@ -349,57 +181,49 @@ public class GameUtil
 		
 	public static bool IsAssetFileExists(string filePath)
 	{
-#if UNITY_ANDROID
-        if (filePath.IndexOf("://") != -1)
+        var url = new System.Uri(filePath);
+        if (File.Exists(url.ToString()))
+            return true;
+        try
         {
-            //调用android接口
+            UnityWebRequest request = UnityWebRequest.Head(url);
+            request.SendWebRequest();
+            while (!request.isDone) { }
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+                return false;
+
+            return request.responseCode == 200;
+        }
+        catch (System.Exception ex)
+        {
             return false;
         }
-        else
-#endif
-        {
-            string path = GameUtil.MakePathFromWWW(filePath);
-            return File.Exists(path);
-        }
-	}
+    }
 
     public static byte[] ReadAssetFile(string filePath)
     {
-#if UNITY_WEBGL && !UNITY_EDITOR
-        
-#endif
-
-#if UNITY_ANDROID
-        if (filePath.IndexOf("://") != -1)
+        try
         {
-            //调用android接口
-            return null;
-        }
-        else
-#endif
-        {
-            string path = GameUtil.MakePathFromWWW(filePath);
-            if(File.Exists(path))
+            byte[] ret = null;
+            _ansy_open_file_(filePath, (bool success, object data) =>
             {
-                FileStream fs = File.Open(path, FileMode.Open);
-                long length = fs.Length;
-                byte[] bytes = new byte[length];
-                fs.Read(bytes, 0, bytes.Length);
-                fs.Close();
+                if (success) ret = data as byte[];
+            });
 
-                return bytes;
-            }
-            else
-                return null;
+            return ret;
+        }
+        catch (System.Exception)
+        {
+            return null;
         }
     }
 
 	
 
     //发送HTTP请求
-    public static void SendRequest(string url, string data,double t,bool bGet, LuaFunction completeHandler)
+    public static void SendRequest(string url, string data, double t, bool bGet, LuaFunction completeHandler)
     {
-        var request = new HTTPRequest(new Uri(url), bGet ? HTTPMethods.Get : HTTPMethods.Post, (req, resp) =>
+        var request = new BestHTTP.HTTPRequest(new Uri(url), bGet ? BestHTTP.HTTPMethods.Get : BestHTTP.HTTPMethods.Post, (req, resp) =>
         {
             if (completeHandler != null)
             {
@@ -418,13 +242,13 @@ public class GameUtil
 		string tmpPath = SaveFilePath + ".tmp";
 		if (File.Exists (tmpPath)) File.Delete (tmpPath);
 		
-        var request = new HTTPRequest(new Uri(SrcFilePath), bGet ? HTTPMethods.Get : HTTPMethods.Post, keepAlive, (req, resp) =>
+        var request = new BestHTTP.HTTPRequest(new Uri(SrcFilePath), bGet ? BestHTTP.HTTPMethods.Get : BestHTTP.HTTPMethods.Post, keepAlive, (req, resp) =>
         {
             List<byte[]> fragments = null;
             string status = "";
             switch (req.State)
             {
-                case HTTPRequestStates.Processing:
+                case BestHTTP.HTTPRequestStates.Processing:
                     {
                         fragments = resp.GetStreamedFragments();
                         if (fragments != null && fragments.Count > 0)
@@ -436,7 +260,7 @@ public class GameUtil
                         }
                     }
                     break;
-                case HTTPRequestStates.Finished:
+                case BestHTTP.HTTPRequestStates.Finished:
                     {
                         if (resp.IsSuccess)
                         {
@@ -489,7 +313,7 @@ public class GameUtil
                         }
                     }
                     break;
-                case HTTPRequestStates.Error:
+                case BestHTTP.HTTPRequestStates.Error:
                     {
                     	if (progressHander != null)
 			            {
@@ -505,7 +329,7 @@ public class GameUtil
                             LogUtil.LogWarning(status);
                     }
                     break;
-                case HTTPRequestStates.Aborted:
+                case BestHTTP.HTTPRequestStates.Aborted:
                     {
                     	if (progressHander != null)
 			            {
@@ -522,7 +346,7 @@ public class GameUtil
 
                     }
                     break;
-                case HTTPRequestStates.ConnectionTimedOut:
+                case BestHTTP.HTTPRequestStates.ConnectionTimedOut:
                     {
                     	if (progressHander != null)
 			            {
@@ -538,7 +362,7 @@ public class GameUtil
                             LogUtil.LogWarning(status);
                     }
                     break;
-                case HTTPRequestStates.TimedOut:
+                case BestHTTP.HTTPRequestStates.TimedOut:
                     {
                     	if (progressHander != null)
 			            {
@@ -568,7 +392,7 @@ public class GameUtil
 
 		
         request.UseStreaming = true;
-		request.StreamFragmentSize = HTTPResponse.MinBufferSize; //
+		request.StreamFragmentSize = BestHTTP.HTTPResponse.MinBufferSize; //
         request.DisableCache = true; // already saving to a file, so turn off caching
         request.Send();
     }
@@ -617,13 +441,13 @@ public class GameUtil
         }));
     }
 
-			public static Dictionary<string,GameObject> Test()
-			{
-			Dictionary<string,GameObject> a = new Dictionary<string, GameObject> ();
-			a ["hello"] = new GameObject("hello");
-			a ["hello world"] = new GameObject("hello2");
+	public static Dictionary<string,GameObject> TestSLua()
+	{
+		Dictionary<string,GameObject> a = new Dictionary<string, GameObject> ();
+		a["hello"] = new GameObject("hello");
+		a["hello world"] = new GameObject("hello2");
 		return a;
-			}
+	}
 
     public static void LuaGC()
     {

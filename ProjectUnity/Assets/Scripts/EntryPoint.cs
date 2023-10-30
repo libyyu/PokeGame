@@ -71,20 +71,19 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 
     void SetupEnvironment()
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         LogUtil.loglevel = logLevel;
         LogUtil.AttachUnityLogHandle();
         LogFile.Instance.Init();        
+#endif
     }
 
     void SetupPath()
     {
         LogUtil.Log("streamingAssetsPath:" + Application.streamingAssetsPath);
         LogUtil.Log("dataPath:" + Application.dataPath);
-		LogUtil.Log("resBasePath:" + GameUtil.BaseStreamAssetPath);
-        LogUtil.Log("AssetRoot:" + GameUtil.AssetRoot);
-        LogUtil.Log("AssetsPath:" + GameUtil.AssetPath);
-        LogUtil.Log("LuaPath:" + GameUtil.LuaPath);
-        LogUtil.Log("PckPath:" + GameUtil.SepPath);
+		LogUtil.Log("absoluteURL:" + Application.absoluteURL);
+        LogUtil.Log("persistentDataPath:" + Application.persistentDataPath);
 		LogUtil.Log("TempPath:" + Application.temporaryCachePath);
     }
 
@@ -197,11 +196,17 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     {
         m_TimerList.Clear();
         m_LateTimerList.Clear();
+        //关闭lua虚拟机前停止日志传递lua
+#if !UNITY_WEBGL || UNITY_EDITOR
         LogUtil.DetachUnityLogHandle();
+#endif
 #if !UNITY_EDITOR
         if (null != lua) { lua.Close(); lua = null; }
 #endif
+        //最后结束日志文件
+#if !UNITY_WEBGL || UNITY_EDITOR
         LogFile.Instance.UnInit();
+#endif
     }
 
     protected override void OnDestroy()
