@@ -196,13 +196,13 @@ public class GameUtil
         {
             UnityWebRequest request = UnityWebRequest.Head(url);
             request.SendWebRequest();
-            while (!request.isDone) { }
+            while (!request.isDone) { } //webgl中不能使用
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
                 return false;
 
             return request.responseCode == 200;
         }
-        catch (System.Exception ex)
+        catch (System.Exception)
         {
             return false;
         }

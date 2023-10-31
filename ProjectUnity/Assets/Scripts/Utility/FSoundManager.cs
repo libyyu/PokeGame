@@ -71,6 +71,17 @@ public class FSoundManager : PersistentSingleton<FSoundManager>
 		return audioSource;
 	}
 
+    public virtual void PlayUISound(AudioSource sound)
+	{
+        if (!SfxOn)
+            return;
+        sound.volume = MusicVolume;
+        // we start playing the background music
+        sound.Play();
+		//
+        Destroy(sound, 1.0f);
+    }
+
     void LateUpdate()
     {
         if (_backgroundMusic == null)

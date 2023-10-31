@@ -1,4 +1,3 @@
-using DG.Tweening.Plugins.Core.PathCore;
 using SLua;
 using System;
 using System.Collections;
@@ -518,7 +517,7 @@ public class UnityAssetBundleLoader : IAssetLoader
 
         float beginTime = Time.realtimeSinceStartup;
         UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
-        //if(isManifest) request.SetRequestHeader("Cache-Control", "no-cache");
+        if(isManifest) request.SetRequestHeader("Cache-Control", "no-cache");
         yield return request.SendWebRequest();
 
         if(request.result == UnityWebRequest.Result.Success)

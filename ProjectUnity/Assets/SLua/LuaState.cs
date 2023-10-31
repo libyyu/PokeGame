@@ -297,6 +297,32 @@ namespace SLua
             LuaDLL.lua_newtable(L);
             valueref = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
         }
+
+        public void setMeta(LuaTable meta)
+        {
+            int n = LuaDLL.lua_gettop(L);
+            push(L);
+            meta.push(L);
+            LuaDLL.lua_setmetatable(L, -2);
+            LuaDLL.lua_settop(L, n);
+        }
+        public object getMeta()
+        {
+            push(L); //t
+            if (LuaDLL.lua_getmetatable(L, -1) == 1)
+            {//t, mt
+                int p = LuaDLL.lua_absindex(L, -1);
+                object ret = LuaObject.checkVar(L, p);
+                LuaDLL.lua_pop(L, 2);
+                return ret;
+            }
+            else
+            {
+                LuaDLL.lua_pop(L, 1);
+                return null;
+            }
+        }
+
         public object this[string key]
         {
             get
@@ -362,9 +388,10 @@ namespace SLua
 			LuaFunction f = (LuaFunction)this[func];
 			if (f != null)
 			{
-				object[] args_with_self = new object[args.Length + 1];
+                int argv = args != null ? args.Length : 0;
+				object[] args_with_self = new object[argv + 1];
 				args_with_self [0] = this;
-				args.CopyTo (args_with_self, 1);
+				if(args != null) args.CopyTo (args_with_self, 1);
 				return f.call(args_with_self);
 			}
 			throw new Exception(string.Format("Can't find {0} function", func));
@@ -374,9 +401,10 @@ namespace SLua
 		{
 			LuaFunction f = (LuaFunction)this[func];
 			if (f != null) {
-				object[] args_with_self = new object[args.Length + 1];
+                int argv = args != null ? args.Length : 0;
+                object[] args_with_self = new object[argv + 1];
 				args_with_self [0] = this;
-				args.CopyTo (args_with_self, 1);
+                if (args != null) args.CopyTo (args_with_self, 1);
 				return f.call (args_with_self);
 			} 
 			else

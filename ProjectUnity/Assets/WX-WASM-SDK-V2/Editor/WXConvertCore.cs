@@ -335,6 +335,17 @@ namespace WeChatWASM
             {
                 if (config.CompileOptions.DeleteStreamingAssets)
                 {
+                    string src_res = Application.dataPath + "/../../Output";
+                    SimpleCopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String srcPath, String filepath) =>
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(filepath));
+                        File.Copy(srcPath, filepath + ".bytes", true);
+                    });
+                    AssetDatabase.ImportAsset(Application.dataPath + "/Lua");
+                    AssetDatabase.Refresh();
+                    UnityEngine.Debug.Log("[Builder] lua脚本导入完成");
+
+
                     var assetsOutputDir = Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets");
                     UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets"));
                     BuildAssetBundleOptions options = BuildAssetBundleOptions.AppendHashToAssetBundleName | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
@@ -376,6 +387,26 @@ namespace WeChatWASM
             }
 
             return 0;
+        }
+
+        static void SimpleCopyDirectorys(string src, string dst, Action<string, string> call = null)
+        {
+            if (!Directory.Exists(src))
+                return;
+
+            UnityUtil.DelectDir(dst);
+            Directory.CreateDirectory(dst);
+            foreach (string filename in Directory.GetFiles(src, "*.*", SearchOption.AllDirectories))
+            {
+                string fname = filename.Replace(src, "");
+                string foutname = dst + fname;
+                if (call == null)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(foutname));
+                    File.Copy(filename, foutname, true);
+                }
+                else call(filename, foutname);
+            }
         }
 
         private static string GetWebGLDataPath()

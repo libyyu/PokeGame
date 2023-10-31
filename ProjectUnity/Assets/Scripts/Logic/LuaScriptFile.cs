@@ -5,53 +5,28 @@ using SLua;
 [CustomLuaClass]
 public class LuaScriptFile : MonoBehaviour {
 
-	LuaState lua = null;
 	LuaTable script = null;
-
-	bool bRequired = false;
-	public string scriptFileName ;
-
     public bool usingUpdate = false;
     public bool usingFixedUpdate = false;
     public bool usingLateUpdate = false;
     public bool forceUpdate = false;
 
-	public LuaState env {
-		get {
-			if(lua == null && LuaSvr.mainState != null && LuaSvr.inited){
-				lua = LuaSvr.mainState;
-			}
-			return lua;
-		}
-		set {
-			lua = value;
-		}
+	LuaState env 
+	{
+		get { return LuaSvr.mainState; }
 	}
+    public string scriptFileName;
 
-	public string Buffer {
-		get { 
-			return scriptFileName;
-		}
-		set {
-			if(scriptFileName != value)
-			{
-				Cleanup();
-				scriptFileName = value;
-                DoScriptFile(() =>
-                {
-                    CallMethod("Start");
-                });
-            }
-		}
-	}
+    void Awake()
+    {
+        DoScriptFile();
+        CallMethod("Awake");
+    }
 
-	// Use this for initialization
-	void Start () {
-		DoScriptFile(()=>
-			{
-				CallMethod("Start");
-			});
-	}
+    // Use this for initialization
+    void Start () {
+        CallMethod("Start");
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -81,38 +56,26 @@ public class LuaScriptFile : MonoBehaviour {
         Cleanup();
 	}
 
-    IEnumerator DoFile(string fn,System.Action complete = null)
+	void DoScriptFile()
     {
-        yield return new WaitForEndOfFrame();
-        while (env == null )
+        if (!string.IsNullOrEmpty(scriptFileName) && env != null)
         {
-            yield return new WaitForEndOfFrame();
-        }
-		if (!string.IsNullOrEmpty(fn) && env != null && !bRequired)
-        {
-            bRequired = true;
-            object obj = env.doFile(fn);
+            object obj = env.doFile(scriptFileName);
             if (obj != null && obj is LuaTable)
             {
-                script = (LuaTable)obj;
+                var M = (LuaTable)obj;
+                script = new LuaTable(env);
+                script.setMeta(M);
+                M["__index"] = M;
 
                 script["component"] = this;
                 script["transform"] = transform;
                 script["gameObject"] = gameObject;
             }
         }
-		if (bRequired && complete != null)
-			complete ();
     }
 
-	void DoScriptFile(System.Action complete = null){
-        StartCoroutine(DoFile(scriptFileName, complete));
-	}
-
 	void Cleanup(){
-		if (!bRequired)
-			return;
-		bRequired = false;
 		if (script != null)
         {
             script.Dispose();
@@ -123,13 +86,12 @@ public class LuaScriptFile : MonoBehaviour {
 
 	protected object CallMethod(string function, params object[] args)
     {
-    	if(!bRequired) return null;
         if (script == null)
         	return null;
 
         try
         {
-			return script.safe_invoke(function, args);
+			return script.safe_invoke_self(function, args);
         }
         catch (System.Exception e)
         {
