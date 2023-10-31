@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using static System.Collections.Specialized.BitVector32;
 
 [CustomLuaClass]
 public class GameUtil

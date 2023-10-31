@@ -467,8 +467,8 @@ public class UnityAssetBundleLoader : IAssetLoader
     IEnumerator OnLoadAssetBundleInner(System.Uri uri, string abName, Type type, Action<bool> action)
     {
         LogUtil.Log(string.Format("try load asset {0}", uri.ToString()));
-        UnityWebRequest request = UnityWebRequest.Get(uri);
-        if (type != typeof(AssetBundleManifest))
+        bool isManifest = type == typeof(AssetBundleManifest);
+        if (!isManifest)
         {
             if (m_AssetBundleManifest != null)
             {
@@ -515,22 +515,27 @@ public class UnityAssetBundleLoader : IAssetLoader
                 }
             }
         }
+
+        float beginTime = Time.realtimeSinceStartup;
+        UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
+        //if(isManifest) request.SetRequestHeader("Cache-Control", "no-cache");
         yield return request.SendWebRequest();
-        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+
+        if(request.result == UnityWebRequest.Result.Success)
         {
-            LogUtil.LogWarning(request.error);
-            if(action != null) action(false);
-        }
-        else
-        {
-            LogUtil.Log(string.Format("success load asset {0}", uri.ToString()));
-            AssetBundle assetBundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+            LogUtil.Log(string.Format("success load asset {0}, cost time: {1}", uri.ToString(), Time.realtimeSinceStartup-beginTime));
+            AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
             if (assetBundle != null)
             {
                 m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
             }
 
             if (action != null) action(true);
+        }
+        else
+        {
+            LogUtil.LogWarning(request.error);
+            if (action != null) action(false);
         }
     }
 

@@ -101,15 +101,17 @@ function AsyncLoadArray(assetNames, cb)
 end
 
 function AsyncLoadABundle(assetBundleName)
+	local abName = TransformABName(assetBundleName)
 	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
-	FAssetBundleUtil.Instance():AsyncLoadABundle(assetBundleName, function(ab)
+	FAssetBundleUtil.Instance():AsyncLoadABundle(abName, function(ab)
 		cb(ab)
 	end)
 end
 
 function UnloadAssetBundle(assetBundleName, unload)
+	local abName = TransformABName(assetBundleName)
 	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
-	FAssetBundleUtil.Instance():UnloadABundle(assetBundleName, unload)
+	FAssetBundleUtil.Instance():UnloadABundle(abName, unload)
 end
 
 function MsgBox(hwnd,content,title,mask,click_cb)
