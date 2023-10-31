@@ -1,15 +1,14 @@
 local FPlayer = require "player.FPlayer"
-local FHostPlayer = FLua.Class("FHostPlayer",FPlayer)
+local FHostPlayer = FLua.Class(FPlayer, "FHostPlayer")
 
 do
 	function FHostPlayer:__constructor()
-
+		self.m_IsHost = true
 	end
 
 	function FHostPlayer:Init(info)
-		self.m_IsHost = true
 		self.m_InfoData = info
-		self:Create("Villager_B_Boy_prefab")
+		self:Create("TestProjName/Model/Npc_boy/villarger_B_Boy/Prefabs/Villager_B_Boy_prefab.prefab")
 	end
 
 	function FHostPlayer:OnLoaded(obj)

@@ -36,7 +36,7 @@ do
 		self.m_abName = abname
 		
 		self.m_status = ModelStatus.LOADING
-		AsyncLoad(abname,resname, loaded)
+		AsyncLoadWithAB(abname, resname, loaded)
 	end
 
 	function FModel:Destroy()

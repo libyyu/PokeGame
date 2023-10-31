@@ -44,8 +44,8 @@ public class FHotKeyLogic : MonoBehaviour {
         }
     }
 
-    private static Dictionary<KeyCode, bool> sKeyCodeMap = new Dictionary<KeyCode, bool>();
-    private static bool bInited = false;
+    private Dictionary<KeyCode, bool> sKeyCodeMap = new Dictionary<KeyCode, bool>();
+    private bool bInited = false;
 
     void InitKeyCodeMap()
     {

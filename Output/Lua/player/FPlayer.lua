@@ -1,5 +1,5 @@
 local FObject = require "object.FObject"
-local FPlayer = FLua.Class("FPlayer",FObject)
+local FPlayer = FLua.Class(FObject, "FPlayer")
 
 do
 	function FPlayer:__constructor()
@@ -8,7 +8,8 @@ do
 	end
 
 	function FPlayer:Create(resname)
-		self:LoadModel("Player",resname,function(model)
+		local abName = TransformABName(resname)
+		self:LoadModel(abName,resname,function(model)
 			self:OnLoaded(model.m_model)
 		end)
 	end

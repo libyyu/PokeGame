@@ -79,7 +79,8 @@ do
 
 	function FGame:Run()
 		self:InitGame()
-		self:EnterLoginStage()
+		--self:EnterLoginStage()
+		self:EnterGameLogic()
 	end
 	function FGame:EnterLoginStage()
 		self:InitLoginInfo()
@@ -120,7 +121,8 @@ do
 		self:LeaveLoginState()
 		self.m_isGameLogic = true
 		--加载世界
-		AsyncLoad("Map","x1",function(asset)
+		AsyncLoad("TestProjName/Model/x1.prefab", function(asset)
+			print("asset", asset)
 			local goMap = Instantiate(asset)
 			goMap.transform.localPosition = Vector3(-121.6,-44.2,-241.3)
 			goMap.transform.localScale = Vector3(1, 1, 1)
