@@ -21,7 +21,19 @@ public class AssetExport
 		{
 			return;
 		}
-		else if(abName.Contains("/editor/"))
+		else if (abName.EndsWith(".js") || abName.EndsWith(".jslib"))
+        {
+            return;
+        }
+        else if (abName.EndsWith(".meta"))
+        {
+            return;
+        }
+        else if (abName.EndsWith(".dll") || abName.EndsWith(".dll.mdb") || abName.EndsWith(".so") || abName.EndsWith(".a") || abName.EndsWith(".bundle"))
+        {
+            return;
+        }
+        else if(abName.Contains("/editor/"))
 		{
 			return;
 		}
@@ -202,7 +214,8 @@ public class AssetExport
 		{
             File.Copy(srcPath, filepath + ".bytes", true);
         });
-		UnityLog.Log("lua脚本导入完成");
+        AssetDatabase.Refresh();
+        UnityLog.Log("lua脚本导入完成");
     }
 
     [MenuItem("ExportAssets/步骤1.导出AssetBundle", false, 11)]

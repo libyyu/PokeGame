@@ -176,7 +176,6 @@ checkVersion().then((enable) => {
             gameManager.assetPath = `${(managerConfig.DATA_CDN || '').replace(/\/$/, '')}/Assets`;
             gameManager.streamingAssetsUrl = `${(managerConfig.DATA_CDN || '').replace(/\/$/, '')}/StreamingAssets`;
             gameManager.assetBundleManifestName = "StreamingAssets";
-            GameGlobal.unityNamespace.UnityModule.streamingAssetsUrl = gameManager.streamingAssetsUrl;
             preloadWxCommonFont();
         });
         
