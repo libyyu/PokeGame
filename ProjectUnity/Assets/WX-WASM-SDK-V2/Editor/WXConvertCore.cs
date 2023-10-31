@@ -330,6 +330,51 @@ namespace WeChatWASM
             }
 
             UnityEngine.Debug.LogFormat("[Builder] Done: " + projDir);
+
+            //user custom
+            {
+                if (config.CompileOptions.DeleteStreamingAssets)
+                {
+                    var assetsOutputDir = Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets");
+                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets"));
+                    BuildAssetBundleOptions options = BuildAssetBundleOptions.AppendHashToAssetBundleName | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
+                    try
+                    {
+                        BuildPipeline.BuildAssetBundles(assetsOutputDir, options, EditorUserBuildSettings.activeBuildTarget);
+                        UnityEngine.Debug.LogFormat("[Builder] Export AssetBundles Done: " + assetsOutputDir);
+                    }
+                    catch (Exception e)
+                    {
+                        UnityEngine.Debug.LogFormat("[Builder] Export AssetBundles Failed: {0}", e.ToString());
+                    }
+                }
+
+                Rule[] rules =
+                {
+                    new Rule()
+                    {
+                        old = "${buildUrlprefix}",
+                        newStr = "/static/webgl/",
+                    },
+                    new Rule()
+                    {
+                        old = "$buildUrlprefix",
+                        newStr = "/static/webgl/",
+                    }
+                };
+                var text = File.ReadAllText(Path.Combine(config.ProjectConf.DST, webglDir, "index.html"), Encoding.UTF8);
+                foreach (var rule in rules)
+                {
+                    //text = Regex.Replace(text, rule.old, rule.newStr);
+                    text = text.Replace(rule.old, rule.newStr);
+                }
+                //text = text.Replace("${buildUrlprefix}", "/static/webgl/");
+                //text = text.Replace("$buildUrlprefix", "/static/webgl/");
+
+                File.WriteAllText(Path.Combine(config.ProjectConf.DST, webglDir, "index.html"), text, new UTF8Encoding(false));
+                UnityEngine.Debug.LogFormat("[Builder] Modify webgl/index.html Done" );
+            }
+
             return 0;
         }
 

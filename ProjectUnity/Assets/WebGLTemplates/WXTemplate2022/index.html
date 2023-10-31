@@ -12,11 +12,11 @@
         padding: 0;
       }
     </style>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
-    <link rel="stylesheet" href="TemplateData/style.css" />
+    <link rel="shortcut icon" href="${buildUrlprefix}TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="${buildUrlprefix}TemplateData/style.css" />
 #if SHOW_DIAGNOSTICS
-    <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>" />
-    <script src="<<<TemplateData/diagnostics.js>>>"></script>
+    <link rel="stylesheet" href="<<<${buildUrlprefix}TemplateData/diagnostics.css>>>" />
+    <script src="<<<${buildUrlprefix}TemplateData/diagnostics.js>>>"></script>
 #endif
   </head>
   <body>
@@ -33,7 +33,7 @@
         <div id="unity-webgl-logo"></div>
         <div id="unity-fullscreen-button"></div>
 #if SHOW_DIAGNOSTICS
-        <img id="diagnostics-icon" src="TemplateData/webmemd-icon.png" />
+        <img id="diagnostics-icon" src="${buildUrlprefix}TemplateData/webmemd-icon.png" />
 #endif
         <div id="unity-build-title">{{{ PRODUCT_NAME }}}</div>
       </div>
@@ -74,7 +74,7 @@
               updateBannerVisibility();
             }
 
-            var buildUrl = "Build";
+            var buildUrl = "${buildUrlprefix}Build";
             var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
             var config = {
               dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
@@ -91,7 +91,7 @@
       #if SYMBOLS_FILENAME
               symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
       #endif
-              streamingAssetsUrl: "StreamingAssets",
+              streamingAssetsUrl: "${buildUrlprefix}StreamingAssets",
               companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
               productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
               productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
