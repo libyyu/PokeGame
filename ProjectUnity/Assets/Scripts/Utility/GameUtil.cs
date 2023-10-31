@@ -23,6 +23,15 @@ public class GameUtil
 #endif
     }
 
+    public static string GetStreamingAssetsUrl()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return WebCommon.get_streamingAssetsUrl();
+#else
+        return Application.streamingAssetsPath;
+#endif
+    }
+
     public static void CreateDirectory(string dir)
     {
         if (!Directory.Exists(dir))

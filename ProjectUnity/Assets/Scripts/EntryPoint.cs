@@ -2,7 +2,6 @@
 using System.Collections;
 using SLua;
 using System.IO;
-using FGame;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Networking;
@@ -125,10 +124,34 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         {
             return FResourceLoader.Instance.ReadFileBytes("lua", name);
         }
-        catch(Exception e)
+        catch(Exception)
         {
             return null;
         }
+    }
+
+    bool isLuaDebugEnable()
+    {
+        var url = Application.absoluteURL;
+        var query = new System.Uri(url).Query;
+        query = query.TrimStart('?');
+        // 解析 URL 参数
+        string[] parameters = query.Split('&');
+        foreach (string parameter in parameters)
+        {
+            string[] keyValue = parameter.Split('=');
+            string key = keyValue[0];
+            string value = keyValue[1];
+
+            Debug.Log(key + ": " + value);
+
+            if(key == "luadebug")
+            {
+                return value == "1";
+            }
+        }
+
+        return false;
     }
 
     protected override void Awake()
