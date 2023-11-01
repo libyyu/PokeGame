@@ -480,12 +480,16 @@ local function NewClass(base)
 	local M  = {}
 	setmetatable(M, {
 		__index = function(t, k)
-			if base then
-				return base[k]
+			local tt = base or {}
+			local ret = tt[k]
+			if ret then return ret end
+			if k == 'super' then
+				return base
 			end
+			return nil
 		end,
-		__call = function()
-			return setmetatable({}, {__index=M})
+		__call = function(t, ...)
+			return setmetatable({}, {__index=t})
 		end
 	})
 	return M
