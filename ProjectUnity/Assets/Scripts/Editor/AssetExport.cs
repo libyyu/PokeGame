@@ -41,6 +41,18 @@ public class AssetExport
         {
             return;
         }
+		else if(abName.Contains("/webgltemplates/"))
+		{
+			return;
+		}
+        else if (abName.Contains("/wx-wasm-sdk-v1/"))
+        {
+            return;
+        }
+        else if(abName.Contains("/wx-wasm-sdk-v2/"))
+		{
+			return;
+		}
 
         AssetImporter import = AssetImporter.GetAtPath(sp);
         string name = GameUtil.FileNameWithoutExt(abName);
