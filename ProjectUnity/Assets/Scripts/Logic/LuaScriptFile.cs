@@ -60,18 +60,20 @@ public class LuaScriptFile : MonoBehaviour {
     {
         if (!string.IsNullOrEmpty(scriptFileName) && env != null)
         {
+            int top = env.Top;
             object obj = env.doFile(scriptFileName);
             if (obj != null && obj is LuaTable)
             {
                 var M = (LuaTable)obj;
                 script = new LuaTable(env);
-                script.setMeta(M);
-                M["__index"] = M;
-
+                var meta = new LuaTable(env);
+                meta["__index"] = M;
+                script.setMeta(meta);
                 script["component"] = this;
                 script["transform"] = transform;
                 script["gameObject"] = gameObject;
             }
+            LuaDLL.lua_settop(env.L, top);
         }
     }
 

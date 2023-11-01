@@ -472,6 +472,27 @@ return Class
 
 
             createTypeMetatable(l, null, typeof(LuaHelper));
+
+            string classstr =
+@"
+SLua = SLua or {}
+local function NewClass(base)
+	local M  = {}
+	setmetatable(M, {
+		__index = function(t, k)
+			if base then
+				return base[k]
+			end
+		end,
+		__call = function()
+			return setmetatable({}, {__index=M})
+		end
+	})
+	return M
+end
+SLua.Class = NewClass
+";
+            LuaState.get(l).doString(classstr);
         }
     }
 }
