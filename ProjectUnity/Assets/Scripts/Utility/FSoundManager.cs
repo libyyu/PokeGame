@@ -82,8 +82,6 @@ public class FSoundManager : PersistentSingleton<FSoundManager>
         sound.volume = UIVolume;
         // we start playing the background music
         sound.Play();
-		//
-        Destroy(sound, 1.0f);
     }
 
     void LateUpdate()

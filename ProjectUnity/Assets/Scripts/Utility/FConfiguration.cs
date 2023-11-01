@@ -1,86 +1,67 @@
 using System.Collections;
 using System.Collections.Generic;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
+using System;
+using SLua;
 
 
+[CustomLuaClass]
 public class FConfiguration : MonoBehaviour
 {
-    public UnityEngine.Object obj;
-    [SerializeField]
-    public Dictionary<string, string> strConfig = new Dictionary<string, string>();
-    [SerializeField]
-    public Dictionary<string, UnityEngine.Object> objConfig;
-#if UNITY_EDITOR
-
-    [CustomEditor(typeof(FConfiguration))]
-    public class MyComponentEditor : Editor
+    [DoNotToLua]
+    [Serializable]
+    public class TSerializableKeyValue<TKey, TValue>
     {
-        public override void OnInspectorGUI()
-        {
-            FConfiguration myComponent = (FConfiguration)target;
-
-            // 显示和编辑 Dictionary 字段
-            SerializedObject serializedObject = new SerializedObject(myComponent);
-            SerializedProperty dictionaryProperty = serializedObject.FindProperty("strConfig");
-            EditorGUILayout.PropertyField(dictionaryProperty, true);
-
-            // 应用修改
-            serializedObject.ApplyModifiedProperties();
-
-            // 显示默认 Inspector
-            DrawDefaultInspector();
-        }
+        [SerializeField]
+        public TKey key;
+        [SerializeField]
+        public TValue value;
     }
 
-    [CustomPropertyDrawer(typeof(Dictionary<string, string>))]
-    public class DictionaryStringStringDrawer : PropertyDrawer
+    [SerializeField]
+    private List<TSerializableKeyValue<string, string>> strConfig = new List<TSerializableKeyValue<string, string>>();
+    [SerializeField]
+    private List<TSerializableKeyValue<string, UnityEngine.Object>> objConfig = new List<TSerializableKeyValue<string, UnityEngine.Object>>();
+
+    Dictionary<string, string> getConfig()
     {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        Dictionary<string, string> ret = new Dictionary<string, string>();
+        foreach(var kv in strConfig)
         {
-            EditorGUI.BeginProperty(position, label, property);
-
-            EditorGUI.LabelField(position, label);
-
-            EditorGUI.indentLevel++;
-
-            SerializedProperty keysProperty = property.FindPropertyRelative("keys");
-            SerializedProperty valuesProperty = property.FindPropertyRelative("values");
-
-            for (int i = 0; i < keysProperty.arraySize; i++)
-            {
-                Rect keyRect = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight * (i + 1), position.width * 0.4f, EditorGUIUtility.singleLineHeight);
-                EditorGUI.PropertyField(keyRect, keysProperty.GetArrayElementAtIndex(i), GUIContent.none);
-
-                Rect valueRect = new Rect(position.x + position.width * 0.4f, position.y + EditorGUIUtility.singleLineHeight * (i + 1), position.width * 0.6f, EditorGUIUtility.singleLineHeight);
-                EditorGUI.PropertyField(valueRect, valuesProperty.GetArrayElementAtIndex(i), GUIContent.none);
-            }
-
-            EditorGUI.indentLevel--;
-
-            EditorGUI.EndProperty();
+            if(!ret.ContainsKey(kv.key))
+                ret.Add(kv.key, kv.value);
+            else
+                ret[kv.key] = kv.value;
         }
-
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            SerializedProperty keysProperty = property.FindPropertyRelative("keys");
-            float lineHeight = EditorGUIUtility.singleLineHeight;
-            return (keysProperty.arraySize + 1) * lineHeight;
-        }
+        return ret;
     }
 
-#endif
+    public Dictionary<string, string> Config
+    {
+        get { return getConfig(); }
+    }
+
+    Dictionary<string, UnityEngine.Object> getObjConfig()
+    {
+        Dictionary<string, UnityEngine.Object> ret = new Dictionary<string, UnityEngine.Object>();
+        foreach (var kv in objConfig)
+        {
+            if (!ret.ContainsKey(kv.key))
+                ret.Add(kv.key, kv.value);
+            else
+                ret[kv.key] = kv.value;
+        }
+        return ret;
+    }
+
+    public Dictionary<string, UnityEngine.Object> ObjConfig
+    {
+        get { return getObjConfig(); }
+    }
+
 
     // Start is called before the first frame update
     void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
     {
         
     }

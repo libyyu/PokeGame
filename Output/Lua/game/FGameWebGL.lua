@@ -79,7 +79,8 @@ do
 
 	function FGame:Run()
 		self:InitGame()
-		self:EnterLoginStage()
+		--self:EnterLoginStage()
+		self:EnterGameLogic()
 	end
 	function FGame:EnterLoginStage()
 		self:InitLoginInfo()
@@ -108,7 +109,7 @@ do
 		local backgroundMusic = musicGo:AddComponent(LuaHelper.GetClsType("FBackgroundMusic"))
 		DontDestroyOnLoad(musicGo)
 		--测试背景音
-		AsyncLoad(ResPathReader.BackgroundMusic, ResPathReader.BackgroundMusic, function(obj)
+		AsyncLoad(ResPathReader.BackgroundMusic, function(obj)
 			warn("=======",obj)
 			--if obj and not obj.isNil then
 				backgroundMusic:PlayBackgroundMusic(obj)
@@ -120,7 +121,7 @@ do
 		self:LeaveLoginState()
 		self.m_isGameLogic = true
 		--加载世界
-		AsyncLoad("Map","x1",function(asset)
+		AsyncLoad("TestProjName/Model/x1.prefab", function(asset)
 			local goMap = Instantiate(asset)
 			goMap.transform.localPosition = Vector3(-121.6,-44.2,-241.3)
 			goMap.transform.localScale = Vector3(1, 1, 1)
@@ -130,6 +131,7 @@ do
 			p:Init({})
 			self.m_HostPlayer = p
 		end)
+		require "ui.FGUIMan".Instance():CreateSimpleUI("TestProjName/UI/Level.prefab")
 	end
 	function FGame:LeaveGameLogic()
 		self.m_isGameLogic = false

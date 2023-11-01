@@ -132,6 +132,15 @@ do
 			p:Init({})
 			self.m_HostPlayer = p
 		end)
+
+		require "ui.FGUIMan".Instance():CreateSimpleUI("TestProjName/UI/Level.prefab", nil, function(panel, go)
+			require "ui.FGUIMan".Instance():CreateSimpleUI("ProjIdiom/UI/UIStart.prefab", function(panel)
+				print(panel.m_panel.transform)
+				print(panel.m_panel.transform.localPosition)
+				print(panel.m_panel.transform.localScale)
+				print(panel.m_panel.transform.rect)
+			end)
+		end)
 	end
 	function FGame:LeaveGameLogic()
 		self.m_isGameLogic = false

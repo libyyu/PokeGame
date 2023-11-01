@@ -57,8 +57,8 @@ do
 
 		    local canScaler = goCanvas:AddComponent(UnityEngine.UI.CanvasScaler);
 		    canScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
-		    canScaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand
-		    canScaler.referenceResolution = Vector2(960,640)
+		    canScaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight
+		    canScaler.referenceResolution = Vector2(750, 1344)
 
 		    goCanvas:AddComponent(UnityEngine.UI.GraphicRaycaster);
 
@@ -87,7 +87,7 @@ do
 		end
 	end
 
-	function FGUIMan:CreatePanel(assetName, callback)
+	function FGUIMan:LoadPanelRes(assetName, callback)
 		if self:UseFairyGUI() then 
 			AsyncLoadBundleArray({ResPathReader.PokerCommon, assetName}, function(bundles)
 				if not bundles[1] then
@@ -107,6 +107,25 @@ do
 				callback(obj)
 			end)
 		end
+	end
+
+	function FGUIMan:CreateSimpleUI(assetName, callback, onclick)
+		local M = FLua.Class(require "ui.FBaseUI")
+		do
+			function M.OnCreate(panel)
+				if callback then 
+					callback(panel)
+				end
+			end
+			function M.OnClick(panel, go)
+				if onclick then
+					onclick(panel, go)
+				end
+			end
+		end
+		local panel = M()
+		panel:CreatePanel(assetName)
+		return panel
 	end
 end
 

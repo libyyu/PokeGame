@@ -215,6 +215,10 @@ function IsWebGLRuntime()
 	return UnityEngine.RuntimePlatform.WebGLPlayer == UnityEngine.Application.platform
 end
 
+function IsWXRuntime()
+	return IsWebGLRuntime() and GameUtil.IsWXEnv()
+end
+
 _G.PlatformSuffix = IsWebGLRuntime() and "WebGL" or "App"
 
 

@@ -70,7 +70,7 @@ do
 			self.m_panelName = getPanelNameFromResName(assetName)
 			self.m_loading = true
 			FGUIMan.Instance():RegisterPanel(assetName, self)
-			FGUIMan.Instance():CreatePanel(assetName, function(obj)
+			FGUIMan.Instance():LoadPanelRes(assetName, function(obj)
 				if self:UseFairyGUI() then
 				else
 					if obj then
