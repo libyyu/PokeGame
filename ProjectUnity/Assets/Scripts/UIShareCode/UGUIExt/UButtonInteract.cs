@@ -9,11 +9,13 @@ public class UButtonInteract : MonoBehaviour
 {
     public Button target;
     public AudioClip clip = null;
-
+    AudioSource audioSource = null;
     void Awake()
     {
         if (target == null)
             target = gameObject.GetComponent<Button>();
+        audioSource = gameObject.GetComponent<AudioSource>();
+        if(audioSource == null) audioSource = gameObject.AddComponent<AudioSource>() as AudioSource;
 
         target.onClick.AddListener(OnClick);
     }
@@ -30,10 +32,7 @@ public class UButtonInteract : MonoBehaviour
     {
         if (clip == null) return;
 
-        AudioSource audioSource = gameObject.AddComponent<AudioSource>() as AudioSource;
-        // we set that audio source clip to the one in paramaters
         audioSource.clip = clip;
-
         FSoundManager.Instance.PlayUISound(audioSource);
     }
 }

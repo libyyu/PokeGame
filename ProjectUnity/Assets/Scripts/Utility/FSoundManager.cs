@@ -17,6 +17,9 @@ public class FSoundManager : PersistentSingleton<FSoundManager>
 	[Range(0,1)]
 	public float SfxVolume=1f;
 
+    [Range(0, 1)]
+    public float UIVolume = 1f;
+
     protected AudioSource _backgroundMusic;	
 		
 	/// <summary>
@@ -75,7 +78,8 @@ public class FSoundManager : PersistentSingleton<FSoundManager>
 	{
         if (!SfxOn)
             return;
-        sound.volume = MusicVolume;
+		if(sound.isPlaying) sound.Stop();
+        sound.volume = UIVolume;
         // we start playing the background music
         sound.Play();
 		//
