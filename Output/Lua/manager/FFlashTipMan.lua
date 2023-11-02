@@ -8,6 +8,14 @@ do
 		self.m_used = {}
 	end
 
+	local l_instance
+	function FFlashTipMan.Instance()
+		if not l_instance then
+			l_instance = FFlashTipMan()
+		end
+		return l_instance
+	end
+
 	function FFlashTipMan:InitCacheRoot()
 		self.m_root = NewGameObject("FlashTipCacheRoot")
 	end
@@ -47,7 +55,5 @@ do
 		return false
 	end
 end
-
-FlashTipMan = FFlashTipMan()
 
 return FFlashTipMan

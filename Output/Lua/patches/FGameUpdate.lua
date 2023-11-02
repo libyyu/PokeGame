@@ -321,7 +321,6 @@ do
             if compareVersionString(game_version, patchesInfo.lates_version) < 0 then 
                 FUpdateUI.Instance():SetTip(StringReader.Get(14))
                 local patches_list = get_patheslist(game_version, patchesInfo.lates_version, patchesInfo.patches_dict,patchesInfo.patches_count)
-                PrintTable(patches_list)
                 local updateSize = self:CalcDownloadSize(patches_list)
                 local boxType = compareVersionString(game_version, self.m_RemoteVersion.resource.mini_version) >= 0 and MsgBoxType.MBBT_OKCANCEL or MsgBoxType.MBBT_OK
                 MsgBox(self,StringReader.Get(8),"update",boxType,function(_,ret)

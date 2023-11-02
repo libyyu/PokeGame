@@ -112,4 +112,9 @@ public class LuaScriptFile : MonoBehaviour {
         string source = (string.IsNullOrEmpty(e.Source)) ? "<no source>" : e.Source.Substring(0, e.Source.Length - 2);
         return string.Format("{0}\nLua (at {2})", e.Message, string.Empty, source);
     }
+
+    public void OnInvokeLua(string method, UnityEngine.GameObject go)
+    {
+        CallMethod(method, go);
+    }
 }

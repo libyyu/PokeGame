@@ -234,8 +234,93 @@ return Class
             }
         }
 
-		//convert lua binary string to c# byte[]
-		[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static public int InstanceMeta(IntPtr l)
+		{
+            try
+            {
+                int argc = LuaDLL.lua_gettop(l);
+                if (matchType(l, 1, typeof(string)))
+                {
+                    string cls;
+                    checkType(l, 1, out cls);
+                    Type t = LuaObject.FindType(cls);
+					if (t != null)
+					{
+						pushValue(l, true);
+                        LuaDLL.lua_getfield(l, LuaIndexes.LUA_REGISTRYINDEX, ObjectCache.getAQName(t));
+                        return 2;
+					}
+                    pushValue(l, false);
+                    LuaDLL.lua_pushstring(l, string.Format("No matched Type found. {0}", cls));
+					return 2;
+                }
+                else if (matchType(l, 1, typeof(Type)))
+                {
+					Type t;
+                    checkType(l, 1, out t);
+                    if (t != null)
+                    {
+                        pushValue(l, true);
+                        LuaDLL.lua_getfield(l, LuaIndexes.LUA_REGISTRYINDEX, ObjectCache.getAQName(t));
+                        return 2;
+                    }
+                }
+				pushValue(l, false);
+				LuaDLL.lua_pushstring(l, "No matched override function InstanceMeta to call");
+				return 2;
+			}
+            catch (Exception e)
+            {
+                return error(l, e);
+            }
+        }
+
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static public int StaticMeta(IntPtr l)
+        {
+            try
+            {
+                int argc = LuaDLL.lua_gettop(l);
+                if (matchType(l, 1, typeof(string)))
+                {
+                    string cls;
+                    checkType(l, 1, out cls);
+                    Type t = LuaObject.FindType(cls);
+                    if (t != null)
+                    {
+                        pushValue(l, true);
+                        LuaDLL.lua_getfield(l, LuaIndexes.LUA_REGISTRYINDEX, t.FullName);
+                        return 2;
+                    }
+                    pushValue(l, false);
+                    LuaDLL.lua_pushstring(l, string.Format("No matched Type found. {0}", cls));
+                    return 2;
+                }
+                else if (matchType(l, 1, typeof(Type)))
+                {
+                    Type t;
+                    checkType(l, 1, out t);
+                    if (t != null)
+                    {
+                        pushValue(l, true);
+                        LuaDLL.lua_getfield(l, LuaIndexes.LUA_REGISTRYINDEX, t.FullName);
+                        return 2;
+                    }
+                }
+                pushValue(l, false);
+                LuaDLL.lua_pushstring(l, "No matched override function StaticMeta to call");
+                return 2;
+            }
+            catch (Exception e)
+            {
+                return error(l, e);
+            }
+        }
+
+
+        //convert lua binary string to c# byte[]
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
 		static public int ToBytes(IntPtr l){
 			try{
 				byte[] bytes = null;
@@ -460,6 +545,8 @@ return Class
             addMember(l, "out", get_out, null, false);
             addMember(l, "version", get_version, null, false);
             addMember(l, GetClsType, false);
+            addMember(l, InstanceMeta, false);
+			addMember(l, StaticMeta, false);
             addMember(l, StringToBytes, false);
             addMember(l, BytesToString, false);
             addMember(l, BytesArrayToTable, false);

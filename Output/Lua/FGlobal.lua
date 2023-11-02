@@ -165,27 +165,6 @@ function DontDestroyOnLoad(go)
 	UnityEngine.Object.DontDestroyOnLoad(go)
 end
 
-function Table2String(tab)
-    local str = {}
-    local function internal(tab, str, indent)
-        for k,v in pairs(tab) do
-            if type(v) == "table" then
-                table.insert(str, indent.."["..tostring(k).."]="..":\n")
-                internal(v, str, indent..' ')
-            else
-                table.insert(str, indent..tostring(k).."="..tostring(v).."\n")
-            end
-        end
-    end
-
-    internal(tab, str, '')
-    return table.concat(str, '')
-end
-
-function PrintTable(t)
-	local str = Table2String(t)
-	print(str)
-end
 
 function NewByteBuffer(data)
 	if not data then
@@ -212,11 +191,11 @@ function ReadFileContent(filename)
 end
 
 function IsWebGLRuntime()
-	return UnityEngine.RuntimePlatform.WebGLPlayer == UnityEngine.Application.platform
+	return UnityEngine.RuntimePlatform.WebGLPlayer == UnityEngine.Application.platform or GameUtil.IsWebGLEnv()
 end
 
 function IsWXRuntime()
-	return IsWebGLRuntime() and GameUtil.IsWXEnv()
+	return IsWebGLRuntime() and not GameUtil.IsEditorEnv() and GameUtil.IsWXEnv()
 end
 
 _G.PlatformSuffix = IsWebGLRuntime() and "WebGL" or "App"

@@ -120,7 +120,7 @@ namespace SLua
 #if UNITY_2017_2_OR_NEWER
         public static string[] unityModule = new string[] { "UnityEngine","UnityEngine.CoreModule","UnityEngine.UIModule","UnityEngine.TextRenderingModule","UnityEngine.TextRenderingModule",
                 "UnityEngine.UnityWebRequestWWWModule","UnityEngine.Physics2DModule","UnityEngine.AnimationModule","UnityEngine.TextRenderingModule","UnityEngine.IMGUIModule","UnityEngine.UnityWebRequestModule",
-            "UnityEngine.PhysicsModule", "UnityEngine.UI", "UnityEngine.AudioModule", "UnityEngine.ParticleSystemModule", "UnityEngine.InputLegacyModule"};
+            "UnityEngine.PhysicsModule", "UnityEngine.AudioModule", "UnityEngine.ParticleSystemModule", "UnityEngine.InputLegacyModule"};
 #else
         public static string[] unityModule = null;
 #endif
@@ -376,7 +376,7 @@ namespace SLua
             aCustomExport = new object[] { fun };
 			InvokeEditorMethod<ICustomExportPost>("OnAddCustomClass", ref aCustomExport);
 
-			GenerateBind(exports, "BindCustom", 3, path);
+			GenerateBind(exports, "BindCustom", 4, path);
             if(autoRefresh)
 			    AssetDatabase.Refresh();
 			
@@ -469,7 +469,7 @@ namespace SLua
 					if (Generate(t,path))
 						exports.Add(t);
 				}
-				GenerateBind(exports, "BindDll", 2, path);
+				GenerateBind(exports, "BindDll", 3, path);
                 if(autoRefresh)
 				    AssetDatabase.Refresh();
 				Debug.Log("Generate 3rdDll interface finished");

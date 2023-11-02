@@ -1,1 +1,140 @@
-return require ("game.FGame"..PlatformSuffix)
+
+theGame = nil
+local FLogicSession = require "network.FLogicSession"
+local FAssetBundleUtil = require "utility.FAssetBundleUtil"
+local FLibEvent = require "utility.FLibEvent"
+local FConsoleUI = require "ui.FConsoleUI"
+local FCommand = require "game.FCommand"
+
+local FGame = FLua.Class("FGame")
+do
+	function FGame.Instance( )
+		return theGame
+	end
+
+	function FGame:__constructor()
+		self.m_LogicNetwork = nil
+		self.m_AssetBundle = nil
+		self.m_LogicEvent = FLibEvent("LogicEvent")
+		self.m_LogList = {}
+		self.m_MainCam = nil
+		self.m_HostPlayer = nil
+		self.m_FPS = nil
+		self.m_LoginInfo = nil
+		self.m_isGameLogic = false
+	end
+
+	function FGame:InitGame()
+		if not IsWebGLRuntime() then
+			self.m_LogicNetwork = FLogicSession.Instance()
+			self.m_LogicNetwork:InitNetwork()
+		end
+
+		--初始化主相机
+		self:InitGameObject()
+
+		--Init FHotKeyLogic
+		local hotGo = NewGameObject("FHotKeyLogic")
+		local clsT = LuaHelper.GetClsType("FHotKeyLogic")
+		hotGo:AddComponent(clsT)
+		DontDestroyOnLoad(hotGo)
+
+		--初始化2D-ui根节点
+		require "ui.FGUIMan".Instance():InitUIRoot()
+		require "manager.FFlashTipMan".Instance():InitCacheRoot()
+	end
+
+	function FGame:InitLoginInfo()
+		self.m_LoginInfo = {name="libyyu",passwd="123456",}
+	end
+
+	function FGame:InitGameObject()
+		if self.m_MainCam and not self.m_MainCam.isNil then
+			return
+		end
+		--Main Camera
+		local cam_root = NewGameObject("MainCamera Root")
+	    cam_root.transform.localPosition = Vector3(0, 0, 0)
+	    cam_root.transform.localScale = Vector3(1, 1, 1)
+	    DontDestroyOnLoad(cam_root)
+	    local camobj = NewGameObject("Main Camera")
+	    camobj.transform:SetParent(cam_root.transform)
+	    camobj.transform.localPosition = Vector3(85, 18, 20);
+	    camobj.transform.localRotation = Quaternion(0.1, -0.9, 0.4, 0.2);
+	    camobj.transform.localScale = Vector3(1, 1, 1);
+	    camobj:AddComponent(LuaHelper.GetClsType("FSmootFollow"))
+	    local cam = camobj:AddComponent(UnityEngine.Camera)
+	    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
+	    cam.cullingMask = bit.bnot(bit.lshift(1,5)) --去除UI
+	    --camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
+	    camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
+        camobj.tag = "MainCamera"
+        self.m_MainCam = camobj	    
+	    --AudioListener
+	    local goAudio = NewGameObject("AudioListener")
+	    goAudio:AddComponent(LuaHelper.GetClsType("UnityEngine.AudioListener"))
+	    DontDestroyOnLoad(goAudio)
+	end
+
+	function FGame:Setup()
+		MainThreadTask.Init()
+		--AssetBundleManager
+		self.m_AssetBundle = FAssetBundleUtil.Instance()
+		self.m_AssetBundle:InitAssetBundle()
+
+		self:InitGame()
+	end
+
+	function FGame:Run()
+		self:OnRun()
+	end
+	
+	function FGame:ToggleConsole()
+		FConsoleUI.Instance():ToggleConsole()
+	end
+	function FGame:ForceCloseConsole()
+		FConsoleUI.Instance():DestroyPanel()
+	end
+	function FGame:OnUnityLog(t,str)
+		--table.insert(self.m_LogList,{type=t,str=str})
+		--FireEvent(EventDef.UnityLog,{type=t,str=str})
+	end
+	function FGame:GetAllLogs()
+		return self.m_LogList
+	end
+
+	function FGame:ExecuteDebugString(input)
+		local args = string.split(input, ' ')
+		local cmd = table.remove(args,1)
+
+		local commands = FCommand:getAllCommands()
+		if commands[cmd] then
+			commands[cmd].execute(args)
+		else
+			warn("unknow command:"..cmd)
+		end
+	end
+
+	function FGame:ShowFPS(show)
+		if show then
+			if not self.m_FPS then
+				self.m_FPS = NewGameObject("FPS")
+			end
+			local fps = self.m_FPS:GetComponent("FPS")
+			if not fps then
+				self.m_FPS:AddComponent(LuaHelper.GetClsType("FPS"))
+			end
+		else
+			if self.m_FPS then
+				DestroyObject(self.m_FPS)
+				self.m_FPS = nil
+			end
+		end
+	end
+end
+
+require ("game.FGame" .. PlatformSuffix)
+
+theGame = FGame()
+
+return FGame

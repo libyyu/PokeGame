@@ -13,11 +13,29 @@ public class GameUtil
     public const string BundleExt = ".ab";
     public const string ManifestName = "StreamingAssets";
 
+    public static bool IsEditorEnv()
+    {
+#if UNITY_EDITOR
+        return true;
+#else
+        return false;
+#endif
+    }
+
     //当前是否运行在微信小游戏环境
     public static bool IsWXEnv()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         return WebCommon.isRunEnvWX();
+#else
+        return false;
+#endif
+    }
+
+    public static bool IsWebGLEnv()
+    {
+#if UNITY_WEBGL
+        return true;
 #else
         return false;
 #endif

@@ -35,11 +35,12 @@ do
 		    local cam = goRoot:AddComponent(UnityEngine.Camera)
 		    cam.clearFlags = UnityEngine.CameraClearFlags.Depth
 		    --cam.backgroundColor = Color(128,128,128,255)
-		    cam.cullingMask = 32
+		    cam.cullingMask = bit.lshift(1,5)
 		    cam.orthographic = true;
 		    cam.orthographicSize = 3.2
 		    cam.nearClipPlane = -10;
 		    cam.farClipPlane = 1000;
+		    cam.depth = 2
 
 		    goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
 	        --goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
