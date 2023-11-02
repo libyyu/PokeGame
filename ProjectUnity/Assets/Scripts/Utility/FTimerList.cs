@@ -8,7 +8,7 @@ using System.Text;
 public class FTimerList
 {
     static int _uniqueid = 1;
-    public static int total_count = 0;
+    public int total_count = 0;
 
     public struct Timer
     {
@@ -77,7 +77,8 @@ public class FTimerList
                 {
                     tm.callback.Dispose();
                     //LuaDLL.luaL_unref(L, LuaIndexes.LUA_REGISTRYINDEX, tm.callback);
-                    LuaDLL.luaL_unref(L, LuaIndexes.LUA_REGISTRYINDEX, tm.cbparam);
+                    if (tm.cbparam != LuaRefValue.LUA_NOREF)
+                        LuaDLL.luaL_unref(L, LuaIndexes.LUA_REGISTRYINDEX, tm.cbparam);
                     m_List.RemoveAt(i);
                     total_count--;
                     return;
@@ -101,12 +102,12 @@ public class FTimerList
         }
     }
 
-    public void Tick()
+    public void Tick(float CurTime)
     {
         if (m_List.Count == 0)
             return;
 
-        float cur = EntryPoint.CurTime;
+        float cur = CurTime;
         int i = 0;
         m_bTick = true;
 
@@ -128,7 +129,8 @@ public class FTimerList
                 {
                     tm.callback.Dispose();
                     //LuaDLL.luaL_unref(wLua.L.L, LuaIndexes.LUA_REGISTRYINDEX, tm.callback);
-                    LuaDLL.luaL_unref(L, LuaIndexes.LUA_REGISTRYINDEX, tm.cbparam);
+                    if (tm.cbparam != LuaRefValue.LUA_NOREF)
+                        LuaDLL.luaL_unref(L, LuaIndexes.LUA_REGISTRYINDEX, tm.cbparam);
                     m_List.RemoveAt(i);
                     total_count--;
                 }
@@ -186,7 +188,10 @@ public class FTimerList
         for (int i = 0; i < m_List.Count; i++)
         {
             m_List[i].callback.Dispose();
-            LuaDLL.luaL_unref(getL(), LuaIndexes.LUA_REGISTRYINDEX, m_List[i].cbparam);
+            if (m_List[i].cbparam != LuaRefValue.LUA_NOREF)
+            {
+                LuaDLL.luaL_unref(getL(), LuaIndexes.LUA_REGISTRYINDEX, m_List[i].cbparam);
+            }
         }
 
         m_List.Clear();
@@ -250,5 +255,71 @@ public class FTimerList
     public static void UnregisterTimerList(FTimerList timerList)
     {
         s_instanceMap.Remove(timerList);
+    }
+}
+
+
+public class FTimerListBehavior : MonoBehaviour
+{
+    float CurTime;
+    float DeltaTime;
+    FTimerList m_TimerList = new FTimerList();
+    FTimerList m_LateTimerList = new FTimerList();
+#if UNITY_EDITOR
+    public int timer_num = 0;
+#endif
+    void Awake()
+    {
+        FTimerList.RegisterTimerList(m_TimerList, gameObject);
+        FTimerList.RegisterTimerList(m_LateTimerList, gameObject);
+    }
+
+    void OnDestroy()
+    {
+        FTimerList.UnregisterTimerList(m_TimerList);
+        FTimerList.UnregisterTimerList(m_LateTimerList);
+
+        m_TimerList.Clear();
+        m_LateTimerList.Clear();
+    }
+
+    void Update()
+    {
+        CurTime = Time.time;
+        DeltaTime = Time.deltaTime;
+
+        m_TimerList.Tick(CurTime);
+
+#if UNITY_EDITOR
+        timer_num = m_TimerList.total_count;
+#endif
+    }
+    void LateUpdate()
+    {
+        m_LateTimerList.Tick(CurTime);
+    }
+
+    public int AddTimer(float ttl, bool bOnce, int cb, int cbparam, bool bLateUpdate)
+    {
+        if (bLateUpdate)
+        {
+            return m_LateTimerList.AddTimer(ttl, bOnce, cb, cbparam);
+        }
+        else
+        {
+            return m_TimerList.AddTimer(ttl, bOnce, cb, cbparam);
+        }
+    }
+
+    public void RemoveTimer(int id)
+    {
+        m_TimerList.RemoveTimer(id);
+        m_LateTimerList.RemoveTimer(id);
+    }
+
+    public void ResetTimer(int id)
+    {
+        m_TimerList.ResetTimer(id);
+        m_LateTimerList.ResetTimer(id);
     }
 }

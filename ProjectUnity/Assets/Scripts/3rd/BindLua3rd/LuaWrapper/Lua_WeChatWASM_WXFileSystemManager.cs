@@ -253,7 +253,7 @@ public class Lua_WeChatWASM_WXFileSystemManager : LuaObject {
 	}
 	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
 	[UnityEngine.Scripting.Preserve]
-	static public int Unlink(IntPtr l) {
+	static public int UnlinkAsync(IntPtr l) {
 		try {
 			WeChatWASM.WXFileSystemManager self=(WeChatWASM.WXFileSystemManager)checkSelf(l);
 			WeChatWASM.UnlinkParam a1 = default(WeChatWASM.UnlinkParam);
@@ -885,7 +885,7 @@ public class Lua_WeChatWASM_WXFileSystemManager : LuaObject {
 		addMember(l,CopyFileSync);
 		addMember(l,CopyFile);
 		addMember(l,UnlinkSync);
-		addMember(l,Unlink);
+		addMember(l,UnlinkAsync);
 		addMember(l,Mkdir);
 		addMember(l,MkdirSync);
 		addMember(l,Rmdir);

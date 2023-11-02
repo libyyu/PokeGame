@@ -510,4 +510,164 @@ public class GameUtil
         uiRaycaster.Raycast(eventDataCurrentPosition, results);
         return results.Count > 0;
     }
+
+    [MonoPInvokeCallback(typeof(LuaCSFunction))]
+    [StaticExport]
+    [UnityEngine.Scripting.Preserve]
+    public static int AddGlobalTimer(IntPtr L)
+    {
+        float ttl = (float)LuaDLL.lua_tonumber(L, 1);
+        bool bOnce = LuaDLL.lua_toboolean(L, 2);
+
+        LuaDLL.lua_pushvalue(L, 3);
+        int callbackRef = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+
+        int cbparam;
+        if (!LuaDLL.lua_isnil(L, 4))
+        {
+            LuaDLL.lua_pushvalue(L, 4);
+            cbparam = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+        }
+        else
+            cbparam = LuaRefValue.LUA_NOREF;
+
+        int id = EntryPoint.Instance.AddTimer(ttl, bOnce, callbackRef, cbparam, false);
+        LuaDLL.lua_pushboolean(L, true);
+        LuaDLL.lua_pushinteger(L, id);
+        return 2;
+    }
+
+    [MonoPInvokeCallback(typeof(LuaCSFunction))]
+    [StaticExport]
+    [UnityEngine.Scripting.Preserve]
+    public static int RemoveTimer(IntPtr L)
+    {
+        int id = LuaDLL.lua_tointeger(L, 1);
+        EntryPoint.Instance.RemoveTimer(id);
+        LuaDLL.lua_pushboolean(L, true);
+        return 1;
+    }
+
+    [MonoPInvokeCallback(typeof(LuaCSFunction))]
+    [StaticExport]
+    [UnityEngine.Scripting.Preserve]
+    public static int AddLateTimer(IntPtr L)
+    {
+        float ttl = (float)LuaDLL.lua_tonumber(L, 1);
+        bool bOnce = LuaDLL.lua_toboolean(L, 2);
+
+        LuaDLL.lua_pushvalue(L, 3);
+        int callbackRef = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+
+        int cbparam;
+        if (!LuaDLL.lua_isnil(L, 4))
+        {
+            LuaDLL.lua_pushvalue(L, 4);
+            cbparam = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+        }
+        else
+            cbparam = LuaRefValue.LUA_NOREF;
+
+        int id = EntryPoint.Instance.AddTimer(ttl, bOnce, callbackRef, cbparam, true);
+        LuaDLL.lua_pushboolean(L, true);
+        LuaDLL.lua_pushinteger(L, id);
+        return 2;
+    }
+
+    [MonoPInvokeCallback(typeof(LuaCSFunction))]
+    [StaticExport]
+    [UnityEngine.Scripting.Preserve]
+    public static int AddObjectTimer(IntPtr L)
+    {
+        UnityEngine.GameObject self = (UnityEngine.GameObject)LuaObject.checkSelf(L);
+        if(self == null)
+        {
+            LuaDLL.lua_pushboolean(L, false);
+            LuaDLL.lua_pushstring(L, "can't not BindObject Timer to destroyed object");
+            return 2;
+        }
+        FTimerListBehavior comp = self.GetComponent<FTimerListBehavior>();
+        if(comp == null) comp = self.AddComponent<FTimerListBehavior>();
+
+        float ttl = (float)LuaDLL.lua_tonumber(L, 2);
+        bool bOnce = LuaDLL.lua_toboolean(L, 3);
+
+        LuaDLL.lua_pushvalue(L, 4);
+        int callbackRef = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+
+        int cbparam;
+        if (!LuaDLL.lua_isnil(L, 5))
+        {
+            LuaDLL.lua_pushvalue(L, 5);
+            cbparam = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+        }
+        else
+            cbparam = LuaRefValue.LUA_NOREF;
+
+        int id = comp.AddTimer(ttl, bOnce, callbackRef, cbparam, false);
+        LuaDLL.lua_pushboolean(L, true);
+        LuaDLL.lua_pushinteger(L, id);
+        return 2;
+    }
+
+    [MonoPInvokeCallback(typeof(LuaCSFunction))]
+    [StaticExport]
+    [UnityEngine.Scripting.Preserve]
+    public static int AddObjectLateTimer(IntPtr L)
+    {
+        UnityEngine.GameObject self = (UnityEngine.GameObject)LuaObject.checkSelf(L);
+        if (self == null)
+        {
+            LuaDLL.lua_pushboolean(L, false);
+            LuaDLL.lua_pushstring(L, "can't not BindObject Timer to destroyed object");
+            return 2;
+        }
+        FTimerListBehavior comp = self.GetComponent<FTimerListBehavior>();
+        if (comp == null) comp = self.AddComponent<FTimerListBehavior>();
+
+        float ttl = (float)LuaDLL.lua_tonumber(L, 2);
+        bool bOnce = LuaDLL.lua_toboolean(L, 3);
+
+        LuaDLL.lua_pushvalue(L, 4);
+        int callbackRef = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+
+        int cbparam;
+        if (!LuaDLL.lua_isnil(L, 5))
+        {
+            LuaDLL.lua_pushvalue(L, 5);
+            cbparam = LuaDLL.luaL_ref(L, LuaIndexes.LUA_REGISTRYINDEX);
+        }
+        else
+            cbparam = LuaRefValue.LUA_NOREF;
+
+        int id = comp.AddTimer(ttl, bOnce, callbackRef, cbparam, true);
+        LuaDLL.lua_pushboolean(L, true);
+        LuaDLL.lua_pushinteger(L, id);
+        return 2;
+    }
+
+    [MonoPInvokeCallback(typeof(LuaCSFunction))]
+    [StaticExport]
+    [UnityEngine.Scripting.Preserve]
+    public static int RemoveObjectTimer(IntPtr L)
+    {
+        UnityEngine.GameObject self = (UnityEngine.GameObject)LuaObject.checkSelf(L);
+        if (self == null)
+        {
+            LuaDLL.lua_pushboolean(L, false);
+            LuaDLL.lua_pushstring(L, "can't not RemoveObjectTimer Timer from destroyed object");
+            return 2;
+        }
+        FTimerListBehavior comp = self.GetComponent<FTimerListBehavior>();
+        if(comp == null)
+        {
+            LuaDLL.lua_pushboolean(L, true);
+            return 1;
+        }
+
+        int id = LuaDLL.lua_tointeger(L, 2);
+        comp.RemoveTimer(id);
+        LuaDLL.lua_pushboolean(L, true);
+        return 1;
+    }
 }

@@ -32,6 +32,7 @@ do
 		start = math.min(start or 0, 100)
 		start = math.max(self.normalizedValue*100, start)
 		print("AutoProgress", time, start, to)
+		if not time or time == 0 then time = 0.1 end 
 		local last = UnityEngine.Time.realtimeSinceStartup
 		local speed = (to - start) / time
 		local target = 0
@@ -39,17 +40,18 @@ do
 		local currentProgress = start
 		local UPDATE_INTERVAL = 0.2
 		self.normalizedValue = currentProgress/100
-		idTimer = LuaTimer.Add(0, 0.2, function()
+		--idTimer = GameUtil.AddGlobalTimer(0.1, false, function()
+		idTimer = GameUtil.AddObjectTimer(self.gameObject, 0.1, false, function()
 			if self.isNil or currentProgress >= to then
-				LuaTimer.Delete(idTimer)
+				GameUtil.RemoveObjectTimer(self.gameObject, idTimer)
 				idTimer = 0
 				return
 			end
-			speed = math.max(to - currentProgress, 0) / UPDATE_INTERVAL / 2
 			local newProgress = math.min(currentProgress + speed * (UnityEngine.Time.realtimeSinceStartup - last), to)
 			self.normalizedValue = newProgress/100
 			currentProgress = newProgress
 			last = UnityEngine.Time.realtimeSinceStartup
+			return
 		end)
 	end
 end

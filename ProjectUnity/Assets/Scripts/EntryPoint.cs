@@ -190,7 +190,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 
         CurTime = Time.time;
         DeltaTime = Time.deltaTime;
-        m_TimerList.Tick();
+        m_TimerList.Tick(CurTime);
 
         LuaState l = LuaSvr.mainState;
         LuaFunction func = l.getFunction("TickGame");
@@ -212,7 +212,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
             func.call();
             func.Dispose();
         }
-        m_LateTimerList.Tick();
+        m_LateTimerList.Tick(CurTime);
     }
 
     void Cleanup()
