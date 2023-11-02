@@ -545,7 +545,17 @@ public class UnityAssetBundleLoader : IAssetLoader
         var streamingAssetsUrl = Application.streamingAssetsPath;
         if(WebCommon.isRunEnvWX())
             streamingAssetsUrl = WebCommon.get_streamingAssetsUrl();
-        var uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed);
+        System.Uri uri = null;
+        if (type == typeof(AssetBundleManifest))
+        {
+            var sep = "?";
+            if(abNameHashed.Contains('?')) sep = "&";
+            uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed + sep + "t_=" + DateTime.Now.ToString());
+        }
+        else
+        {
+            uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed);
+        }
         yield return OnLoadAssetBundleInner(uri, abName, type, null);
 #else
         bool bLoaded = false;
