@@ -550,7 +550,7 @@ public class UnityAssetBundleLoader : IAssetLoader
         {
             var sep = "?";
             if(abNameHashed.Contains('?')) sep = "&";
-            uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed + sep + "t_=" + DateTime.Now.ToString());
+            uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed + sep + "t_=" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
         }
         else
         {
