@@ -42,7 +42,7 @@ public class PersistentSingleton<T> : MonoBehaviour	where T : Component
 			_instance = this as T;
 			DontDestroyOnLoad (transform.gameObject);
 		}
-		else
+		else if(_instance != this) 
 		{
             Debug.LogError(string.Format("only one object({0}) is allowed", typeof(T)));
 		}

@@ -239,6 +239,30 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         base.OnDestroy();
     }
 
+    void OnApplicationFocus(bool focus)
+    {
+        try
+        {
+            if (!LuaSvr.inited || null == LuaSvr.mainState)
+                return;
+            LuaState l = LuaSvr.mainState;
+            LuaFunction func = l.getFunction("OnApplicationFocus", focus);
+            if (null != func)
+            {
+                func.call();
+                func.Dispose();
+            }
+            else
+            {
+                //LogUtil.Log("OnApplicationPause");
+            }
+        }
+        catch (Exception e)
+        {
+            LogUtil.LogException(e);
+        }
+    }
+
     void OnApplicationPause()
     {
         try
