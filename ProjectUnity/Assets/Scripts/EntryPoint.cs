@@ -246,10 +246,10 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
             if (!LuaSvr.inited || null == LuaSvr.mainState)
                 return;
             LuaState l = LuaSvr.mainState;
-            LuaFunction func = l.getFunction("OnApplicationFocus", focus);
+            LuaFunction func = l.getFunction("OnApplicationFocus");
             if (null != func)
             {
-                func.call();
+                func.call(focus);
                 func.Dispose();
             }
             else
