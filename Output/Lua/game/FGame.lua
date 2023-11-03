@@ -52,28 +52,42 @@ do
 		if self.m_MainCam and not self.m_MainCam.isNil then
 			return
 		end
-		--Main Camera
-		local cam_root = NewGameObject("MainCamera Root")
-	    cam_root.transform.localPosition = Vector3(0, 0, 0)
-	    cam_root.transform.localScale = Vector3(1, 1, 1)
-	    DontDestroyOnLoad(cam_root)
-	    local camobj = NewGameObject("Main Camera")
-	    camobj.transform:SetParent(cam_root.transform)
-	    camobj.transform.localPosition = Vector3(85, 18, 20);
-	    camobj.transform.localRotation = Quaternion(0.1, -0.9, 0.4, 0.2);
-	    camobj.transform.localScale = Vector3(1, 1, 1);
-	    camobj:AddComponent(LuaHelper.GetClsType("FSmootFollow"))
-	    local cam = camobj:AddComponent(UnityEngine.Camera)
-	    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
-	    cam.cullingMask = bit.bnot(bit.lshift(1,5)) --去除UI
-	    --camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
-	    camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
-        camobj.tag = "MainCamera"
-        self.m_MainCam = camobj	    
-	    --AudioListener
-	    local goAudio = NewGameObject("AudioListener")
-	    goAudio:AddComponent(LuaHelper.GetClsType("UnityEngine.AudioListener"))
-	    DontDestroyOnLoad(goAudio)
+		if false then
+			--Main Camera
+			local cam_root = NewGameObject("MainCamera Root")
+		    cam_root.transform.localPosition = Vector3(0, 0, 0)
+		    cam_root.transform.localScale = Vector3(1, 1, 1)
+		    DontDestroyOnLoad(cam_root)
+		    local camobj = NewGameObject("Main Camera")
+		    camobj.transform:SetParent(cam_root.transform)
+		    camobj.transform.localPosition = Vector3(85, 18, 20);
+		    camobj.transform.localRotation = Quaternion(0.1, -0.9, 0.4, 0.2);
+		    camobj.transform.localScale = Vector3(1, 1, 1);
+		    camobj:AddComponent(LuaHelper.GetClsType("FSmootFollow"))
+		    local cam = camobj:AddComponent(UnityEngine.Camera)
+		    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
+		    cam.cullingMask = bit.bnot(bit.lshift(1,5)) --去除UI
+		    --camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
+		    camobj:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
+	        camobj.tag = "MainCamera"
+	        self.m_MainCam = camobj	    
+		    --AudioListener
+		    local goAudio = NewGameObject("AudioListener")
+		    goAudio:AddComponent(LuaHelper.GetClsType("UnityEngine.AudioListener"))
+		    DontDestroyOnLoad(goAudio)
+		else
+			local finished
+			AsyncLoad(ResPathReader.CameraRoot, function(asset)
+				local goCamRoot = Instantiate(asset)
+				goCamRoot.transform.localPosition = Vector3(0, 0, 0)
+				goCamRoot.transform.localScale = Vector3(1, 1, 1)
+				self.m_MainCam = goCamRoot.transform:Find("MainCameraRoot/MainCamera")
+				finished = true
+			end)
+			while not finished do
+				_G.coro.yield()
+			end
+		end
 	end
 
 	function FGame:Setup()

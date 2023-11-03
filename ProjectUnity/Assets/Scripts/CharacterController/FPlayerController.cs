@@ -387,7 +387,8 @@ public class FPlayerController : MonoBehaviour
             if (FootstepAudioClips.Length > 0)
             {
                 var index = Random.Range(0, FootstepAudioClips.Length);
-                AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                //AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                FSoundManager.Instance.PlaySound(FootstepAudioClips[index], transform.TransformPoint(_controller.center));
             }
         }
     }
@@ -396,7 +397,8 @@ public class FPlayerController : MonoBehaviour
     {
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
-            AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+            //AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+            FSoundManager.Instance.PlaySound(LandingAudioClip, transform.TransformPoint(_controller.center));
         }
     }
 }

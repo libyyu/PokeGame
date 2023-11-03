@@ -227,3 +227,9 @@ end
 function _G.index_to_mask (index)
 	return bit.lshift(1, index - 1)
 end
+
+function TickGame(DeltaTime)
+	TickCoroutine(DeltaTime)
+	if theGame then
+	end
+end

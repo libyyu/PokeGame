@@ -25,7 +25,13 @@ end
 
 do
 	local mt = LuaHelper.InstanceMeta(UnityEngine.UI.Slider)
-	function mt:AutoProgress(time, to, start)
+	function mt:AutoProgress(time, start, to, onfinish)
+		local pretimer = self:GetLuaUserData("AutoProgress")
+		if pretimer then
+			GameUtil.RemoveObjectTimer(self.gameObject, pretimer)
+			self:SetLuaUserData("AutoProgress", nil)
+		end
+
 		local minValue = self.minValue
 		local maxValue = self.maxValue
 		to = math.max(to or 0, 100)
@@ -42,16 +48,22 @@ do
 		self.normalizedValue = currentProgress/100
 		--idTimer = GameUtil.AddGlobalTimer(0.1, false, function()
 		idTimer = GameUtil.AddObjectTimer(self.gameObject, 0.1, false, function()
-			if self.isNil or currentProgress >= to then
+			if self.isNil then
+				return
+			end
+			if currentProgress >= to then
 				GameUtil.RemoveObjectTimer(self.gameObject, idTimer)
+				self:SetLuaUserData("AutoProgress", nil)
 				idTimer = 0
+				if onfinish then onfinish() end
 				return
 			end
 			local newProgress = math.min(currentProgress + speed * (UnityEngine.Time.realtimeSinceStartup - last), to)
 			self.normalizedValue = newProgress/100
 			currentProgress = newProgress
 			last = UnityEngine.Time.realtimeSinceStartup
-			return
 		end)
+
+		self:SetLuaUserData("AutoProgress", idTimer)
 	end
 end

@@ -8,15 +8,14 @@ do
 
 	function FHostPlayer:Init(info)
 		self.m_InfoData = info
-		self:Create("TestProjName/Model/Npc_boy/villarger_B_Boy/Prefabs/Villager_B_Boy_prefab.prefab")
+		self:Create("Arts/Prefabs/Player/Player_CC.prefab")
 	end
 
 	function FHostPlayer:OnLoaded(obj)
 		obj.tag = "HostPlayer"
-		obj.transform.localPosition = Vector3(80.45,10.4,16.14)
-		obj.transform.localScale = Vector3(3,3,3)
-		self:Play("Idle",UnityEngine.WrapMode.Loop)
-		theGame.m_MainCam:GetComponent("FSmootFollow").target = obj.transform
+		obj.transform.localPosition = Vector3(0, 0, 0)
+		obj.transform.localScale = Vector3(1, 1, 1)
+		--self:Play("Idle",UnityEngine.WrapMode.Loop)
 		self.m_IsReady = true
 	end
 end

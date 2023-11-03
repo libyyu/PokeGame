@@ -12,37 +12,44 @@ do
 		AsyncLoad(ResPathReader.BackgroundMusic, function(obj)
 			warn("=======",obj)
 			--if obj and not obj.isNil then
-				backgroundMusic:PlayBackgroundMusic(obj)
+				--backgroundMusic:PlayBackgroundMusic(obj)
 			--end
 		end)
 
-		local FWaitingUI = require "ui.FWaitingUI"
-		FWaitingUI.Instance():DestroyPanel()
-		self.m_isGameLogic = true
-		--加载世界
-		AsyncLoad("TestProjName/Model/x1.prefab", function(asset)
-			local goMap = Instantiate(asset)
-			goMap.transform.localPosition = Vector3(-121.6,-44.2,-241.3)
-			goMap.transform.localScale = Vector3(1, 1, 1)
+		self:EnterStartUI(function()
+			require "ui.FGUIMan".Instance():CreateSimpleUI("Arts/UI/UILoading.prefab", function(panel)
+				local slider = panel:FindChildObj("bg/Slider"):GetComponent("Slider")
+				slider:AutoProgress(2, nil, 80)
 
-			-- local player = require "player.FHostPlayer"
-			-- local p = player()
-			-- p:Init({})
-			-- self.m_HostPlayer = p
-		end)
+				AsyncLoad("Arts/Prefabs/Scene/Environment_Prefab.prefab", function(asset)
+					local goMap = Instantiate(asset)
+					goMap.transform.localPosition = Vector3(0, 0, 0)
+					goMap.transform.localScale = Vector3(1, 1, 1)
 
-		require "ui.FGUIMan".Instance():CreateSimpleUI("TestProjName/UI/Level.prefab", nil, function(panel, go)
-			-- require "ui.FGUIMan".Instance():CreateSimpleUI("ProjIdiom/UI/UIStart.prefab", function(panel)
-			-- 	print(panel.m_panel.transform)
-			-- 	print(panel.m_panel.transform.localPosition)
-			-- 	print(panel.m_panel.transform.localScale)
-			-- 	print(panel.m_panel.transform.rect)
-			-- end)
-			local slider = panel:FindChildObj("Slider"):GetComponent("Slider")
-			slider:AutoProgress(2)
+					local player = require "player.FHostPlayer"
+					local p = player()
+					p:Init({})
+					self.m_HostPlayer = p
+					slider:AutoProgress(1, nil, 100, function()
+						panel:DestroyPanel()
+					end)
 
+					local FWaitingUI = require "ui.FWaitingUI"
+					FWaitingUI.Instance():DestroyPanel()
+					self.m_isGameLogic = true
+				end)
+			end)
 		end)
 	end
+
+	function FGame:EnterStartUI(OnFinish)
+		require "ui.FGUIMan".Instance():CreateSimpleUI("Arts/UI/UIStart.prefab", nil, function(panel, go)
+			panel:DestroyPanel()
+
+			OnFinish()
+		end)
+	end
+
 	function FGame:LeaveGameLogic()
 		self.m_isGameLogic = false
 	end

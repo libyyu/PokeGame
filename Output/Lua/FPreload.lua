@@ -1,5 +1,6 @@
 require "bit"
 require "core.preload"
+require "coro"
 require "FLua"
 require "FGlobal"
 require "common.FClientDef"

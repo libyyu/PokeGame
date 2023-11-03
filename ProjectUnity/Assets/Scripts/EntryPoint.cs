@@ -196,7 +196,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         LuaFunction func = l.getFunction("TickGame");
         if (null != func)
         {
-            func.call(Time.deltaTime);
+            func.call(DeltaTime);
             func.Dispose();
         }
     }

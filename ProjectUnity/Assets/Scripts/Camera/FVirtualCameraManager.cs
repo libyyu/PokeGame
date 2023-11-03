@@ -71,6 +71,11 @@ public class FVirtualCameraManager : PersistentSingleton<FVirtualCameraManager>
         {
             if (playerObj == null)
             {
+                playerObj = GameObject.FindGameObjectWithTag("HostPlayer");
+            }
+
+            if (playerObj == null)
+            {
                 return;
             }
             else

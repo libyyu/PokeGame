@@ -57,7 +57,7 @@ public class FSoundManager : PersistentSingleton<FSoundManager>
 		if (!SfxOn)
 			return null;
 		// we create a temporary game object to host our audio source
-		GameObject temporaryAudioHost = new GameObject("TempAudio");
+		GameObject temporaryAudioHost = new GameObject("__TempAudio");
 		// we set the temp audio's position
 		temporaryAudioHost.transform.position = Location;
 		// we add an audio source to that host
