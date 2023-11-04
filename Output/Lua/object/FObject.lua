@@ -7,7 +7,6 @@ do
 	function FObject:__constructor()
 		self.m_InfoData = nil
 		self.m_Model = nil 
-		self.OnLoadedCallbacks = {}
 	end
 
 	function FObject:LoadModel(abName,resName,cb)

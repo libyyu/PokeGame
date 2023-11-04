@@ -22,6 +22,7 @@ do
 		self.m_FPS = nil
 		self.m_LoginInfo = nil
 		self.m_isGameLogic = false
+		self.m_backgroundMusicComp = nil
 	end
 
 	function FGame:InitGame()
@@ -42,6 +43,10 @@ do
 		--初始化2D-ui根节点
 		require "ui.FGUIMan".Instance():InitUIRoot()
 		require "manager.FFlashTipMan".Instance():InitCacheRoot()
+
+		local musicGo = NewGameObject("BackgroundMusic")
+		self.m_backgroundMusicComp = musicGo:AddComponent(LuaHelper.GetClsType("FBackgroundMusic"))
+		DontDestroyOnLoad(musicGo)
 	end
 
 	function FGame:InitLoginInfo()
@@ -144,6 +149,15 @@ do
 				self.m_FPS = nil
 			end
 		end
+	end
+
+	function FGame:ResumeBackgroundMusic()
+		--测试背景音
+		AsyncLoad(ResPathReader.BackgroundMusic, function(obj)
+			if obj and not obj.isNil then
+				self.m_backgroundMusicComp:PlayBackgroundMusic(obj)
+			end
+		end)
 	end
 end
 

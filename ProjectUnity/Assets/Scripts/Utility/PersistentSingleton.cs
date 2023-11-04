@@ -40,8 +40,11 @@ public class PersistentSingleton<T> : MonoBehaviour	where T : Component
 		{
 			//If I am the first instance, make me the Singleton
 			_instance = this as T;
-			DontDestroyOnLoad (transform.gameObject);
-		}
+			if(transform.parent == null)
+				DontDestroyOnLoad (transform.gameObject);
+			else
+                Debug.LogWarning(string.Format("Singleton not mark DontDestroyOnLoad, because it only works for root(none parent) object. {0}", typeof(T)));
+        }
 		else if(_instance != this) 
 		{
             Debug.LogError(string.Format("only one object({0}) is allowed", typeof(T)));

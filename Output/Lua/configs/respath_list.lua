@@ -1,6 +1,8 @@
 local respath_list = 
 {
 	CameraRoot = "Arts/Prefabs/Camera/CameraRoot.prefab",
+	StartUI = "Arts/UI/UIStart.prefab",
+	MainWorld = "Arts/Prefabs/Scene/Environment_Prefab.prefab",
 
 
 	ConsoleUI = "TestProjName/UI/ConsoleUI.prefab",

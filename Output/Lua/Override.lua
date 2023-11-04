@@ -34,7 +34,7 @@ do
 
 		local minValue = self.minValue
 		local maxValue = self.maxValue
-		to = math.max(to or 0, 100)
+		to = math.min(to or 0, 100)
 		start = math.min(start or 0, 100)
 		start = math.max(self.normalizedValue*100, start)
 		print("AutoProgress", time, start, to)
@@ -51,6 +51,7 @@ do
 			if self.isNil then
 				return
 			end
+			--print("tick pro:", currentProgress, to)
 			if currentProgress >= to then
 				GameUtil.RemoveObjectTimer(self.gameObject, idTimer)
 				self:SetLuaUserData("AutoProgress", nil)

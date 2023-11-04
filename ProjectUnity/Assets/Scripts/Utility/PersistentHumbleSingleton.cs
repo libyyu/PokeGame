@@ -37,10 +37,13 @@ public class PersistentHumbleSingleton<T> : MonoBehaviour	where T : Component
     protected virtual void Awake ()
 	{
 		InitializationTime=Time.time;
-		
-		DontDestroyOnLoad (this.gameObject);				
-		// we check for existing objects of the same type
-		T[] check = FindObjectsOfType<T>();
+
+        if (transform.parent == null)
+            DontDestroyOnLoad (this.gameObject);
+        else
+            Debug.LogWarning(string.Format("Singleton not mark DontDestroyOnLoad, because it only works for root(none parent) object. {0}", typeof(T)));
+        // we check for existing objects of the same type
+        T[] check = FindObjectsOfType<T>();
 		foreach (T searched in check)
 		{
 			if (searched!=this)
