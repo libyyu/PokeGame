@@ -1,3 +1,4 @@
+
 local FGame = FLua.ForwardClass("FGame")
 do
 	function FGame:OnRun()
@@ -10,29 +11,38 @@ do
 	function FGame:LeaveLoginState()
 	end
 
+	function FGame:LoadHostPlayer()
+		local player = require "player.FHostPlayer"
+		local p = player()
+		p:Init({ResPath="Arts/Prefabs/Player/Player_CC.prefab"})
+		p:Load(function()
+			local panel = require "ui.FPanelStartUI".Instance()
+			panel:AutoProgress(1, nil, 100, function()
+				panel:DestroyPanel()
+
+				self:ResumeBackgroundMusic()
+			end)
+		end)
+		self.m_HostPlayer = p
+	end
+
+	function FGame:EnterWorld(cb)
+		local FWorld = require "world.FWorld"
+		self.m_world = FWorld()
+		self.m_world:Init({})
+		self.m_world:Load(cb)
+
+		self.m_isGameLogic = true
+	end
+
 	function FGame:EnterGameLogic()
 		self:LeaveLoginState()
 		
 		local panel = require "ui.FPanelStartUI".Instance()
 		panel:AutoProgress(2, 0, 80)
 
-		AsyncLoad(ResPathReader.MainWorld, function(asset)
-			local goMap = Instantiate(asset)
-			goMap.transform.localPosition = Vector3(0, 0, 0)
-			goMap.transform.localScale = Vector3(1, 1, 1)
-
-			local player = require "player.FHostPlayer"
-			local p = player()
-			p:Init({ResPath="Arts/Prefabs/Player/Player_CC.prefab"})
-			p:Load(function()
-				self.m_isGameLogic = true
-				panel:AutoProgress(1, nil, 100, function()
-					panel:DestroyPanel()
-
-					self:ResumeBackgroundMusic()
-				end)
-			end)
-			self.m_HostPlayer = p
+		self:EnterWorld(function()
+			self:LoadHostPlayer()
 		end)
 	end
 

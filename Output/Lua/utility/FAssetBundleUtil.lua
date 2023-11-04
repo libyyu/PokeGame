@@ -8,6 +8,7 @@ do
 	function FAssetBundleUtil.Instance()
 		if not l_instance then
 			l_instance = FAssetBundleUtil()
+			l_instance:InitAssetBundle()
 		end
 		return l_instance
 	end

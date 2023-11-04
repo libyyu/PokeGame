@@ -6,7 +6,7 @@ local FLibEvent = require "utility.FLibEvent"
 local FConsoleUI = require "ui.FConsoleUI"
 local FCommand = require "game.FCommand"
 
-local FGame = FLua.Class("FGame")
+local FGame = FLua.FinalClass("FGame")
 do
 	function FGame.Instance( )
 		return theGame
@@ -14,7 +14,6 @@ do
 
 	function FGame:__constructor()
 		self.m_LogicNetwork = nil
-		self.m_AssetBundle = nil
 		self.m_LogicEvent = FLibEvent("LogicEvent")
 		self.m_LogList = {}
 		self.m_MainCam = nil
@@ -23,6 +22,7 @@ do
 		self.m_LoginInfo = nil
 		self.m_isGameLogic = false
 		self.m_backgroundMusicComp = nil
+		self.m_world = nil
 	end
 
 	function FGame:InitGame()
@@ -97,10 +97,6 @@ do
 
 	function FGame:Setup()
 		MainThreadTask.Init()
-		--AssetBundleManager
-		self.m_AssetBundle = FAssetBundleUtil.Instance()
-		self.m_AssetBundle:InitAssetBundle()
-
 		self:InitGame()
 	end
 
