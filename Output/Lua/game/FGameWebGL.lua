@@ -44,6 +44,14 @@ do
 		self:EnterWorld(function()
 			self:LoadHostPlayer()
 		end)
+
+		require "ui.FGUIMan".Instance():CreateSimpleUI("Assets/Arts/UI/UIGameing.prefab", function(panel)
+			local uiTable = panel:FindChildObj("GameObject"):GetComponent("ScrollRectTable")
+			for i=1,100 do
+				uiTable:insertData({index=i, test="ttt" .. i}, i)
+			end
+			uiTable:Refresh(-1, -1)
+		end)
 	end
 
 	function FGame:LeaveGameLogic()

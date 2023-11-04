@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using SLua;
+using System.Reflection;
 
 namespace UGUI
 {
@@ -316,6 +317,17 @@ namespace UGUI
                 wi = tileSize.x <= 0 ? size.x : tileSize.x;
                 he = tileSize.y <= 0 ? size.y : tileSize.y;
 
+                if(columns >0)
+                {
+                    float eachWi = wi + padding.x;
+                    if(eachWi * columns > this.moveContainer.rect.width)
+                    {
+                        wi = this.moveContainer.rect.width / columns - padding.x;
+
+                        tileItem.rectTransform.sizeDelta = new Vector2(wi, he);
+                    }
+                }
+
                 rect = new Rect(0, 0, wi + padding.x, he + padding.y);
             }
         }
@@ -351,12 +363,14 @@ namespace UGUI
                 repositionIntList.RemoveAt(0);
                 if (currRenderIndex + 1 <= recordCount)
                 {
+                    item.gameObject.SetActive(true);
+                    setPosition(item.rectTransform, currRenderIndex);
                     if (onItemRender != null) onItemRender.call(item, currRenderIndex, data[currRenderIndex + 1]);
                 }
             }
         }
 
-        void setPosition(Transform trans, int index)
+        void setPosition(RectTransform trans, int index)
         {
             if (trans.parent != this.transform) trans.SetParent(this.transform);
             Vector3 pos = Vector3.zero;
@@ -380,12 +394,13 @@ namespace UGUI
                 pos.x = rect.width * x + rect.width * .5f + this.padding.x;
 
             }
-            trans.localPosition = pos;
+            trans.anchorMax = trans.anchorMin = new Vector2(0, 1);
+            trans.anchoredPosition = new Vector2 (pos.x, pos.y);
         }
 
         void preRender(ScrollRectItem item, int index)
         {
-            setPosition(item.transform, index);
+            setPosition(item.rectTransform, index);
             object dataI = index + 1 <= recordCount ? data[index + 1] : null;
             doPreRender(item, index, dataI);
         }
