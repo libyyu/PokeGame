@@ -46,11 +46,11 @@ do
 		end)
 
 		require "ui.FGUIMan".Instance():CreateSimpleUI("Assets/Arts/UI/UIGameing.prefab", function(panel)
-			local uiTable = panel:FindChildObj("GameObject"):GetComponent("ScrollRectTable")
-			for i=1,100 do
-				uiTable:insertData({index=i, test="ttt" .. i}, i)
-			end
-			uiTable:Refresh(-1, -1)
+			-- local uiTable = panel:FindChildObj("tableView"):GetComponent("ScrollRectTable")
+			-- for i=1,500 do
+			-- 	uiTable:insertData({index=i, test="ttt" .. i}, i)
+			-- end
+			-- uiTable:Refresh(-1, -1)
 		end)
 	end
 
