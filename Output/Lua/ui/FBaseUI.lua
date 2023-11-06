@@ -77,8 +77,7 @@ do
 						if not self.m_loading then
 							return
 						end
-						self.m_panel = Instantiate(obj)
-						self.m_panel.name = self.m_panelName
+						self.m_panel = Instantiate(obj, self.m_panelName, self:GetUIRoot())
 						self:_Create()
 					else
 						self:DestroyPanel()
@@ -89,21 +88,21 @@ do
 		end
 	end
 
-	function FBaseUI:Detach(root)
-		if self.m_panel then
-			self.m_panel.transform:SetParent(root)
-		end
-		return self.m_panel
-	end
+	-- function FBaseUI:Detach(root)
+	-- 	if self.m_panel then
+	-- 		self.m_panel.transform:SetParent(root)
+	-- 	end
+	-- 	return self.m_panel
+	-- end
 
-	function FBaseUI:Attach(go)
-		assert(go)
-		assert(go.tag == "Panel")
-		assert(not self.m_panel)
+	-- function FBaseUI:Attach(go)
+	-- 	assert(go)
+	-- 	assert(go.tag == "Panel")
+	-- 	assert(not self.m_panel)
 
-		self.m_panel = go
-		self:_Create()
-	end
+	-- 	self.m_panel = go
+	-- 	self:_Create()
+	-- end
 
 	function FBaseUI:DestroyPanel()
 		if self.m_panel ~= nil then
@@ -130,7 +129,7 @@ do
 			warn("error" .. tostring(self) .. "(FindChild)".. ", self.m_panel is nil")
 			return nil
 		else
-			local obj = self.m_panel.transform:FindChild(objpath)
+			local obj = self.m_panel.transform:Find(objpath)
 			if not obj then
 				warn("can not " .. tostring(self) .. "(FindChild):".. objpath)
 			end
@@ -175,9 +174,9 @@ do
 		self.m_created = true
 		self.m_panel.layer = LayerMask.NameToLayer("UI")
 		self.m_panel.tag = "Panel"
-		self.m_panel.transform:SetParent(self:GetUIRoot())
-		self.m_panel.transform.localPosition = Vector3(0, 0, 0)
-		self.m_panel.transform.localScale = Vector3(1, 1, 1)
+		-- self.m_panel.transform:SetParent(self:GetUIRoot())
+		-- self.m_panel.transform.localPosition = Vector3(0, 0, 0)
+		-- self.m_panel.transform.localScale = Vector3(1, 1, 1)
 		self:TouchGUIMsg()
 		self:BringDepth()
 		self:OnCreate()

@@ -149,8 +149,8 @@ function NewGameObject(name, parent)
 	end
 end
 
-function Instantiate(go,name)
-	local obj = UnityEngine.Object.Instantiate(go)
+function Instantiate(go, name, parentTr)
+	local obj = parentTr and UnityEngine.Object.Instantiate(go, parentTr) or UnityEngine.Object.Instantiate(go)
 	if type(name) == "string" then
 		obj.name = name
 	end

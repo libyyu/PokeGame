@@ -42,8 +42,8 @@ public class PersistentSingleton<T> : MonoBehaviour	where T : Component
 			_instance = this as T;
 			if(transform.parent == null)
 				DontDestroyOnLoad (transform.gameObject);
-			else
-                Debug.LogWarning(string.Format("Singleton not mark DontDestroyOnLoad, because it only works for root(none parent) object. {0}", typeof(T)));
+			//else
+            //    Debug.LogWarning(string.Format("Singleton not mark DontDestroyOnLoad, because it only works for root(none parent) object. {0}", typeof(T)));
         }
 		else if(_instance != this) 
 		{

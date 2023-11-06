@@ -97,44 +97,51 @@ public class ScrollView : MonoBehaviour
             {
                 OnItemUpdate.Invoke(obj);
             }
+#if UNITY_EDITOR
+            obj.GetComponent<ScrollViewItem>().UpdateTemplate(data);
+#endif
 
             RectTransform objRect = obj.GetComponent<RectTransform>();
-            //float height = objRect.sizeDelta.y;
+
+            if (first != null)
+            {
+                float height = first.gameObject.GetComponent<RectTransform>().sizeDelta.y;
+                obj.transform.localPosition = first.localPosition + new Vector3(0, height + spacing, 0);
+            }
+
+            if (isStart)
+            {
+                float height = objRect.sizeDelta.y;
+                content.sizeDelta += new Vector2(0, height + spacing);
+                isStart = false;
+            }
 
             //if (first != null)
             //{
-            //    obj.transform.localPosition = first.localPosition + new Vector3(0, height + spacing, 0);
+            //    float totalHeight = 0;
+            //    Transform prev = null;
+            //    for (int i = 0; i < content.childCount; ++i)
+            //    {
+            //        var tr = content.GetChild(i);
+            //        if (tr.gameObject != scrollItemGo)
+            //        {
+            //            if (prev != null)
+            //            {
+            //                float height = prev.GetComponent<RectTransform>().sizeDelta.y;
+            //                tr.localPosition = prev.localPosition - new Vector3(0, height + spacing, 0);
+            //            }
+            //            else
+            //            {
+            //                tr.localPosition.Set(tr.localPosition.x, 0, 0);
+            //            }
+            //            prev = tr;
+
+            //            totalHeight += tr.GetComponent<RectTransform>().sizeDelta.y + spacing;
+            //        }
+            //    }
+
+            //    //content.sizeDelta = new Vector2(content.sizeDelta.x, totalHeight+spacing);
             //}
-
-            //if (isStart)
-            //{
-            //    content.sizeDelta += new Vector2(0, height + spacing);
-            //    isStart = false;
-            //}
-
-            float totalHeight = 0;
-            Transform prev = null;
-            for (int i = 0; i < content.childCount; ++i)
-            {
-                var tr = content.GetChild(i);
-                if (tr.gameObject != scrollItemGo)
-                {
-                    if (prev != null)
-                    {
-                        float height = prev.GetComponent<RectTransform>().sizeDelta.y;
-                        tr.localPosition = prev.localPosition - new Vector3(0, height + spacing, 0);
-                    }
-                    else
-                    {
-                        tr.localPosition.Set(tr.localPosition.x, 0, 0);
-                    }
-                    prev = tr;
-
-                    totalHeight += tr.GetComponent<RectTransform>().sizeDelta.y + spacing;
-                }
-            }
-
-            content.sizeDelta = new Vector2(content.sizeDelta.x, totalHeight+spacing);
         }
     }
 
@@ -167,7 +174,9 @@ public class ScrollView : MonoBehaviour
             {
                 OnItemUpdate.Invoke(obj);
             }
-
+#if UNITY_EDITOR
+            obj.GetComponent<ScrollViewItem>().UpdateTemplate(data);
+#endif
             if (end != null)
             {
                 float height = end.GetComponent<RectTransform>().sizeDelta.y;
@@ -271,10 +280,12 @@ public class ScrollView : MonoBehaviour
 
     public void InitTest()
     {
+        int nowNum = scrollData.Length;
         List<LuaTable> datas = new List<LuaTable>();
         for (int i = 0; i < 3; ++i)
         {
             LuaTable t = new LuaTable(LuaState.main);
+            t["index"] = nowNum + 1 + i;
             datas.Add(t);
         }
         AddDataList(datas);
@@ -282,11 +293,13 @@ public class ScrollView : MonoBehaviour
     public void AddTailTest()
     {
         LuaTable t = new LuaTable(LuaState.main);
+        t["index"] = scrollData.Length + 1;
         AddDataTail(t);
     }
     public void AddFrontTest()
     {
         LuaTable t = new LuaTable(LuaState.main);
+        t["index"] = scrollData.Length + 1;
         AddDataFront(t);
     }
 }

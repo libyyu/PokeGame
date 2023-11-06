@@ -22,6 +22,16 @@ public class ScrollViewItem : MonoBehaviour
     public Action onAddEnd;
     public Action onRemoveEnd;
 
+#if UNITY_EDITOR
+    public Text nameT;
+    public void UpdateTemplate(SLua.LuaTable data)
+    {
+        if (nameT == null) return;
+        var oindex = data["index"];
+        int index = Convert.ToInt32(oindex);
+        nameT.text = string.Format("fuck : {0}", index);
+    }
+#endif
     void Start()
     {
         Init();
