@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace UGUI
 {
-    [ExecuteInEditMode]
+    //[ExecuteInEditMode]
     [AddComponentMenu("UGUI/ScrollRectTable")]
 #if !PEOJECT_ARTS //非美术工程
     [CustomLuaClass]

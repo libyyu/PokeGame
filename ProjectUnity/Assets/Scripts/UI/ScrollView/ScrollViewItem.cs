@@ -49,6 +49,7 @@ public class ScrollViewItem : MonoBehaviour
 
     void Update()
     {
+        Init();
         OnRecyclingItem();
     }
 

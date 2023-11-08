@@ -27,7 +27,7 @@ public class ScrollView : MonoBehaviour
     private bool isStart = true;
 
     private ScrollData<LuaTable> scrollData = new ScrollData<LuaTable>();
-
+    public float scrollValue;
     /// <summary>
     /// 列表项更新的回调
     /// </summary>
@@ -38,6 +38,11 @@ public class ScrollView : MonoBehaviour
     {
         content = this.GetComponent<ScrollRect>().content;
         OnAddHead();
+    }
+
+    private void Update()
+    {
+        scrollValue = this.GetComponent<ScrollRect>().verticalNormalizedPosition;
     }
 
     /// <summary>
@@ -77,9 +82,47 @@ public class ScrollView : MonoBehaviour
         
         childItem.transform.localScale = Vector3.one;
         childItem.transform.localPosition = Vector3.zero;
-        
+
+        childItem.transform.localScale = Vector3.one;
+        RectTransform cellRectTrans = childItem.GetComponent<RectTransform>();
+        cellRectTrans.pivot = new Vector2(0f, 1f);
+        cellRectTrans.anchorMin = new Vector2(0, 1);
+        cellRectTrans.anchorMax = new Vector2(1, 1);
+        cellRectTrans.anchoredPosition = Vector2.zero;
+
         //-----设置宽高——加载数据 
         return childItem;
+    }
+
+    private void UpdateItemPosition(bool updateDelta = false)
+    {
+        float totalHeight = 0;
+        Transform prev = null;
+        for (int i = 0; i < content.childCount; ++i)
+        {
+            var tr = content.GetChild(i);
+            if (tr.gameObject != scrollItemGo)
+            {
+                if (tr.gameObject.activeSelf)
+                {
+                    var localPos = tr.localPosition;
+                    if (prev != null)
+                    {
+                        float height = prev.GetComponent<RectTransform>().sizeDelta.y;
+                        tr.localPosition = prev.localPosition - new Vector3(0, height + spacing, 0);
+                    }
+                    else
+                    {
+                        tr.localPosition = new Vector3(localPos.x, 0, 0);
+                    }
+                    prev = tr;
+                }
+
+                totalHeight += tr.GetComponent<RectTransform>().sizeDelta.y + spacing;
+            }
+        }
+        //if (updateDelta)
+            content.sizeDelta = new Vector2(content.sizeDelta.x, totalHeight);
     }
 
     private void OnAddHead()
@@ -105,7 +148,8 @@ public class ScrollView : MonoBehaviour
 
             if (first != null)
             {
-                float height = first.gameObject.GetComponent<RectTransform>().sizeDelta.y;
+                float height = objRect.sizeDelta.y;
+                //float height = first.gameObject.GetComponent<RectTransform>().sizeDelta.y;
                 obj.transform.localPosition = first.localPosition + new Vector3(0, height + spacing, 0);
             }
 
@@ -115,33 +159,6 @@ public class ScrollView : MonoBehaviour
                 content.sizeDelta += new Vector2(0, height + spacing);
                 isStart = false;
             }
-
-            //if (first != null)
-            //{
-            //    float totalHeight = 0;
-            //    Transform prev = null;
-            //    for (int i = 0; i < content.childCount; ++i)
-            //    {
-            //        var tr = content.GetChild(i);
-            //        if (tr.gameObject != scrollItemGo)
-            //        {
-            //            if (prev != null)
-            //            {
-            //                float height = prev.GetComponent<RectTransform>().sizeDelta.y;
-            //                tr.localPosition = prev.localPosition - new Vector3(0, height + spacing, 0);
-            //            }
-            //            else
-            //            {
-            //                tr.localPosition.Set(tr.localPosition.x, 0, 0);
-            //            }
-            //            prev = tr;
-
-            //            totalHeight += tr.GetComponent<RectTransform>().sizeDelta.y + spacing;
-            //        }
-            //    }
-
-            //    //content.sizeDelta = new Vector2(content.sizeDelta.x, totalHeight+spacing);
-            //}
         }
     }
 
@@ -275,7 +292,7 @@ public class ScrollView : MonoBehaviour
     public void AddDataFront(LuaTable data)
     {
         scrollData.AddFront(data);
-        OnAddHead();
+        //OnAddHead();
     }
 
     public void InitTest()
