@@ -91,7 +91,7 @@
       #if SYMBOLS_FILENAME
               symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
       #endif
-              streamingAssetsUrl: "${buildUrlprefix}StreamingAssets",
+              streamingAssetsUrl: "${buildUrlprefix}${BUNDLE_IDENTIFIER}",
               companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
               productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
               productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},

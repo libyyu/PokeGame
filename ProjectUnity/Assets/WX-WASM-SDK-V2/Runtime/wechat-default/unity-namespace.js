@@ -62,7 +62,12 @@ unityNamespace.monitorConfig = {
 
 unityNamespace.isCacheableFile = function (path) {
     
-    const cacheableFileIdentifier = [$BUNDLE_PATH_IDENTIFIER];
+    const StreamingAssetsIdentifier = GameGlobal.managerConfig.BUNDLE_IDENTIFIER;
+    if (path.endsWith("/" + StreamingAssetsIdentifier) || path.includes("/" + StreamingAssetsIdentifier + "?")) {
+        return false;
+    }
+
+    const cacheableFileIdentifier = [StreamingAssetsIdentifier];
     
     const excludeFileIdentifier = [$EXCLUDE_FILE_EXTENSIONS];
     if (cacheableFileIdentifier.some(identifier => path.includes(identifier)

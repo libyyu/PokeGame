@@ -21,7 +21,7 @@ mergeInto(LibraryManager.library, {
   },
   getAssetBundleManifestName:function()
   {
-    var ret = "StreamingAssets";
+    var ret = "";
     if(typeof GameGlobal === "object" && typeof GameGlobal.manager === "object" && typeof GameGlobal.manager.assetBundleManifestName == 'string') {
       ret = GameGlobal.manager.assetBundleManifestName;
     }

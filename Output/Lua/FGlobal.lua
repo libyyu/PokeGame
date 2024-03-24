@@ -59,8 +59,9 @@ function TransformABName(assetName)
         abName = abName:sub(1, i - 1)
     end
 
-	if abName:sub(-3) ~= ".ab" then
-		abName = abName .. ".ab"
+    local abExt = GameUtil.BundleExt
+	if abName:sub(-3) ~= abExt then
+		abName = abName .. abExt
 	end
 	return abName
 end

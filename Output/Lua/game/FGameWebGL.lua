@@ -41,23 +41,23 @@ do
 		local panel = require "ui.FPanelStartUI".Instance()
 		panel:AutoProgress(2, 0, 80)
 
-		-- self:EnterWorld(function()
-		-- 	self:LoadHostPlayer()
-		-- end)
-
-		require "ui.FGUIMan".Instance():CreateSimpleUI("Assets/Arts/UI/UIGameing.prefab", function(_)
-			-- local uiTable = panel:FindChildObj("tableView"):GetComponent("ScrollRectTable")
-			-- for i=1,500 do
-			-- 	uiTable:insertData({index=i, test="ttt" .. i}, i)
-			-- end
-			-- uiTable:Refresh(-1, -1)
-
-			panel:AutoProgress(1, nil, 100, function()
-				panel:DestroyPanel()
-
-				self:ResumeBackgroundMusic()
-			end)
+		self:EnterWorld(function()
+			self:LoadHostPlayer()
 		end)
+
+		-- require "ui.FGUIMan".Instance():CreateSimpleUI("Assets/Arts/UI/UIGameing.prefab", function(_)
+		-- 	-- local uiTable = panel:FindChildObj("tableView"):GetComponent("ScrollRectTable")
+		-- 	-- for i=1,500 do
+		-- 	-- 	uiTable:insertData({index=i, test="ttt" .. i}, i)
+		-- 	-- end
+		-- 	-- uiTable:Refresh(-1, -1)
+
+		-- 	panel:AutoProgress(1, nil, 100, function()
+		-- 		panel:DestroyPanel()
+
+		-- 		self:ResumeBackgroundMusic()
+		-- 	end)
+		-- end)
 	end
 
 	function FGame:LeaveGameLogic()

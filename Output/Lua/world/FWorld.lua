@@ -16,6 +16,11 @@ function FWorld:OnWorldLoaded()
 end
 
 function FWorld:Load(onFinish)
+	if self.m_IsReady then
+		if onFinish then onFinish(self) end
+		return
+	end
+
 	if onFinish then
 		self:AddWorldLoadedCallback(onFinish)
 	end

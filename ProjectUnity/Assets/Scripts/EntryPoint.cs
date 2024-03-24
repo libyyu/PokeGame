@@ -73,8 +73,10 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #if !UNITY_WEBGL || UNITY_EDITOR
         LogUtil.loglevel = logLevel;
         LogUtil.AttachUnityLogHandle();
-        LogFile.Instance.Init();        
+        LogFile.Instance.Init();
 #endif
+        FTimerList.RegisterTimerList(m_TimerList, gameObject);
+        FTimerList.RegisterTimerList(m_LateTimerList, gameObject);
     }
 
     void SetupPath()
@@ -170,9 +172,6 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     // Use this for initialization
     void Start () 
     {
-        FTimerList.RegisterTimerList(m_TimerList, gameObject);
-        FTimerList.RegisterTimerList(m_LateTimerList, gameObject);
-
 #if TEST_EASYSOCKET
         testSocket = new SuperSocket.ClientEngine.FTestSuperSocket();
         testSocket.ConnectTo("127.0.0.1", 3001);
@@ -226,9 +225,14 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #if !UNITY_EDITOR
         if (null != lua) { lua.Close(); lua = null; }
 #endif
+
+        FTimerList.UnregisterTimerList(m_TimerList);
+        FTimerList.UnregisterTimerList(m_LateTimerList);
+
         //最后结束日志文件
 #if !UNITY_WEBGL || UNITY_EDITOR
         LogFile.Instance.UnInit();
+        LogUtil.DetachUnityLogHandle();
 #endif
     }
 

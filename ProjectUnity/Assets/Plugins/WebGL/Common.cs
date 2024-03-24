@@ -27,7 +27,20 @@ public class WebCommon
 	}
 
 	[DllImport("__Internal")]
-	public static extern string getAssetBundleManifestName();
+	protected static extern string getAssetBundleManifestName();
+
+	static string _AssetBundleManifestName = null;
+	public static string get_AssetBundleManifestName()
+	{
+		if(_AssetBundleManifestName == null)
+			_AssetBundleManifestName = getAssetBundleManifestName();
+
+		if(string.IsNullOrEmpty(_AssetBundleManifestName)){
+			return "StreamingAssets";
+		}
+
+		return _AssetBundleManifestName;
+	}
 
 	[DllImport("__Internal")]
 	public static extern string callJSMethod(string method, string jsonParams);

@@ -66,7 +66,7 @@ namespace WeChatWASM
         public static string dataMd5 = string.Empty;
         private static string SDKFilePath = string.Empty;
         public static string defaultImgSrc = "Assets/WX-WASM-SDK-V2/Runtime/wechat-default/images/background.jpg";
-
+        public const string BUNDLE_IDENTIFIER = "StreamingAssets";
         // 可以调用这个来集成
         public static WXExportError DoExport(bool buildWebGL = true)
         {
@@ -92,7 +92,7 @@ namespace WeChatWASM
                 // 仅删除StreamingAssets目录
                 if (config.CompileOptions.DeleteStreamingAssets)
                 {
-                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets"));
+                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER));
                 }
 
                 if (buildWebGL && Build() != 0)
@@ -346,8 +346,8 @@ namespace WeChatWASM
                     UnityEngine.Debug.Log("[Builder] lua脚本导入完成");
 
 
-                    var assetsOutputDir = Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets");
-                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/StreamingAssets"));
+                    var assetsOutputDir = Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER);
+                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER));
                     BuildAssetBundleOptions options = BuildAssetBundleOptions.AppendHashToAssetBundleName | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
                     try
                     {
@@ -371,6 +371,16 @@ namespace WeChatWASM
                     {
                         old = "$buildUrlprefix",
                         newStr = "/static/webgl/",
+                    },
+                    new Rule()
+                    {
+                        old = "${BUNDLE_IDENTIFIER}",
+                        newStr = BUNDLE_IDENTIFIER,
+                    },
+                    new Rule()
+                    {
+                        old = "$BUNDLE_IDENTIFIER",
+                        newStr = BUNDLE_IDENTIFIER,
                     }
                 };
                 var text = File.ReadAllText(Path.Combine(config.ProjectConf.DST, webglDir, "index.html"), Encoding.UTF8);

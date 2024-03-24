@@ -231,7 +231,7 @@ public class UnityAssetBundleLoader : IAssetLoader
         get
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            return WebCommon.getAssetBundleManifestName();
+            return WebCommon.get_AssetBundleManifestName();
 #else
             return GameUtil.ManifestName;
 #endif

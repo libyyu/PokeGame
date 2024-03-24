@@ -40,6 +40,7 @@ const managerConfig = {
     DATA_FILE_SIZE: "$DATA_FILE_SIZE",
     OPT_DATA_FILE_SIZE: "$OPT_DATA_FILE_SIZE",
     DATA_CDN: '$DEPLOY_URL',
+    BUNDLE_IDENTIFIER: $BUNDLE_PATH_IDENTIFIER,
     
     loadDataPackageFromSubpackage: $LOAD_DATA_FROM_SUBPACKAGE,
     
@@ -174,8 +175,8 @@ checkVersion().then((enable) => {
             }
             managerConfig.DATA_CDN = GameGlobal.DATA_CDN;
             gameManager.assetPath = `${(managerConfig.DATA_CDN || '').replace(/\/$/, '')}/Assets`;
-            gameManager.streamingAssetsUrl = `${(managerConfig.DATA_CDN || '').replace(/\/$/, '')}/StreamingAssets`;
-            gameManager.assetBundleManifestName = "StreamingAssets";
+            gameManager.streamingAssetsUrl = `${(managerConfig.DATA_CDN || '').replace(/\/$/, '')}/${(managerConfig.BUNDLE_IDENTIFIER || '').replace(/\/$/, '')}`;
+            gameManager.assetBundleManifestName = `${(managerConfig.BUNDLE_IDENTIFIER || '').replace(/\/$/, '')}`;
             preloadWxCommonFont();
         });
         
