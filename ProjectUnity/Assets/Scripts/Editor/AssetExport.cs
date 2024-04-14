@@ -200,11 +200,21 @@ public class AssetExport
 
 	static void ExportAssets(string output)
 	{
-		BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
+        BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
 		UnityLog.Log(string.Format("打包资源到目录:{0},平台:{1}", output, target.ToString()));
 
-		if (!Directory.Exists(output))
-			Directory.CreateDirectory(output);
+		string backupPath = output + "_backup";
+		if (Directory.Exists(backupPath))
+		{
+			Directory.Delete(backupPath, true);
+        }
+        if (Directory.Exists(output))
+		{
+			Directory.Move(output, backupPath);
+		}
+        Directory.CreateDirectory(output);
+		          
+        ImportLuaScript();
 
 #if UNITY_WEBGL
         BuildAssetBundleOptions options = BuildAssetBundleOptions.AppendHashToAssetBundleName | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
@@ -212,20 +222,44 @@ public class AssetExport
 		BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
 #endif
         BuildPipeline.BuildAssetBundles(output, options, target);
-
 		AssetDatabase.Refresh();
 		UnityLog.Log("AssetBundle打包完成");
-	}
+
+  //      string manifestPath = Path.Combine(output, "StreamingAssets");
+  //      string manifestPathTemp = Path.Combine(Application.dataPath, "StreamingAssets.manifest.bytes");
+  //      try
+		//{
+  //          File.Copy(manifestPath, manifestPathTemp, true);
+  //          AssetDatabase.Refresh();
+  //          AssetBundleManifest Manifest = AssetDatabase.LoadAssetAtPath<AssetBundleManifest>("assets/StreamingAssets.manifest.bytes");
+  //          string[] bundles = Manifest.GetAllAssetBundles();
+		//	foreach (string bundle in bundles)
+		//	{
+
+		//	}
+  //      }
+		//finally
+		//{
+		//	if (File.Exists(manifestPathTemp))
+		//	{
+		//		File.Delete(manifestPathTemp);
+  //              AssetDatabase.Refresh();
+  //          }
+		//}
+    }
 
     [MenuItem("ExportAssets/步骤0.导入Lua脚本", false, 10)]
     public static void ImportLuaScript()
     {
         string src_res = Application.dataPath + "/../../Output";
-
+		Directory.Delete(Application.dataPath + "/Lua", true);
 		CopyDirectorys(src_res + "/Lua", Application.dataPath + "/Lua", (String srcPath, String filepath) =>
 		{
+            Directory.CreateDirectory(Path.GetDirectoryName(filepath));
             File.Copy(srcPath, filepath + ".bytes", true);
         });
+        AssetDatabase.Refresh();
+        AssetDatabase.ImportAsset(Application.dataPath + "/Lua");
         AssetDatabase.Refresh();
         UnityLog.Log("lua脚本导入完成");
     }

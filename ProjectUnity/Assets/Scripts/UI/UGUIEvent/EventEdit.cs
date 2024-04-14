@@ -19,7 +19,7 @@ namespace UGUIEvent
             if (m_Input == null)
                 m_Input = gameObject.GetComponent<InputField>();
             m_Input.onEndEdit.AddListener(OnEndEdit);
-            m_Input.onValueChange.AddListener(OnValueChange);
+            m_Input.onValueChanged.AddListener(OnValueChange);
         }
 
         void Destroy()
@@ -27,7 +27,7 @@ namespace UGUIEvent
             if(m_Input != null)
             {
                 m_Input.onEndEdit.RemoveListener(OnEndEdit);
-                m_Input.onValueChange.RemoveListener(OnValueChange);
+                m_Input.onValueChanged.RemoveListener(OnValueChange);
             }
         }
 

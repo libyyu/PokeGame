@@ -40,7 +40,7 @@ public class ChatScroll : MonoBehaviour
     //当向上滑动时调用-加载上方子物体
     private void AddLastItem()
     {
-        ChatData data = testC.chatData.GetEndData();
+        ChatData data = null;// testC.chatData.GetEndData();
         if (data == null)
             return;
 
@@ -68,7 +68,7 @@ public class ChatScroll : MonoBehaviour
     //向下滑动，加载向下的子物体
     private void AddFirstItem()
     {
-        ChatData data = testC.chatData.GetHeadData();
+        ChatData data = null;// testC.chatData.GetHeadData();
         if (data == null)
             return;
         
@@ -166,7 +166,7 @@ public class ChatScroll : MonoBehaviour
     private void RemoveFist()
     {
         var scrollData = this.GetComponent<TestChat>().chatData;
-        if (scrollData.RemoveHeadData())
+        if (scrollData.RemoveHeadShowData() != -1)
         {
             Transform tf = FindFirst();
             if (tf != null)
@@ -178,7 +178,7 @@ public class ChatScroll : MonoBehaviour
     private void RemoveLast()
     {
         var scrollData = this.GetComponent<TestChat>().chatData;
-        if (scrollData.RemoveEndData())
+        if (scrollData.RemoveEndShowData() != -1)
         {
             Transform tf = FindEnd();
             if (tf != null)

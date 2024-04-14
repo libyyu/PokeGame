@@ -70,7 +70,7 @@ public class GUITools  {
         goEvt.transform.SetParent(uiRoot2D.transform);
         EventSystem evt = goEvt.AddComponent<EventSystem>();
         goEvt.AddComponent<StandaloneInputModule>();
-        goEvt.AddComponent<TouchInputModule>();
+        //goEvt.AddComponent<TouchInputModule>();
 
         Selection.activeObject = uiRoot2D;
 #endif
@@ -112,7 +112,8 @@ public class GUITools  {
                 
                 string allPath = GetFilePath(assetPath) + "/" + sprite.name + ".prefab";
                 string prefabPath = allPath.Substring(allPath.IndexOf("Assets"));
-                PrefabUtility.CreatePrefab(prefabPath, go);
+                bool bOk;
+                PrefabUtility.SaveAsPrefabAsset(go, prefabPath, out bOk);
                 GameObject.DestroyImmediate(go);
             }
         }
