@@ -1,3 +1,4 @@
+using SLua;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 public delegate void ScrollListViewItemUpdate(GameObject item, int index);
 public delegate void ScrollListViewItemRemoved(GameObject item, int index);
 
+[CustomLuaClass]
 [RequireComponent(typeof(ScrollRect))]
 public class ScrollListView : MonoBehaviour
 {
@@ -21,9 +23,7 @@ public class ScrollListView : MonoBehaviour
     public GameObject scrollItemGo;
 
     [Header("格子模板对象")]
-    public Vector2 CellSize = new Vector2(80, 80);
-
-    private Vector2 ItemGridSize = new Vector2(0, 0);
+    public Vector2 CellSize = new Vector2(0, 0);
 
     [Tooltip("总数量量")]
     public int itemCount = 0;
@@ -42,6 +42,8 @@ public class ScrollListView : MonoBehaviour
     [Tooltip("行或者列数量")]
     public int cellCount = 1;
     private int _lastCellCount = 1;
+
+    protected Coroutine m_JumpCoroutine = null;
 
     private ScrollRect scrollRectComp;
     private RectTransform viewPortTransform;
@@ -66,14 +68,30 @@ public class ScrollListView : MonoBehaviour
     void Start()
     {
         scrollRectComp = GetComponent<ScrollRect>();
-        viewPortTransform = scrollRectComp.GetComponent<RectTransform>();
+        viewPortTransform = scrollRectComp.viewport;
         contentTransform = scrollRectComp.content;
 
         viewPortTransform.GetWorldCorners(rectViewportCorners);
         contentTransform.GetWorldCorners(rectContentCorners);
 
-        ItemGridSize = scrollItemGo.GetComponent<RectTransform>().sizeDelta;
+        Vector2 ItemGridSize = scrollItemGo.GetComponent<RectTransform>().sizeDelta;
+        if (CellSize.x <= 0) CellSize.x = ItemGridSize.x;
+        if (CellSize.y <= 0) CellSize.y = ItemGridSize.y;
         RepairDirection();
+
+        scrollRectComp.onValueChanged.AddListener(onScrollValueChanged);
+    }
+
+    void OnDestroy()
+    {
+        if (m_JumpCoroutine != null)
+        {
+            StopCoroutine(m_JumpCoroutine);
+            m_JumpCoroutine = null;
+        }
+
+        if (scrollRectComp != null)
+            scrollRectComp.onValueChanged.RemoveListener(onScrollValueChanged);
     }
 
     // Update is called once per frame
@@ -284,7 +302,7 @@ public class ScrollListView : MonoBehaviour
             obj.GetComponent<RectTransform>().sizeDelta = new Vector2(CellSize.x, CellSize.y);
 
         int endRow, endCell;
-        CalcRowAndCell(_endIndex, out endRow, out endCell);
+        CalcRowAndCell(itemCount-1, out endRow, out endCell);
         float w = obj.GetComponent<RectTransform>().sizeDelta.x;
         float h = obj.GetComponent<RectTransform>().sizeDelta.y;
         if (direction == ScrollDirection.Vertical)
@@ -326,6 +344,12 @@ public class ScrollListView : MonoBehaviour
     /// </summary>
     protected void ClearAllItem()
     {
+        if (m_JumpCoroutine != null)
+        {
+            StopCoroutine(m_JumpCoroutine);
+            m_JumpCoroutine = null;
+        }
+
         float viewportH = rectViewportCorners[1].y - rectViewportCorners[0].y;
         float viewportW = rectViewportCorners[3].x - rectViewportCorners[0].x;
 
@@ -350,6 +374,13 @@ public class ScrollListView : MonoBehaviour
         itemCount = 0;
     }
 
+    /// <summary>
+    /// 计算格子对应的行和列
+    /// </summary>
+    /// <param name="index">格子索引</param>
+    /// <param name="row">行</param>
+    /// <param name="cell">列</param>
+
     void CalcRowAndCell(int index, out int row, out int cell)
     {
         row = -1;
@@ -368,16 +399,85 @@ public class ScrollListView : MonoBehaviour
         }
     }
 
-    float GetPerGridSize()
+    public void RemoveItem(int index)
     {
-        float gridWidth = 0f;
-        float contentW = viewPortTransform.sizeDelta.x;
-        float contentH = viewPortTransform.sizeDelta.y;
+        RemoveItemRange(index, 1);
+    }
+    public void RemoveItemRange(int index, int count)
+    {
+
+    }
+    public void JumpToIndex(int index, float delay = 0.1f)
+    {
+        float pos;
+        if(CalcItemScrollPosition(index, out pos))
+        {
+            Vector3 targetPos = direction == ScrollDirection.Vertical ? new Vector3(0, pos, 0) : new Vector3(pos, 0, 0);
+            if (m_JumpCoroutine != null)
+            {
+                StopCoroutine(m_JumpCoroutine);
+                m_JumpCoroutine = null;
+            }
+            m_JumpCoroutine = StartCoroutine(TweenMoveToPos(contentTransform.anchoredPosition3D, targetPos, delay));
+        }
+
+    }
+    protected IEnumerator TweenMoveToPos(Vector3 startPos, Vector3 endPos, float delay)
+    {
+        bool running = true;
+        float passedTime = 0f;
+        while (running)
+        {
+            yield return new WaitForEndOfFrame();
+            passedTime += Time.deltaTime;
+            Vector3 vCur;
+            if (passedTime >= delay)
+            {
+                vCur = endPos;
+                running = false;
+                if (m_JumpCoroutine != null)
+                {
+                    StopCoroutine(m_JumpCoroutine);
+                    m_JumpCoroutine = null;
+                }
+            }
+            else
+            {
+                vCur = Vector3.Lerp(startPos, endPos, passedTime / delay);
+            }
+            contentTransform.anchoredPosition3D = vCur;
+        }
+    }
+
+    bool CalcItemScrollPosition(int index, out float pos)
+    {
+        pos = 0;
+        if(index < 0 || index >= itemCount) return false;
+        int row, cell;
+        CalcRowAndCell(index, out row, out cell);
+        int maxRow, maxCell;
+        CalcRowAndCell(itemCount-1, out maxRow, out maxCell);
+
+        Vector2 viewSize = viewPortTransform.rect.size;
         if (direction == ScrollDirection.Vertical)
-            gridWidth = (contentW + itemPadding.x) / cellCount - itemPadding.x;
+        {
+            float designPos = (CellSize.y + itemPadding.y) * row;
+            float posMax = (CellSize.y + itemPadding.y) * maxRow + CellSize.y - viewSize.y;
+            pos = Math.Min(posMax, designPos);
+        }
         else
-            gridWidth = (contentH + itemPadding.y) / cellCount - itemPadding.y;
-        return gridWidth;
+        {
+            float designPos = (CellSize.x + itemPadding.x) * cell;
+            float posMax = (CellSize.x + itemPadding.x) * maxCell + CellSize.x - viewSize.x;
+            pos = Math.Min(posMax, designPos);
+        }
+
+        return true;
+    }
+
+    void onScrollValueChanged(Vector2 value)
+    {
+
     }
 
     /*
@@ -540,7 +640,7 @@ public class ScrollListView : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    public void TestUpdateTemplate(GameObject obj, int index)
+    void TestUpdateTemplate(GameObject obj, int index)
     {
         Transform tr = obj.transform.Find("#UserName");
         if (tr == null) return;

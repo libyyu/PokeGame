@@ -2,6 +2,8 @@
 using System.Collections;
 using SLua;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using UGUIEvent;
 
 [CustomLuaClass]
 public class LuaScriptFile : MonoBehaviour {
@@ -57,9 +59,9 @@ public class LuaScriptFile : MonoBehaviour {
 
 	void OnDestroy(){
 		CallMethod("OnDestroy");
-
         Cleanup();
-	}
+        DetachEventHandle();
+    }
 
     private void OnDisable()
     {
@@ -86,13 +88,16 @@ public class LuaScriptFile : MonoBehaviour {
                 script["component"] = this;
                 script["transform"] = transform;
                 script["gameObject"] = gameObject;
+
+                AttachEventHandle();
             }
             LuaDLL.lua_settop(env.L, top);
         }
     }
 
-	void Cleanup(){
-		if (script != null)
+	void Cleanup()
+    {
+        if (script != null)
         {
             script.Dispose();
             script = null;
@@ -144,6 +149,158 @@ public class LuaScriptFile : MonoBehaviour {
     {
         CallMethod(method, go);
     }
+
+    [ContextMenu("UnTouchEvent")]
+    public void DetachEventHandle()
+    {
+        UnTouchButton();
+        UnTouchInputField();
+        UnTouchTweener();
+        UnTouchScroll();
+    }
+
+    [ContextMenu("TouchEvent")]
+    public void AttachEventHandle()
+    {
+        TouchButton();
+        TouchInputField();
+        TouchTweener();
+        TouchScroll();
+    }
+
+    void TouchButton()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<Button>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                Button button = comps[i];
+                EventClick.Get(button.gameObject).onClick += onClick;
+            }
+        }
+    }
+    void UnTouchButton()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<Button>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                Button button = comps[i];
+                EventClick.Get(button.gameObject).onClick -= onClick;
+            }
+        }
+    }
+    
+    void TouchInputField()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<InputField>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                InputField inputfield = comps[i];
+                EventEdit.Get(inputfield.gameObject).onSubmit += onSubmit;
+                EventEdit.Get(inputfield.gameObject).onTextChange += onTextChange;
+            }
+        }
+    }
+    void UnTouchInputField()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<InputField>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                InputField inputfield = comps[i];
+                EventEdit.Get(inputfield.gameObject).onSubmit -= onSubmit;
+                EventEdit.Get(inputfield.gameObject).onTextChange -= onTextChange;
+            }
+        }
+    }
+    void TouchTweener()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<UGUI.ITween>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                UGUI.ITween tweener = comps[i];
+                tweener.onTweenFinish += onTweenFinish;
+                tweener.onStepTweenFinish += onStepTweenFinish;
+            }
+        }
+    }
+    void UnTouchTweener()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<UGUI.ITween>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                UGUI.ITween tweener = comps[i];
+                tweener.onTweenFinish -= onTweenFinish;
+                tweener.onStepTweenFinish -= onStepTweenFinish;
+            }
+        }
+    }
+
+    void TouchScroll()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<Slider>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                Slider slider = comps[i];
+                EventSlider.Get(slider.gameObject).onScroll += onScroll;
+            }
+        }
+    }
+    void UnTouchScroll()
+    {
+        {
+            var comps = gameObject.GetComponentsInChildren<Slider>(true);
+            int Length = comps.Length;
+            for (int i = 0; i < Length; ++i)
+            {
+                Slider slider = comps[i];
+                EventSlider.Get(slider.gameObject).onScroll -= onScroll;
+            }
+        }
+    }
+
+    void onClick(GameObject go)
+    {
+        CallMethod("onClick", go);
+    }
+
+    void onSubmit(GameObject go, string str)
+    {
+        CallMethod("onSubmit", go, str);
+    }
+
+    void onTextChange(GameObject go, string str)
+    {
+        CallMethod("onTextChange", go, str);
+    }
+
+    void onTweenFinish(GameObject go)
+    {
+        CallMethod("onTweenFinish", go);
+    }
+    void onStepTweenFinish(GameObject go)
+    {
+        CallMethod("onStepTweenFinish", go);
+    }
+    void onScroll(GameObject go, float value)
+    {
+        CallMethod("onScroll", go, value);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     void OnTriggerEnter(Collider other)
     {
