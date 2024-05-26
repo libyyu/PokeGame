@@ -200,7 +200,7 @@ function IsWXRuntime()
 end
 
 _G.PlatformSuffix = IsWebGLRuntime() and "WebGL" or "App"
-
+print("PlatformSuffix", PlatformSuffix, "IsWebGLRuntime", IsWebGLRuntime(), "IsWXRuntime", IsWXRuntime())
 
 local function mask_to_index_func()
     local c = 1

@@ -177,6 +177,7 @@ do
 		-- self.m_panel.transform:SetParent(self:GetUIRoot())
 		-- self.m_panel.transform.localPosition = Vector3(0, 0, 0)
 		-- self.m_panel.transform.localScale = Vector3(1, 1, 1)
+		FGUIMan.Instance():RegisterPanelObj(self.m_panel, self)
 		self:TouchGUIMsg()
 		self:BringDepth()
 		self:OnCreate()
@@ -189,6 +190,7 @@ do
 	function FBaseUI:OnDestroy()
 	end
 	function FBaseUI:_Destroy()
+		FGUIMan.Instance():UnRegisterPanelObj(self.m_panel)
 		self.m_panel = nil
 		self.m_loading = false
 		self.m_created = false

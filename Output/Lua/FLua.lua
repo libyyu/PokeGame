@@ -35,6 +35,49 @@ else
     end
 end
 
+----------------------------------------
+--
+-- FLua config
+--
+----------------------------------------
+local config =
+{
+    --default config
+    declare_checking = true,
+    accessing_checking = true,
+    calling_checking = true,
+}
+
+--
+-- load config
+--
+local loadedConfig
+do
+    -- load from module Lplus_config
+    local currentModule = ...
+    if currentModule ~= nil then
+        local configModule = currentModule .. "_config"
+        local bRet, result = pcall(require, configModule)
+        if bRet then
+            if type(result) ~= "table" then
+                error("module FLua_config should return a table, got: " .. type(result))
+            end
+            loadedConfig = result
+        end
+    end
+end
+
+if loadedConfig ~= nil then
+    for k, v in pairs(loadedConfig) do
+        config[k] = v
+    end
+end
+
+----------------------------------------
+--
+-- FLua declare
+--
+----------------------------------------
 do
     local typeClassMagic = {}
     local typeObjMagic = {}
@@ -103,14 +146,14 @@ do
         local typeMeta = {
             __magic = typeClassMagic,
             __declared = true,
-            __typetable = classType,
+            __class = classType,
             __property = {},
-            __typeName = className
+            __classname = className
         }
         --local cls_pointer = tostring(classType)
         typeMeta.__tostring = function(theType)
             local meta = getmetatable(theType)
-            local typeString = (meta.__typeName or "anonymousType") .. "(forward declare)"
+            local typeString = (meta.__classname or "anonymousType") .. "(forward declare)"
             return typeString
         end
 
@@ -125,11 +168,11 @@ do
 
     ------------------------------------------------------------------
     local function class__rawget(theType, key)
-        local meta = getmetatable(theType)
-        if rawget(meta, key) then
-            return rawget(meta, key)
+        if rawget(theType, key) then
+            return rawget(theType, key)
         end
 
+        local meta = getmetatable(theType)
         local property = meta.__property
         if property[key] then
             return property[key].value
@@ -138,22 +181,19 @@ do
         return nil
     end
 
-    local function class__tryget(theType, key)
-        local meta = getmetatable(theType)
-        if rawget(meta, key) then
-            return rawget(meta, key)
+    local function class__tryget(theType, key)    
+        if rawget(theType, key) then
+            return rawget(theType, key)
         end
 
+        local meta = getmetatable(theType)
         local property = meta.__property
         if property[key] then
             return property[key].value
         else
             local parent = meta.__parent
             if parent then
-                local pv = class__tryget(parent, key)
-                if pv then
-                    return pv
-                end
+                return class__tryget(parent, key)
             end
         end
         return nil
@@ -169,11 +209,11 @@ do
             return rawget(objMeta, key), true
         end
 
-        local attributes = rawget(obj, "__attributes")
+        local attributes = obj.__attributes
         if attributes and attributes[key] then
             return attributes[key].value, true
         else
-            local v = class__tryget(objMeta.__classType, key)
+            local v = class__tryget(objMeta.__class, key)
             return v, not not v
         end
         return nil
@@ -214,7 +254,7 @@ do
 
                 className = classNameOrForwardCls
             elseif type(classNameOrForwardCls) == "table" then
-                local forwardDeclareMeta = getmetatable(classNameOrForwardCls)
+                local forwardDeclareMeta = _getClassMeta(classNameOrForwardCls)
         
                 if forwardDeclareMeta == nil then   -- not type table
                     error("invalid forward declare (type table expected, got " .. type(classNameOrForwardCls) .. ")", 2)
@@ -283,33 +323,32 @@ do
         local built_in_type = 
         {
             __magic = true,
-            __typetable = true,
+            __class = true,
             __property = true,
-            __typeName = true,
-            __mfields = true,
+            __classname = true,
+            __parent = true,
             __options = true,
-            __objmt = true,
         }
 
         local objMeta = {
             __magic=typeObjMagic, 
-            __classType=classType, 
+            __class=classType, 
         }
 
         local typeMeta = {
             __magic = typeClassMagic,
-            __typetable = classType,
+            __class = classType,
             __property = {},
-            __typeName = className,
-            __mfields = {},
+            __classname = className,
             __options = classOption,
-            __objmt = objMeta,
         }
+
+        local internalOp = {"__tostring", "__add", "__sub", "__mul", "__div", "__mod", "__pow", "__unm", "__contact", "__len", "__eq", "__lt", "__le"}
 
         setmetatable(classType, typeMeta)
 
         if className then
-            typeMeta.__typeName = className
+            typeMeta.__classname = className
         elseif typeSourceInfo then
             typeMeta.__typeSourceInfo = typeSourceInfo
         end
@@ -318,26 +357,11 @@ do
             typeMeta.__parent = parentClassType
         end
         ------------------------------------------------------------------
-        classType.Implement = function(interface)
-            if not _M.getClassMeta(interface) then
-                error(("arguement #1 not a valid FLua-class"):format(tostring(interface)), 2)
-            end
-            local classOption = getmetatable(interface).__options
-            
-            if classOption.type == _INTERFACE then
-                typeMeta.__options.interfaces = typeMeta.__options.interfaces or {}
-                table.insert(typeMeta.__options.interfaces, interface)
-            else
-                error(("arguement #1 not a valid interface class"):format(tostring(interface)), 2) 
-            end
-            return classType
-        end
-        ------------------------------------------------------------------
 
         local cls_pointer = tostring(classType)
         typeMeta.__tostring = function(theType)
             local meta = getmetatable(theType)
-            local typeString = meta.__typeName or ("anonymousType" .. (meta.__typeSourceInfo or ""))
+            local typeString = meta.__classname or ("anonymousType" .. (meta.__typeSourceInfo or ""))
             return typeString .. "(".. cls_pointer .. ")"
         end
 
@@ -354,19 +378,28 @@ do
             if built_in_type[key] then
                 error(("failed to override built-in property '%s' in class:'%s'"):format(key, tostring(theType)), 2)
             end
-            -- local v = class__rawget(theType, key)
-            -- if v then
-            --    error(("failed to override property '%s' in class:'%s'"):format(key, tostring(theType)), 2) 
-            -- end
-            if #key >2 and key:sub(1, 2) == "__" then
-                local meta = getmetatable(theType)
-                meta[key] = value
-                getmetatable(theType).__mfields[key] = value
-                getmetatable(theType).__objmt[key] = value
-            else
-                local property = getmetatable(theType).__property
-                property[key] = {value = value, }
+            
+            local meta = getmetatable(theType)
+            if meta.__property[key] then
+                error(("failed to override property '%s' in class:'%s'"):format(key, tostring(theType)), 2) 
             end
+
+            meta.__property[key] = {value = value, }
+        end
+
+        classType.Implement = function(interface)
+            if not _M.getClassMeta(interface) then
+                error(("arguement #1 not a valid FLua-class"):format(tostring(interface)), 2)
+            end
+            local classOption = getmetatable(interface).__options
+            
+            if classOption.type == _INTERFACE then
+                typeMeta.__options.interfaces = typeMeta.__options.interfaces or {}
+                table.insert(typeMeta.__options.interfaces, interface)
+            else
+                error(("arguement #1 not a valid interface class"):format(tostring(interface)), 2) 
+            end
+            return classType
         end
         ------------------------------------------------------------------
         
@@ -387,9 +420,13 @@ do
             end
             
             if key == "__magic" 
-                or key == "__classType" 
+                or key == "__class" 
                 or key == "__gcproxy"
-                or key == "__pointer" then
+                or key == "__pointer"
+                or key == "__attributes"
+                or key == "__ctor_args"
+                or key == "__in_constructor"
+            then
                 error(("failed to assignment const field:'%s@%s'"):format(key, tostring(obj)), 2)
                 return
             end
@@ -400,18 +437,12 @@ do
 
         objMeta.__tostring = function(obj)
             local meta = getmetatable(obj)
-            local clsType = meta.__classType
-            local toString = class__tryget(clsType, "toString") or class__tryget(clsType, "__tostring")
+            local clsType = meta.__class
+            local toString = class__rawget(clsType, "__tostring") or class__tryget(clsType, "toString")
             if toString then 
                 return toString(obj)
             else
                 return tostring(clsType) ..  "(".. obj.__pointer .. ")"
-            end
-        end
-        for _, k in ipairs({"__add", "__sub", "__mul", "__div", "__mod", "__pow", "__unm", "__contact", "__len", "__eq", "__lt", "__le"}) do
-            local v = class__tryget(classType, k)
-            if v and type(v) == "function" then
-                rawset(objMeta, k, v)
             end
         end
         ------------------------------------------------------------------
@@ -427,13 +458,6 @@ do
             end
 
             for _, interface in ipairs(classOption.interfaces or {}) do
-                for k, v in pairs(getmetatable(interface).__mfields) do
-                    if type(v) == "function" then
-                        if not class__rawget(theType, k) or type(class__rawget(theType, k)) ~= "function" then
-                            error(("can not instantiate class %s, interface '%s' must be implement"):format(tostring(theType), k), 2)
-                        end
-                    end
-                end
                 for k, v in pairs(getmetatable(interface).__property) do
                     if type(v.value) == "function" then
                         if not class__rawget(theType, k) or type(class__rawget(theType, k)) ~= "function" then
@@ -442,11 +466,10 @@ do
                     end
                 end
             end
-
-            for _, k in ipairs({"__add", "__sub", "__mul", "__div", "__mod", "__pow", "__unm", "__contact", "__len", "__eq", "__lt", "__le"}) do
+            -- link internal override methods
+            for _, k in ipairs(internalOp) do
                 local v = class__tryget(theType, k)
                 if v and type(v) == "function" then
-                    --print("rawset", k, v)
                     rawset(objMeta, k, v)
                 end
             end
@@ -464,7 +487,8 @@ do
                 local pcls = theType
                 while pcls ~= nil do
                     table.insert(clsList, pcls)
-                    pcls = class__tryget(pcls, "__parent")
+                    local meta = getmetatable(pcls)
+                    pcls = meta.__parent
                 end
 
                 do --__destructor
@@ -480,7 +504,7 @@ do
                     end)}
                 end
 
-                do --constructor               
+                do --constructor  
                     for i = #clsList, 1, -1 do
                         local _cls = clsList[i]
                         local func = class__rawget(_cls, "__constructor")
@@ -507,16 +531,18 @@ end
 local FBaseObject = _M.Class(nil, "FBaseObject", {type=_ABSTRACT})
 do
     function FBaseObject:GetClass()
-        return self.__classType
+        return self.__class
     end
     function FBaseObject:GetParentClass()
-        return _M.class__tryget(self:GetClass(), "__parent")
+        local meta = getmetatable(self.__class)
+        return meta.__parent
     end
     function FBaseObject:GetPointer()
         return self.__pointer
     end
     function FBaseObject:GetClassOptions()
-        return self.__classType.__options
+         local meta = getmetatable(self.__class)
+        return meta.__options
     end
     function FBaseObject:toString()
         return tostring(self:GetClass()) ..  "(".. self:GetPointer() .. ")"
@@ -553,7 +579,8 @@ do
             if pcls == classType then
                 return true
             else
-                pcls = _M.class__tryget(pcls, "__parent")
+                local meta = getmetatable(pcls)
+                pcls = meta.__parent
             end
         end
         return false

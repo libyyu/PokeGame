@@ -11,6 +11,7 @@ do
 	function FGUIMan:__constructor()
 		self.m_UIRoot = nil
 		self.m_PanelContainer = {}
+		self.m_ObjToPanel = setmetatable({}, {__mode = "k"})
 	end
 
 	function FGUIMan:GetGUIRoot()
@@ -80,6 +81,17 @@ do
 	end
 	function FGUIMan:UnRegisterPanel(name)
 		self.m_PanelContainer[name] = nil
+	end
+
+	function FGUIMan:RegisterPanelObj(obj, panel)
+		self.m_ObjToPanel[obj] = panel
+	end
+	function FGUIMan:UnRegisterPanelObj(obj)
+		self.m_ObjToPanel[obj] = nil
+	end
+
+	function FGUIMan:GetPanelByObj(obj)
+		return self.m_ObjToPanel[obj]
 	end
 
 	function FGUIMan:RemoveWindow(child)

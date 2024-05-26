@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -355,6 +356,7 @@ public class UnityAssetBundleLoader : IAssetLoader
                 LogUtil.Log("AssetBundleManifest Load Finished.");
                 m_AssetBundleManifest = objs[0] as AssetBundleManifest;
                 m_AllManifest = m_AssetBundleManifest.GetAllAssetBundles();
+                m_Dependencies.Clear();
 #if UNITY_WEBGL && !UNITY_EDITOR
                 m_BundleNameToHashBundleName.Clear();
                 m_HashBundleNameToBundleName.Clear();
@@ -366,6 +368,22 @@ public class UnityAssetBundleLoader : IAssetLoader
                     m_HashBundleNameToBundleName.Add(bundleName, bundleNameNoHash);
                 }
 #endif
+
+                foreach (var bundleName in m_AllManifest)
+                {
+                    string[] dependencies = m_AssetBundleManifest.GetAllDependencies(bundleName);
+#if UNITY_WEBGL && !UNITY_EDITOR
+                    string abName = TransformHashABNameToABName(bundleName);
+                    List<string> fixedDepends = new List<string>();
+                    foreach (string dependency in dependencies) 
+                    {
+                        fixedDepends.Add(TransformHashABNameToABName(dependency));
+                    }
+                    m_Dependencies.Add(abName, fixedDepends.ToArray());
+#else
+                    m_Dependencies.Add(bundleName, dependencies);
+#endif
+                }
             }
             else
             {
@@ -378,11 +396,30 @@ public class UnityAssetBundleLoader : IAssetLoader
     void LoadAsset<T>(string abName, string[] assetNames, Action<UObject[]> action = null) where T : UObject
     {
         if (typeof(T) != typeof(AssetBundleManifest))
+        {
             abName = FixABName(abName);
+
+            string[] dependencies = null;
+            if (m_Dependencies.TryGetValue(abName, out dependencies))
+            {
+                string result = string.Join("\n  ", dependencies);
+                LogUtil.Log(string.Format("LoadAsset: {0} \n  {1}", abName, result));
+            }
+        }
+        mh_.StartCoroutine(LoadAssetHelper<T>(abName, assetNames, action, true));
+    }
+
+    IEnumerator LoadAssetHelper<T>(string abName, string[] assetNames, Action<UObject[]> action = null, bool bRecordLog = false) where T : UObject
+    {
+        ReturnTuple<Boolean, UObject[]> LoadResult = new ReturnTuple<Boolean, UObject[]>();
         LoadAssetRequest request = new LoadAssetRequest();
         request.assetType = typeof(T);
         request.assetNames = assetNames;
-        request.onAction = action;
+        request.onAction = (UObject[] objs) => 
+        {
+            LoadResult.value_1 = objs;
+            LoadResult.value_0 = true;
+        };
 
         List<LoadAssetRequest> requests = null;
         if (!m_LoadRequests.TryGetValue(abName, out requests))
@@ -390,19 +427,25 @@ public class UnityAssetBundleLoader : IAssetLoader
             requests = new List<LoadAssetRequest>();
             requests.Add(request);
             m_LoadRequests.Add(abName, requests);
-            mh_.StartCoroutine(OnLoadAsset<T>(abName));
+            mh_.StartCoroutine(OnLoadAsset<T>(abName, bRecordLog));
         }
         else
         {
             requests.Add(request);
         }
+
+        while(!LoadResult.value_0) yield return null;
+        if (action != null) action(LoadResult.value_1);
+
+        yield break;
     }
-    IEnumerator OnLoadAsset<T>(string abName) where T : UObject
+
+    IEnumerator OnLoadAsset<T>(string abName, bool bRecordLog = false) where T : UObject
     {
         AssetBundleInfo bundleInfo = GetLoadedAssetBundle(abName);
         if (bundleInfo == null)
         {
-            yield return mh_.StartCoroutine(OnLoadAssetBundle(abName, typeof(T)));
+            yield return mh_.StartCoroutine(OnLoadAssetBundle<T>(abName));
 
             bundleInfo = GetLoadedAssetBundle(abName);
             if (bundleInfo == null)
@@ -413,7 +456,8 @@ public class UnityAssetBundleLoader : IAssetLoader
             }
             else
             {
-                LogUtil.Log("OnLoadAsset Success --->>> " + abName);
+                if(bRecordLog)
+                    LogUtil.Log("OnLoadAsset Success --->>> " + abName);
             }
         }
 
@@ -421,8 +465,12 @@ public class UnityAssetBundleLoader : IAssetLoader
         if (!m_LoadRequests.TryGetValue(abName, out list))
         {
             m_LoadRequests.Remove(abName);
+            LogUtil.LogWarning(string.Format("OnLoadAsset m_LoadRequests£º{0} is empty", abName));
             yield break;
         }
+        
+        if (bRecordLog) 
+            LogUtil.LogWarning(string.Format("OnLoadAsset m_LoadRequests£º{0} num is {1}", abName, list.Count));
 
         for (int i = 0; i < list.Count; i++)
         {
@@ -430,6 +478,12 @@ public class UnityAssetBundleLoader : IAssetLoader
             List<UObject> result = new List<UObject>();
 
             AssetBundle ab = bundleInfo.m_AssetBundle;
+
+            if(abName.Contains("player_cc"))
+            {
+                LogUtil.LogWarning(string.Format("player_cc £ºsb {0} action {1}", ab, list[i].onAction));
+            }
+
             if (assetNames == null || assetNames.Length == 0)
             {
                 result.Add(ab);
@@ -463,43 +517,20 @@ public class UnityAssetBundleLoader : IAssetLoader
         m_LoadRequests.Remove(abName);
     }
 
-    IEnumerator OnLoadAssetBundleInner(System.Uri uri, string abName, Type type, Action<bool> action)
+    IEnumerator OnLoadAssetBundleInner<T>(System.Uri uri, string abName, Action<bool> action) where T : UObject
     {
-        LogUtil.Log(string.Format("try load asset {0}", uri.ToString()));
-        bool isManifest = type == typeof(AssetBundleManifest);
+        //LogUtil.Log(string.Format("try load asset {0}", abName));
+        bool isManifest = typeof(T) == typeof(AssetBundleManifest);
         if (!isManifest)
         {
             if (m_AssetBundleManifest != null)
             {
-#if UNITY_WEBGL && !UNITY_EDITOR
-                string abNameHashed = TransformABNameToHashABName(abName);
-                string[] dependencies = m_AssetBundleManifest.GetAllDependencies(abNameHashed);
-#else
-                string[] dependencies = m_AssetBundleManifest.GetAllDependencies(abName);
-#endif
-
-                if (dependencies.Length > 0)
+                string[] dependencies = null;
+                if (m_Dependencies.TryGetValue(abName, out dependencies))
                 {
-                    if (!m_Dependencies.ContainsKey(abName))
-                    {
-#if UNITY_WEBGL && !UNITY_EDITOR
-                        List<string> fixedDepends = new List<string>();
-                        foreach (string dependency in dependencies) 
-                        {
-                            fixedDepends.Add(TransformHashABNameToABName(dependency));
-                        }
-                        m_Dependencies.Add(abName, fixedDepends.ToArray());
-#else
-                        m_Dependencies.Add(abName, dependencies);
-#endif
-                    }
                     for (int i = 0; i < dependencies.Length; i++)
                     {
-#if UNITY_WEBGL && !UNITY_EDITOR
-                        string depName = TransformHashABNameToABName(dependencies[i]);
-#else
                         string depName = dependencies[i];
-#endif
                         AssetBundleInfo bundleInfo;
                         if (m_LoadedAssetBundles.TryGetValue(depName, out bundleInfo))
                         {
@@ -507,8 +538,8 @@ public class UnityAssetBundleLoader : IAssetLoader
                         }
                         else if (!m_LoadRequests.ContainsKey(depName))
                         {
-                            LogUtil.Log(string.Format("try load dep asset {0}", depName));
-                            yield return mh_.StartCoroutine(OnLoadAssetBundle(depName, type));
+                            //LogUtil.Log(string.Format("try load dep asset {0}", depName));
+                            yield return mh_.StartCoroutine(LoadAssetHelper<T>(depName, null));
                         }
                     }
                 }
@@ -522,7 +553,7 @@ public class UnityAssetBundleLoader : IAssetLoader
 
         if(request.result == UnityWebRequest.Result.Success)
         {
-            LogUtil.Log(string.Format("success load asset {0}, cost time: {1}", uri.ToString(), Time.realtimeSinceStartup-beginTime));
+            //LogUtil.Log(string.Format("success load asset {0}, cost time: {1}", abName, Time.realtimeSinceStartup-beginTime));
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
             if (assetBundle != null)
             {
@@ -533,12 +564,13 @@ public class UnityAssetBundleLoader : IAssetLoader
         }
         else
         {
+            LogUtil.LogWarning(string.Format("load asset field. {0}", uri.ToString()));
             LogUtil.LogWarning(request.error);
             if (action != null) action(false);
         }
     }
 
-    IEnumerator OnLoadAssetBundle(string abName, Type type)
+    IEnumerator OnLoadAssetBundle<T>(string abName) where T : UObject
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         string abNameHashed = TransformABNameToHashABName(abName);
@@ -546,7 +578,7 @@ public class UnityAssetBundleLoader : IAssetLoader
         if(WebCommon.isRunEnvWX())
             streamingAssetsUrl = WebCommon.get_streamingAssetsUrl();
         System.Uri uri = null;
-        if (type == typeof(AssetBundleManifest))
+        if (typeof(T) == typeof(AssetBundleManifest))
         {
             var sep = "?";
             if(abNameHashed.Contains('?')) sep = "&";
@@ -556,14 +588,14 @@ public class UnityAssetBundleLoader : IAssetLoader
         {
             uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed);
         }
-        yield return OnLoadAssetBundleInner(uri, abName, type, null);
+        yield return OnLoadAssetBundleInner<T>(uri, abName, null);
 #else
         bool bLoaded = false;
         for(int i=0; i< SearchPaths.Length && !bLoaded; ++i)
         {
             string assetRPath = SearchPaths[i];
             var uri = new System.Uri(assetRPath + "/" + GameUtil.ManifestName + "/" + abName);
-            yield return OnLoadAssetBundleInner(uri, abName, type, (bool succeed) => 
+            yield return OnLoadAssetBundleInner<T>(uri, abName, (bool succeed) => 
             {
                 if (succeed) bLoaded = true;
             });
@@ -620,7 +652,6 @@ public class UnityAssetBundleLoader : IAssetLoader
         {
             UnloadAssetBundleInternal(dependency, isThorough);
         }
-        m_Dependencies.Remove(abName);
     }
 
     void UnloadAssetBundleInternal(string abName, bool isThorough)

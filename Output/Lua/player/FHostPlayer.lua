@@ -11,6 +11,7 @@ do
 	end
 
 	function FHostPlayer:OnLoaded()
+		print("HostPlayer OnLoaded")
 		local obj = self.m_Model.m_model
 		obj.tag = "HostPlayer"
 		obj.transform.localPosition = Vector3(0, 0, 0)
