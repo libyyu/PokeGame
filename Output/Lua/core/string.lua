@@ -410,5 +410,15 @@ function string:deserialize()
     return result, errors
 end
 
+function string.isEmpty(object)
+    if object == nil or object == "" then
+        return true
+    else
+        assert(type(object) == "string", "argument not a valid string")
+    end
+
+    return false
+end
+
 -- return module: string
 return string

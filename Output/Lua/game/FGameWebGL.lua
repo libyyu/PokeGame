@@ -44,9 +44,13 @@ do
 		local panel = require "ui.FPanelStartUI".Instance()
 		panel:AutoProgress(2, 0, 80)
 
-		self:EnterWorld(function()
-			self:LoadHostPlayer()
+		local m = require "ui.FMainUI".Instance()
+		m:AttachCreateFunc(function()
+			panel:AutoProgress(1, nil, 100, function()
+				panel:DestroyPanel()
+			end)
 		end)
+		m:ShowPanel(true)
 	end
 
 	function FGame:LeaveGameLogic()

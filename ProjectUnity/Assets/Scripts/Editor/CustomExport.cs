@@ -55,6 +55,9 @@ namespace SLua
 
             add(typeof(UnityEngine.Networking.UnityWebRequest), null);
             add(typeof(UnityEngine.Networking.UnityWebRequest.Result), "UnityEngine.Networking.UnityWebRequest.Result");
+            add(typeof(UnityEngine.Networking.UploadHandler), null);
+            add(typeof(UnityEngine.Networking.DownloadHandler), null);
+            add(typeof(UnityEngine.Networking.CertificateHandler), null);
             // add your custom class here
             // add( type, typename)
             // type is what you want to export
@@ -69,6 +72,7 @@ namespace SLua
                 typeof(BinaryWriter),
                 typeof(FByteBuffer),
 				typeof(FTcpSocketNetworkComponent),
+                typeof(UnityEngine.GameObject),
             };
         }
 
@@ -80,7 +84,21 @@ namespace SLua
 
             //list.Add("NGUI");
             list.Add("FairyGUI");
+#if UNITY_WEBGL || WEIXINMINIGAME || UNITY_EDITOR
+            //list.Add("Wx");
+#endif
         }
+
+        public static Dictionary<string, string> OnGetTypeMarco()
+        {
+            return new Dictionary<string, string>
+            {
+                { "WeChatWASM", "(UNITY_WEBGL || WEIXINMINIGAME) && !UNITY_EDITOR" },
+                { "WXProfileStatsScript", "(UNITY_WEBGL || WEIXINMINIGAME) && !UNITY_EDITOR" },
+                { "WXTouchInputOverride", "(UNITY_WEBGL || WEIXINMINIGAME) && !UNITY_EDITOR" },
+            };
+        }
+
 
         public static Dictionary<string, string> OnAddCustomCheckType()
         {

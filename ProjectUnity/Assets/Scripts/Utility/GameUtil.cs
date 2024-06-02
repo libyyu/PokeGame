@@ -8,10 +8,75 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 [CustomLuaClass]
-public class GameUtil
+public static class GameUtil
 {
-    public const string BundleExt = ".ab";
-    public const string ManifestName = "StreamingAssets";
+    public const string BundleExt = ".ab";  
+    public static string ManifestName
+    {
+        get
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return WebCommon.get_AssetBundleManifestName();
+#else
+            return "StreamingAssets";
+#endif
+        }
+    }
+
+    static Dictionary<string, string> AssetToBundleName = new Dictionary<string, string>();
+    static LuaFunction AssetToBundleNameFunc = null;
+
+    public static string FixAssetPath(string assetPath)
+    {
+        string outName = assetPath.ToLower();
+        if (outName.StartsWith('/')) outName = outName.Substring(1);
+        if (!outName.StartsWith("assets/"))
+        {
+            return "assets/" + outName;
+        }
+        return assetPath;
+    }
+
+    public static string FixABName(string abName)
+    {
+        string outName = abName.ToLower();
+        if (outName.StartsWith('/')) outName = outName.Substring(1);
+        if (!outName.StartsWith("assets/")) outName = "assets/" + outName;
+        if (!outName.EndsWith(BundleExt)) outName = outName + BundleExt;
+        return outName;
+    }
+
+    public static string GetBundleNameByAssetName(string assetName)
+    {
+        assetName = FixAssetPath(assetName);
+        string abName;
+        if (AssetToBundleName.TryGetValue(assetName, out abName)) return abName;
+
+        try
+        {
+            if (!LuaSvr.inited || null == LuaSvr.mainState)
+                return null;
+            LuaState l = LuaSvr.mainState;
+            if(AssetToBundleNameFunc == null)
+                AssetToBundleNameFunc = l.getFunction("TransformABName");
+            if (null != AssetToBundleNameFunc)
+            {
+                abName = (string)AssetToBundleNameFunc.call(assetName);
+
+                if(!string.IsNullOrEmpty(abName))
+                {
+                    AssetToBundleName.Add(assetName, abName);
+                }
+            }
+
+            return abName;
+        }
+        catch
+        {
+        }
+
+        return null;
+    }
 
     public static bool IsEditorEnv()
     {
@@ -257,7 +322,9 @@ public class GameUtil
                 completeHandler.Dispose();
             }
         });
-        request.RawData = Encoding.UTF8.GetBytes(data);
+        if (data != null)
+            request.RawData = Encoding.UTF8.GetBytes(data);
+        request.UseStreaming = false;
         request.ConnectTimeout = TimeSpan.FromSeconds(t);//��ʱ
         request.Send();
     }
@@ -669,5 +736,217 @@ public class GameUtil
         comp.RemoveTimer(id);
         LuaDLL.lua_pushboolean(L, true);
         return 1;
+    }
+
+    static IEnumerator _GetTexture(string url, Action<Texture2D> actionResult)
+    {
+
+        UnityWebRequest uwr = new UnityWebRequest(url);
+        DownloadHandlerTexture downloadTexture = new DownloadHandlerTexture(true);
+        uwr.downloadHandler = downloadTexture;
+
+        yield return uwr.SendWebRequest();
+        Texture2D t = null;
+        if (uwr.result == UnityWebRequest.Result.Success)
+        {
+            t = downloadTexture.texture;
+        }
+        else
+        {
+            LogUtil.LogWarning("下载失败，请检查网络，或者下载地址是否正确 ", url);
+        }
+
+        if (actionResult != null)
+        {
+            actionResult(t);
+        }
+    }
+
+    public static Texture2D LoadTexture2DFromFile(string path)
+    {
+        if (!File.Exists(path)) return null;
+
+        // 创建一个Texture2D
+        Texture2D texture = new Texture2D(1, 1);
+
+        // 加载图片数据
+        byte[] imageData = File.ReadAllBytes(path);
+
+        // 将图片数据加载到Texture2D对象中
+        texture.LoadImage(imageData);
+
+        return texture;
+    }
+
+    static bool IsInsideRoundedCorner(int x, int y, int width, int height, float radius)
+    {
+        // 四个角的坐标
+        Vector2 bottomLeft = new Vector2(radius, radius);
+        Vector2 bottomRight = new Vector2(width - radius, radius);
+        Vector2 topLeft = new Vector2(radius, height - radius);
+        Vector2 topRight = new Vector2(width - radius, height - radius);
+
+        // 检查每个角
+        if (Vector2.Distance(new Vector2(x, y), bottomLeft) < radius) return true;
+        if (Vector2.Distance(new Vector2(x, y), bottomRight) < radius) return true;
+        if (Vector2.Distance(new Vector2(x, y), topLeft) < radius) return true;
+        if (Vector2.Distance(new Vector2(x, y), topRight) < radius) return true;
+
+        // 检查中心区域
+        if (x > radius && x < width - radius && y > radius && y < height - radius) return true;
+
+        return false;
+    }
+
+    public static Texture2D CreateRoundedTexture(Texture2D source, float radius)
+    {
+        int width = source.width;
+        int height = source.height;
+        Texture2D roundedTexture = new Texture2D(width, height);
+
+        // 遍历每个像素，设置圆角效果
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Color originalColor = source.GetPixel(x, y);
+
+                // 计算圆角
+                if (IsInsideRoundedCorner(x, y, width, height, radius))
+                {
+                    roundedTexture.SetPixel(x, y, originalColor);
+                }
+                else
+                {
+                    roundedTexture.SetPixel(x, y, Color.clear);
+                }
+            }
+        }
+
+        roundedTexture.Apply();
+        return roundedTexture;
+    }
+
+    public static void AsyncLoadTextureFromPathOrUrl(string url, LuaFunction cb)
+    {
+        EntryPoint.Instance.StartCoroutine(_GetTexture(url, (tex) =>
+        {
+            cb.call(tex);
+            cb.Dispose();
+        }));
+    }
+
+    public static bool SaveTextureToFile(Texture2D tex, string path)
+    {
+        try
+        {
+            CreateDirectoryForFile(path);
+            Byte[] bytes = tex.EncodeToPNG();
+            File.WriteAllBytes(path, bytes);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LogUtil.LogException(e);
+            return false;
+        }
+    }
+
+    public static bool SaveBytesToFile(Byte[] bytes, string path)
+    {
+        try
+        {
+            CreateDirectoryForFile(path);
+            File.WriteAllBytes(path, bytes);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LogUtil.LogException(e);
+            return false;
+        }
+    }
+
+    public static bool SaveTextToFile(string text, string path)
+    {
+        try
+        {
+            CreateDirectoryForFile(path);
+            File.WriteAllText(path, text);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LogUtil.LogException(e);
+            return false;
+        }
+    }
+
+    public static string ToBase64String(string originalText)
+    {
+        string base64Encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(originalText));
+        return base64Encoded;
+    }
+
+    public static string FromBase64String(string base64Encoded)
+    {
+        string originalText = Encoding.UTF8.GetString(Convert.FromBase64String(base64Encoded));
+        return originalText;
+    }
+
+    public static Byte[] Utf8ToUnicode(string str)
+    {
+        return Encoding.Unicode.GetBytes(str);
+    }
+
+    public static string UnicodeToUtf8(Byte[] bytes)
+    {
+        return Encoding.Unicode.GetString(bytes);
+    }
+
+    public static string CalculateMD5Hash(string input)
+    {
+        // 创建一个 MD5 实例
+        using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+        {
+            // 将输入字符串转换为字节数组
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+
+            // 计算字节数组的 MD5 哈希值
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // 将字节数组转换为十六进制字符串
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("X2"));
+            }
+
+            // 返回十六进制字符串
+            return sb.ToString();
+        }
+    }
+
+    public static string CalculateSHA256Hash(string input)
+    {
+        // 创建一个 SHA256 实例
+        using (System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create())
+        {
+            // 将输入字符串转换为字节数组
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+
+            // 计算字节数组的 SHA-256 哈希值
+            byte[] hashBytes = sha256.ComputeHash(inputBytes);
+
+            // 将字节数组转换为十六进制字符串
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("X2"));
+            }
+
+            // 返回十六进制字符串
+            return sb.ToString();
+        }
     }
 }

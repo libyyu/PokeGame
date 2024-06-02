@@ -34,6 +34,8 @@ namespace SLua
     using System.Text.RegularExpressions;
     using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
+    using static UnityEditor.PlayerSettings;
+    using static UnityEngine.InputSystem.InputControlScheme.MatchResult;
 
     public interface ICustomExportPost { }
 
@@ -441,7 +443,7 @@ namespace SLua
 
 			List<Type> cust = new List<Type>();
 			List<string> assemblyList = new List<string>();
-			CustomExport.OnAddCustomAssembly(ref assemblyList);
+            CustomExport.OnAddCustomAssembly(ref assemblyList);
 
             //detect interface ICustomExportPost,and call OnAddCustomAssembly
             object[] aCustomExport = new object[] { assemblyList };
@@ -466,7 +468,7 @@ namespace SLua
 				}
 				foreach (Type t in cust)
 				{
-					if (Generate(t,path))
+                    if (Generate(t,path))
 						exports.Add(t);
 				}
 				GenerateBind(exports, "BindDll", 3, path);
@@ -871,8 +873,27 @@ namespace SLua
 				return;
 
 			WriteBindType(file, t.BaseType, exported, binded);
-			Write(file, "{0}.reg,", ExportName(t), binded);
-			binded.Add(t);
+
+            Dictionary<string, string> typeMarcos = CustomExport.OnGetTypeMarco();
+            string Marco = null;
+            foreach (var item in typeMarcos)
+            {
+                if (t.FullName.Contains(item.Key) && !string.IsNullOrEmpty(item.Value))
+                {
+                    Marco = item.Value;
+                    break;
+                }
+            }
+			if(ExportName(t).Contains("WX"))
+			{
+				Debug.Log("111");
+			}
+            if (!string.IsNullOrEmpty(Marco))
+                Write(file, "#if " + Marco);
+            Write(file, "{0}.reg,", ExportName(t), binded);
+            if (!string.IsNullOrEmpty(Marco))
+                Write(file, "#endif//" + Marco);
+            binded.Add(t);
 		}
 
 		public string DelegateExportFilename(string path, Type t)
@@ -909,9 +930,9 @@ namespace SLua
 				if (IsEnumType(t))
 				{
 					StreamWriter file = Begin(t);
-					WriteHead(t, file);
+					string NeedEndif = WriteHead(t, file);
 					RegEnumFunction(t, file);
-					End(file);
+					End(file, NeedEndif);
 				}
 				else if (t.BaseType == typeof(System.MulticastDelegate))
 				{
@@ -936,13 +957,13 @@ namespace SLua
 					directfunc.Clear();
 					
 					StreamWriter file = Begin(t);
-					WriteHead(t, file);
+                    string NeedEndif = WriteHead(t, file);
 					WriteConstructor(t, file);
 					WriteFunction(t, file,false);
 					WriteFunction(t, file, true);
 					WriteField(t, file);
 					RegFunction(t, file);
-					End(file);
+					End(file, NeedEndif);
 					
 					if (t.BaseType != null && t.BaseType.Name.Contains("UnityEvent`"))
 					{
@@ -979,8 +1000,28 @@ namespace SLua
 
 		void WriteDelegate(Type t, StreamWriter file)
 		{
-			string temp = @"
-//Auto Generate By LuaInterface, Do Not Edit!
+            bool bNeedEndIf = false;
+            Dictionary<string, string> typeMarcos = CustomExport.OnGetTypeMarco();
+            string Marco;
+            if (typeMarcos.TryGetValue(t.FullName, out Marco) && !string.IsNullOrEmpty(Marco))
+            {
+                bNeedEndIf = true;
+            }
+            else
+            {
+                foreach (var item in typeMarcos)
+                {
+                    if (t.FullName.Contains(item.Key) && !string.IsNullOrEmpty(item.Value))
+                    {
+						Marco = item.Value;
+                        bNeedEndIf = true;
+                        break;
+                    }
+                }
+            }
+
+            string temp = @"
+//Auto Generate By LuaInterface, Do Not Edit!$MARCO
 using System;
 using System.Collections.Generic;
 namespace SLua
@@ -993,8 +1034,8 @@ namespace SLua
             int err = pushTry(l);
 ";
 			MethodInfo mi = t.GetMethod("Invoke");
-
-			temp = temp.Replace("$TN", t.Name);
+            temp = temp.Replace("$MARCO", bNeedEndIf ? "\n#if " + Marco : "");
+            temp = temp.Replace("$TN", t.Name);
 			temp = temp.Replace("$FN", ExportName(t));
 			if("Lua_FairyGUI_UIPackage_LoadResource" == ExportName(t))
 			{
@@ -1047,7 +1088,9 @@ namespace SLua
 			Write(file, "}");
 			Write(file, "}");
 			Write(file, "}");
-		}
+			if(bNeedEndIf)
+                Write(file, "#endif//" + Marco);
+        }
 		
 		string ArgsList(MethodInfo m)
 		{
@@ -1091,8 +1134,28 @@ namespace SLua
 		
 		void WriteEvent(Type t, StreamWriter file)
 		{
-			string temp = @"
-//Auto Generate By LuaInterface, Do Not Edit!
+            bool bNeedEndIf = false;
+            Dictionary<string, string> typeMarcos = CustomExport.OnGetTypeMarco();
+            string Marco;
+            if (typeMarcos.TryGetValue(t.FullName, out Marco) && !string.IsNullOrEmpty(Marco))
+            {
+                bNeedEndIf = true;
+            }
+            else
+            {
+                foreach (var item in typeMarcos)
+                {
+                    if (t.FullName.Contains(item.Key) && !string.IsNullOrEmpty(item.Value))
+                    {
+                        Marco = item.Value;
+                        bNeedEndIf = true;
+                        break;
+                    }
+                }
+            }
+
+            string temp = @"
+//Auto Generate By LuaInterface, Do Not Edit!$MARCO
 using System;
 using System.Collections.Generic;
 
@@ -1185,10 +1248,11 @@ namespace SLua
             return true;
         }
     }
-}";
-			
-			
-			temp = temp.Replace("$CLS", _Name(GenericName(t.BaseType)));
+}$ENDMARCO";
+
+            temp = temp.Replace("$MARCO", bNeedEndIf ? "\n#if " + Marco : "");
+            temp = temp.Replace("$ENDMARCO", bNeedEndIf ? "\n#endif//" + Marco : "");
+            temp = temp.Replace("$CLS", _Name(GenericName(t.BaseType)));
 			temp = temp.Replace("$FNAME", FullName(t));
 			temp = temp.Replace("$GN", GenericName(t.BaseType,","));
 			temp = temp.Replace("$ARGS", ArgsDecl(t.BaseType));
@@ -1321,18 +1385,41 @@ namespace SLua
 			return file;
 		}
 		
-		private void End(StreamWriter file)
+		private void End(StreamWriter file, string NeedEndIf = null)
 		{
 			Write(file, "}");
-			file.Flush();
-			file.Close();
-		}
-		
-		private void WriteHead(Type t, StreamWriter file)
+            if (!string.IsNullOrEmpty(NeedEndIf))
+			{
+                Write(file, "#endif//" + NeedEndIf);
+            }
+            file.Flush();
+            file.Close();
+        }
+
+        private string WriteHead(Type t, StreamWriter file)
 		{
 			HashSet<string> nsset=new HashSet<string>();
 			Write(file, "//Auto Generate By LuaInterface, Do Not Edit!");
-			Write(file, "using System;");
+
+			Dictionary<string, string> typeMarcos = CustomExport.OnGetTypeMarco();
+			string Marco;
+			if(typeMarcos.TryGetValue(t.FullName, out Marco) && !string.IsNullOrEmpty(Marco))
+			{
+            }
+			else
+			{
+				foreach(var item in typeMarcos)
+				{
+					if(t.FullName.Contains(item.Key) && !string.IsNullOrEmpty(item.Value))
+					{
+                        Marco = item.Value;
+                        break;
+                    }
+				}
+			}
+			if (!string.IsNullOrEmpty(Marco))
+				Write(file, "#if " + Marco);
+            Write(file, "using System;");
 			Write(file, "using SLua;");
 			Write(file, "using System.Collections.Generic;");
 			nsset.Add("System");
@@ -1343,7 +1430,9 @@ namespace SLua
 			Write (file, "[UnityEngine.Scripting.Preserve]");
 #endif
 			Write(file, "public class {0} : LuaObject {{", ExportName(t));
-		}
+
+			return Marco;
+        }
 
 		// add namespace for extension method
 		void WriteExtraNamespace(StreamWriter file,Type t, HashSet<string> nsset) {

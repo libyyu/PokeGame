@@ -21,7 +21,11 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace SLua
 {
@@ -563,19 +567,80 @@ namespace SLua
             string s = null;
             if (strlen > 0 && str != IntPtr.Zero)
             {
-                s = Marshal.PtrToStringAnsi(str);
+                try
+                {
+                    s = Marshal.PtrToStringUTF8(str);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning(e.ToString());
+                }
                 // fallback method
-                if(s == null)
+                if (s == null)
                 {
                     byte[] b = new byte[strlen];
                     Marshal.Copy(str, b, 0, strlen);
-                    s = System.Text.Encoding.Default.GetString(b);
+
+                    System.Text.Encoding encoding = GetEncoding(b);
+
+                    if(encoding == System.Text.Encoding.UTF8)
+                    {
+                        s = System.Text.Encoding.UTF8.GetString(b);
+                    }
+                    else if(encoding == System.Text.Encoding.Unicode)
+                    {
+                        s = System.Text.Encoding.Unicode.GetString(b);
+                    }
+                    else if(encoding == System.Text.Encoding.UTF32)
+                    {
+                        s = System.Text.Encoding.UTF32.GetString(b);
+                    }
+                    else if (encoding == System.Text.Encoding.BigEndianUnicode)
+                    {
+                        s = System.Text.Encoding.BigEndianUnicode.GetString(b);
+                    }
+                    else
+                        s = System.Text.Encoding.Default.GetString(b);
                 }
             }
             return (s == null) ? string.Empty : s;
         }
-		
-		public static IntPtr lua_tolstring(IntPtr luaState,int index,out int strLen)
+
+        public static System.Text.Encoding GetEncoding(byte[] bytes)
+        {
+            if (bytes.Length >= 3 &&
+                bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+            {
+                return System.Text.Encoding.UTF8;
+            }
+            else if (bytes.Length >= 2)
+            {
+                if (bytes[0] == 0xFE && bytes[1] == 0xFF)
+                {
+                    return System.Text.Encoding.BigEndianUnicode; // UTF-16 BE
+                }
+                else if (bytes[0] == 0xFF && bytes[1] == 0xFE)
+                {
+                    if (bytes.Length >= 4 &&
+                        bytes[2] == 0x00 && bytes[3] == 0x00)
+                    {
+                        return System.Text.Encoding.UTF32; // UTF-32 LE
+                    }
+                    return System.Text.Encoding.Unicode; // UTF-16 LE
+                }
+            }
+            else if (bytes.Length >= 4 &&
+                     bytes[0] == 0x00 && bytes[1] == 0x00 &&
+                     bytes[2] == 0xFE && bytes[3] == 0xFF)
+            {
+                return System.Text.Encoding.UTF32; // UTF-32 BE
+            }
+
+            // Default to UTF8 if no BOM is found
+            return System.Text.Encoding.UTF8;
+        }
+
+        public static IntPtr lua_tolstring(IntPtr luaState,int index,out int strLen)
         {
             return luaS_tolstring32(luaState, index, out strLen);
         }

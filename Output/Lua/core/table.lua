@@ -29,6 +29,7 @@ end
 
 -- clear the table
 function table.clear(self)
+    assert(type(self) == "table")
     for k in next, self do
         rawset(self, k, nil)
     end
@@ -53,7 +54,7 @@ end
 
 -- join all objects and tables to self
 function table.join2(self, ...)
-
+    assert(type(self) == "table")
     for _, t in ipairs({...}) do
         if type(t) == "table" then
             for k, v in pairs(t) do
@@ -69,6 +70,7 @@ end
 
 -- append all objects to array
 function table.append(array, ...)
+    assert(type(array) == "table")
     for _, value in ipairs({...}) do
         table.insert(array, value)
     end
@@ -76,7 +78,31 @@ function table.append(array, ...)
 end
 
 function table.push_back(array, v)
+    assert(type(array) == "table")
     table.insert(array, v)
+    return array
+end
+
+function table.extend(array, t)
+    assert(type(array) == "table")
+    assert(type(t) == "table")
+    local size = #t
+    -- array part
+    for i = 1, size do
+        local v = t[i]
+        if v ~= nil then
+            table.insert(array, v)
+        end
+    end
+    
+    -- map part
+    for k, v in pairs(t) do
+        if type(k) == "number" and k >= 1 and k <= size then    -- already printed
+        else
+            array[k] = v
+        end
+    end
+    
     return array
 end
 
@@ -100,7 +126,7 @@ end
 function table.copy2(self, copied)
 
     -- check
-    assert(self)
+    assert(type(self) == "table")
 
     -- init it
     copied = copied or {}
@@ -149,7 +175,7 @@ end
 function table.inherit2(self, ...)
 
     -- check
-    assert(self)
+    assert(type(self) == "table")
 
     -- init instance
     local classes = {...}
@@ -178,7 +204,7 @@ end
 
 -- slice table array
 function table.slice(self, first, last, step)
-
+    assert(type(self) == "table")
     -- slice it
     local sliced = {}
     for i = first or 1, last or #self, step or 1 do
@@ -280,7 +306,7 @@ table.unpack = unpack
 -- get keys of a table
 function table.keys(tab)
 
-    assert(tab)
+    assert(type(self) == "table")
 
     local keyset = {}
     local n = 0
@@ -294,7 +320,7 @@ end
 -- get values of a table
 function table.values(tab)
 
-    assert(tab)
+    assert(type(self) == "table")
 
     local valueset = {}
     local n = 0
@@ -306,6 +332,7 @@ function table.values(tab)
 end
 
 function table.has(self, v)
+    assert(type(self) == "table")
     for k,vv in pairs(self) do
         if vv == v then
             return true
@@ -317,6 +344,7 @@ end
 
 
 function table.pop(self, key, default)
+    assert(type(self) == "table")
     local v = self[key]
     self[key] = nil
     if nil == v then 
@@ -328,6 +356,7 @@ end
 
 
 function table.get(self, key)
+    assert(type(self) == "table")
     return self[key]
 end
 

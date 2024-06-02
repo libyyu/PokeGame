@@ -4,36 +4,39 @@ _G.coro = {}
 local coroTable = {}
 local coroToRun = {}
 local stopTag = "stop"
-local quitTag
 
 local function newCoro()
-	local c
-	c = coroutine.create(function()
+	local coro
+	coro = coroutine.create(function()
 		while true do
-			local func = rawget(coroToRun, c)
-			if func then 
-				func()
-			end
+			local func = coroToRun[coro]
+			if func then func() end
 			coroutine.yield(stopTag)
 		end
 	end)
-	return c
+	return coro
 end
 
 function _G.coro.start(func)
-	if quitTag then
-		return
-	end
-	for _, c in ipairs(coroTable) do
-		if rawget(coroToRun, c) == nil then
-			rawset(coroToRun, c, func)
+	local coroIndexToReplace
+	for index, coro in ipairs(coroTable) do
+		if coroutine.status(coro) == "dead" then
+			coroIndexToReplace = index
+			break
+		end
+		if coroToRun[coro] == nil then
+			coroToRun[coro] = func
 			return
 		end
 	end
 	
-	local c = newCoro()
-	table.insert(coroTable, c)
-	rawset(coroToRun, c, func)
+	local coro = newCoro()
+	if coroIndexToReplace then
+		coroTable[coroIndexToReplace] = coro
+	else
+		table.insert(coroTable, coro)
+	end
+	coroToRun[coro] = func
 end
 
 function _G.coro.yield()
@@ -70,26 +73,16 @@ function _G.coro.clear()
 	coroTable = {}
 end
 
-function _G.coro.quit()
-	quitTag = true
-	coroTable = {}
-end
 
 --local promises = require('promises')
 
 function _G.TickCoroutine(DeltaTime)
-	if quitTag then
-		return
-	end
-	
-	for c, func in pairs(coroToRun) do
-		if c and func then
-			local ret1, ret2 = coroutine.resume(c)
-			if (not ret1) or (ret2 == stopTag) then
-				rawset(coroToRun, c, nil)
-				if not ret1 then
-					printerror(debug.traceback(c, ret2, 0))
-				end
+	for coro, func in pairs(coroToRun) do
+		local ret1, ret2 = coroutine.resume(coro)
+		if (not ret1) or (ret2 == stopTag) then
+			coroToRun[coro] = nil
+			if not ret1 then
+				printerror(debug.traceback(coro, ret2, 0))
 			end
 		end
 	end

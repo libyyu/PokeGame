@@ -12,16 +12,6 @@ using UObject = UnityEngine.Object;
 
 public abstract class IAssetLoader
 {
-    protected string FixAssetPath(string assetPath)
-    {
-        string outName = assetPath.ToLower();
-        if (outName.StartsWith('/')) outName = outName.Substring(1);
-        if(!outName.StartsWith("assets/"))
-        {
-            return "assets/" + outName;
-        }
-        return assetPath;
-    }
     protected IAssetLoader() { }
     public UObject LoadAsset(string bundleName, string assetPath) 
     {
@@ -80,7 +70,7 @@ public class UnityEditorResourceLoader : IAssetLoader
         List<UObject> objs = new List<UObject>();
         foreach(string assetPath in assetsPath)
         {
-            UObject obj = UnityEditor.AssetDatabase.LoadAssetAtPath(FixAssetPath(assetPath), typeof(UObject));
+            UObject obj = UnityEditor.AssetDatabase.LoadAssetAtPath(GameUtil.FixAssetPath(assetPath), typeof(UObject));
             objs.Add(obj);
         }
         
@@ -109,7 +99,7 @@ public class UnityEditorResourceLoader : IAssetLoader
             }
             return null;
         }
-        string fpath = FixAssetPath(filePath);
+        string fpath = GameUtil.FixAssetPath(filePath);
         if (System.IO.File.Exists(fpath))
         {
             return System.IO.File.ReadAllBytes(fpath);
@@ -231,11 +221,7 @@ public class UnityAssetBundleLoader : IAssetLoader
     {
         get
         {
-#if UNITY_WEBGL && !UNITY_EDITOR
-            return WebCommon.get_AssetBundleManifestName();
-#else
             return GameUtil.ManifestName;
-#endif
         }
     }
 
@@ -267,15 +253,6 @@ public class UnityAssetBundleLoader : IAssetLoader
     Dictionary<string, string> m_BundleNameToHashBundleName = new Dictionary<string, string>();
     Dictionary<string, string> m_HashBundleNameToBundleName = new Dictionary<string, string>();
 #endif
-
-    string FixABName(string abName)
-    {
-        string outName = abName.ToLower();
-        if (outName.StartsWith('/')) outName = outName.Substring(1);
-        if (!outName.StartsWith("assets/")) outName = "assets/" + outName;
-        if (!outName.EndsWith(GameUtil.BundleExt)) outName = outName + GameUtil.BundleExt;
-        return outName;
-    }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     string TransformABNameToHashABName(string abFullName)
@@ -397,7 +374,7 @@ public class UnityAssetBundleLoader : IAssetLoader
     {
         if (typeof(T) != typeof(AssetBundleManifest))
         {
-            abName = FixABName(abName);
+            abName = GameUtil.FixABName(abName);
 
             string[] dependencies = null;
             if (m_Dependencies.TryGetValue(abName, out dependencies))
@@ -435,6 +412,14 @@ public class UnityAssetBundleLoader : IAssetLoader
         }
 
         while(!LoadResult.value_0) yield return null;
+
+        if (bRecordLog)
+        {
+            AssetBundleInfo bundleInfo = GetLoadedAssetBundle(abName);
+            if(bundleInfo == null || bundleInfo.m_AssetBundle == null)
+                LogUtil.Log("LoadAsset Failed --->>> " + abName);
+        }
+
         if (action != null) action(LoadResult.value_1);
 
         yield break;
@@ -450,9 +435,7 @@ public class UnityAssetBundleLoader : IAssetLoader
             bundleInfo = GetLoadedAssetBundle(abName);
             if (bundleInfo == null)
             {
-                m_LoadRequests.Remove(abName);
                 LogUtil.LogWarning("OnLoadAsset Failed --->>> " + abName);
-                yield break;
             }
             else
             {
@@ -469,39 +452,39 @@ public class UnityAssetBundleLoader : IAssetLoader
             yield break;
         }
         
-        if (bRecordLog) 
-            LogUtil.LogWarning(string.Format("OnLoadAsset m_LoadRequests：{0} num is {1}", abName, list.Count));
-
         for (int i = 0; i < list.Count; i++)
         {
             string[] assetNames = list[i].assetNames;
             List<UObject> result = new List<UObject>();
 
-            AssetBundle ab = bundleInfo.m_AssetBundle;
+            if (bundleInfo != null)
+            {
+                AssetBundle ab = bundleInfo.m_AssetBundle;
 
-            if(abName.Contains("player_cc"))
-            {
-                LogUtil.LogWarning(string.Format("player_cc ：sb {0} action {1}", ab, list[i].onAction));
-            }
+                //if (abName.Contains("player_cc"))
+                //{
+                //    LogUtil.LogWarning(string.Format("player_cc ：sb {0} action {1}", ab, list[i].onAction));
+                //}
 
-            if (assetNames == null || assetNames.Length == 0)
-            {
-                result.Add(ab);
-            }
-            else
-            {
-                //场景数据
-                if (ab.isStreamedSceneAssetBundle)
+                if (assetNames == null || assetNames.Length == 0)
                 {
+                    result.Add(ab);
                 }
                 else
                 {
-                    for (int j = 0; j < assetNames.Length; j++)
+                    //场景数据
+                    if (ab.isStreamedSceneAssetBundle)
                     {
-                        string assetPath = assetNames[j];
-                        AssetBundleRequest request = ab.LoadAssetAsync(assetPath, list[i].assetType);
-                        yield return request;
-                        result.Add(request.asset);
+                    }
+                    else
+                    {
+                        for (int j = 0; j < assetNames.Length; j++)
+                        {
+                            string assetPath = assetNames[j];
+                            AssetBundleRequest request = ab.LoadAssetAsync(assetPath, list[i].assetType);
+                            yield return request;
+                            result.Add(request.asset);
+                        }
                     }
                 }
             }
@@ -511,8 +494,10 @@ public class UnityAssetBundleLoader : IAssetLoader
                 list[i].onAction(result.ToArray());
                 list[i].onAction = null;
             }
-
-            bundleInfo.m_ReferencedCount++;
+            if (bundleInfo != null)
+            {
+                bundleInfo.m_ReferencedCount++;
+            }
         }
         m_LoadRequests.Remove(abName);
     }
@@ -520,6 +505,19 @@ public class UnityAssetBundleLoader : IAssetLoader
     IEnumerator OnLoadAssetBundleInner<T>(System.Uri uri, string abName, Action<bool> action) where T : UObject
     {
         //LogUtil.Log(string.Format("try load asset {0}", abName));
+#if UNITY_WEBGL && !UNITY_EDITOR
+        string abNameHashed = TransformABNameToHashABName(abName);
+        string abNameHashedNoPath = abNameHashed;
+        int pos = abNameHashed.LastIndexOf("/");
+        if (pos != -1)
+        {
+            abNameHashedNoPath = abNameHashed.Substring(pos+1);
+        }
+
+        string assetBundleCachedPath = Path.Combine(Application.persistentDataPath, abNameHashedNoPath);
+#endif
+
+
         bool isManifest = typeof(T) == typeof(AssetBundleManifest);
         if (!isManifest)
         {
@@ -544,26 +542,72 @@ public class UnityAssetBundleLoader : IAssetLoader
                     }
                 }
             }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+            if (File.Exists(assetBundleCachedPath))
+            {
+                // 加载 AssetBundle
+                AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(assetBundleCachedPath);
+                yield return bundleRequest;
+
+                AssetBundle assetBundle = bundleRequest.assetBundle;
+                if (assetBundle != null)
+                {
+                    m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+                    LogUtil.Log(string.Format("load asset from cache. {0}", assetBundleCachedPath));
+                    if (action != null) action(true);
+                    yield break;
+                }
+            }
+#endif
         }
 
         float beginTime = Time.realtimeSinceStartup;
-        UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
+        UnityWebRequest request = UnityWebRequest.Get(uri);
         if(isManifest) request.SetRequestHeader("Cache-Control", "no-cache");
         yield return request.SendWebRequest();
 
         if(request.result == UnityWebRequest.Result.Success)
         {
+            byte[] bundleData = request.downloadHandler.data;
+            AssetBundle assetBundle = AssetBundle.LoadFromMemory(bundleData);
             //LogUtil.Log(string.Format("success load asset {0}, cost time: {1}", abName, Time.realtimeSinceStartup-beginTime));
-            AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
+            //AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
             if (assetBundle != null)
             {
                 m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+#if UNITY_WEBGL && !UNITY_EDITOR
+                // 将字节内容写入目标文件
+                File.WriteAllBytes(assetBundleCachedPath, bundleData);
+                LogUtil.Log(string.Format("save assetbundle to cache {0}", assetBundleCachedPath));
+#endif
+
+                if (action != null) action(true);
+                yield break;
             }
 
-            if (action != null) action(true);
+            if (action != null) action(false);
+            yield break;
         }
         else
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            if (isManifest && File.Exists(assetBundleCachedPath))
+            {
+                // 加载 AssetBundle
+                AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(assetBundleCachedPath);
+                yield return bundleRequest;
+
+                AssetBundle assetBundle = bundleRequest.assetBundle;
+                if (assetBundle != null)
+                {
+                    m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+                    LogUtil.LogWarning(string.Format("load asset from cache. {0}", assetBundleCachedPath));
+                    if (action != null) action(true);
+                    yield break;
+                }
+            }
+#endif
             LogUtil.LogWarning(string.Format("load asset field. {0}", uri.ToString()));
             LogUtil.LogWarning(request.error);
             if (action != null) action(false);
@@ -594,7 +638,7 @@ public class UnityAssetBundleLoader : IAssetLoader
         for(int i=0; i< SearchPaths.Length && !bLoaded; ++i)
         {
             string assetRPath = SearchPaths[i];
-            var uri = new System.Uri(assetRPath + "/" + GameUtil.ManifestName + "/" + abName);
+            var uri = new System.Uri(assetRPath + "/" + AssetBundleManifestName + "/" + abName);
             yield return OnLoadAssetBundleInner<T>(uri, abName, (bool succeed) => 
             {
                 if (succeed) bLoaded = true;
@@ -606,8 +650,48 @@ public class UnityAssetBundleLoader : IAssetLoader
     }
 
 
-    protected override UObject[] LoadAssetImpl(string bundleNamem, string[] assetsPath)
+    protected override UObject[] LoadAssetImpl(string abName, string[] assetsPath)
     {
+        abName = GameUtil.FixABName(abName);
+        AssetBundleInfo bundleInfo = GetLoadedAssetBundle(abName);
+        if (bundleInfo != null)
+        {
+            AssetBundle ab = bundleInfo.m_AssetBundle;
+            if (ab != null)
+            {
+                List<UObject> result = new List<UObject>();
+                if (assetsPath != null)
+                {
+                    if (assetsPath == null || assetsPath.Length == 0)
+                    {
+                        result.Add(ab);
+                    }
+                    else
+                    {
+                        //场景数据
+                        if (ab.isStreamedSceneAssetBundle)
+                        {
+
+                        }
+                        else
+                        {
+                            for (int j = 0; j < assetsPath.Length; j++)
+                            {
+                                string assetPath = assetsPath[j];
+                                UObject obj = ab.LoadAsset<UObject>(GameUtil.FixAssetPath(assetPath));
+                                result.Add(obj);
+                            }
+                        }
+                    }
+                }
+
+                return result.ToArray();
+            }
+        }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        LogUtil.LogError("Sync Load Not Support In WebGL");
+#endif
         return null;
     }
 
@@ -618,7 +702,7 @@ public class UnityAssetBundleLoader : IAssetLoader
             List<string> fixedAssetsPath = new List<string>();
             foreach (var assetPath in assetsPath)
             {
-                fixedAssetsPath.Add(FixAssetPath(assetPath));
+                fixedAssetsPath.Add(GameUtil.FixAssetPath(assetPath));
             }
             LoadAsset<UObject>(bundleName, fixedAssetsPath.ToArray(), (UObject[] objs) =>
             {
@@ -634,7 +718,7 @@ public class UnityAssetBundleLoader : IAssetLoader
     /// <param name="isThorough"></param>
     public override void UnloadAssetBundle(string abName, bool isThorough = false)
     {
-        abName = FixABName(abName);
+        abName = GameUtil.FixABName(abName);
         LogUtil.Log(m_LoadedAssetBundles.Count + " assetbundle(s) in memory before unloading " + abName);
         UnloadAssetBundleInternal(abName, isThorough);
         UnloadDependencies(abName, isThorough);
@@ -696,8 +780,8 @@ public class UnityAssetBundleLoader : IAssetLoader
             return null;
         }
 #if UNITY_WEBGL && !UNITY_EDITOR
-        string realABPath = FixABName(abName);
-        string realAssetPath = FixAssetPath(abName + "/" + filePath);
+        string realABPath = GameUtil.FixABName(abName);
+        string realAssetPath = GameUtil.FixAssetPath(abName + "/" + filePath);
         var ab = GetLoadedABundle(realABPath);
         if(ab == null) LogUtil.Log("ab not loaded:" + realABPath);
         TextAsset textCode = ab != null ? ab.LoadAsset<TextAsset>(realAssetPath) : null;
@@ -728,8 +812,8 @@ public class UnityAssetBundleLoader : IAssetLoader
             }
         }
 
-        var ab = GetLoadedABundle(FixABName(abName));
-        TextAsset textCode = ab != null ? ab.LoadAsset<TextAsset>(FixAssetPath(filePath)) : null;
+        var ab = GetLoadedABundle(GameUtil.FixABName(abName));
+        TextAsset textCode = ab != null ? ab.LoadAsset<TextAsset>(GameUtil.FixAssetPath(filePath)) : null;
         if (textCode != null)
         {
             byte[] buffer = textCode.bytes;

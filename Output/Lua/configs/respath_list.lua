@@ -3,7 +3,11 @@ local respath_list =
 	CameraRoot = "Arts/Prefabs/Camera/CameraRoot.prefab",
 	StartUI = "Arts/UI/UIStart.prefab",
 	LoadingUI = "Arts/UI/UILoading.prefab",
+	MainUI = "Arts/UI/Main/UIMain.prefab",
 	MainWorld = "Arts/Prefabs/Scene/Environment_Prefab.prefab",
+	RoundCorners = "Scripts/UI/UiRoundedCorners/RoundedCorners.shader",
+	IndependentRoundCorners = "Scripts/UI/UiRoundedCorners/IndependentRoundedCorners.shader",
+
 
 
 	ConsoleUI = "TestProjName/UI/ConsoleUI.prefab",

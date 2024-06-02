@@ -4,16 +4,19 @@ using SLua;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UGUIEvent;
+using System;
 
 [CustomLuaClass]
 public class LuaScriptFile : MonoBehaviour {
 
-	LuaTable script = null;
+    LuaTable script = null;
+    LuaTable script_inst = null;
     public string scriptFileName;
     public bool usingUpdate = false;
     public bool usingFixedUpdate = false;
     public bool usingLateUpdate = false;
     public bool forceUpdate = false;
+    public bool requireMode = true;
 
     Dictionary<string, LuaFunction> luaFuncs = new Dictionary<string, LuaFunction>();
 
@@ -21,6 +24,11 @@ public class LuaScriptFile : MonoBehaviour {
 	{
 		get { return LuaSvr.mainState; }
 	}
+
+    public LuaTable lua
+    {
+        get { return script_inst; }
+    }
     
     void Awake()
     {
@@ -77,17 +85,17 @@ public class LuaScriptFile : MonoBehaviour {
         if (!string.IsNullOrEmpty(scriptFileName) && env != null && script == null)
         {
             int top = env.Top;
-            object obj = env.doFile(scriptFileName);
+            object obj = requireMode ? env.doString(string.Format("local M = require [[{0}]]\r\nreturn M", scriptFileName)) : env.doFile(scriptFileName);
             if (obj != null && obj is LuaTable)
             {
-                var M = (LuaTable)obj;
-                script = new LuaTable(env);
+                script = (LuaTable)obj;
+                script_inst = new LuaTable(env);
                 var meta = new LuaTable(env);
-                meta["__index"] = M;
-                script.setMeta(meta);
-                script["component"] = this;
-                script["transform"] = transform;
-                script["gameObject"] = gameObject;
+                meta["__index"] = script;
+                script_inst.setMeta(meta);
+                script_inst["component"] = this;
+                script_inst["transform"] = transform;
+                script_inst["gameObject"] = gameObject;
 
                 AttachEventHandle();
             }
@@ -97,11 +105,17 @@ public class LuaScriptFile : MonoBehaviour {
 
 	void Cleanup()
     {
+        if (script_inst != null)
+        {
+            script_inst.Dispose();
+            script_inst = null;
+        }
+
         if (script != null)
         {
             script.Dispose();
             script = null;
-        }
+        }        
 	}
 
 
@@ -124,7 +138,7 @@ public class LuaScriptFile : MonoBehaviour {
                 }
             }
             if (func != null)
-                return func.call(script, args);
+                return func.call(script_inst, args);
             return null;
         }
         catch (System.Exception e)

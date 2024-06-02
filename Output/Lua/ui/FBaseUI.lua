@@ -112,6 +112,14 @@ do
 		self.m_created = false
 	end
 
+	function FBaseUI:IsValid()
+		if not self.m_panel or self.m_panel.isNil then
+			return false
+		else
+			return true
+		end
+	end
+
 	function FBaseUI:IsActive()
 		if not self.m_panel or self.m_panel.isNil then
 			return false
@@ -156,6 +164,10 @@ do
 		if type(func) ~= "function" then
 			error("create callback must be a function")
 		end
+		if self.m_created then
+			func(self)
+			return
+		end
 		local len = #self.m_createCustomCallback
 		self.m_createCustomCallback[len+1] = func
 	end
@@ -182,9 +194,10 @@ do
 		self:BringDepth()
 		self:OnCreate()
 		FireEvent(EventDef.PanelCreate,self)
-		for i,func in ipairs(self.m_createCustomCallback) do
+		for _,func in ipairs(self.m_createCustomCallback) do
 			func(self)
 		end
+		self.m_createCustomCallback = {}
 	end
 
 	function FBaseUI:OnDestroy()
@@ -197,9 +210,11 @@ do
 		self:OnDestroy()
 		FireEvent(EventDef.PanelDestroy,self)
 		warn("[" .. self.m_panelName.."] is Destroy")
-		for i,func in ipairs(self.m_destoryCustomCallback) do
+		for _,func in ipairs(self.m_destoryCustomCallback) do
 			func(self)
 		end
+		self.m_destoryCustomCallback = {}
+
 		if self.m_UnloadBundleWhenDestroy then
 			UnloadAssetBundle(self.m_abName,false)
 			warn("["..self.m_panelName.."] asset is unload.")

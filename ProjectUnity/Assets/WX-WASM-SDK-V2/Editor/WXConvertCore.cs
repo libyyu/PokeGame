@@ -92,7 +92,7 @@ namespace WeChatWASM
                 // 仅删除StreamingAssets目录
                 if (config.CompileOptions.DeleteStreamingAssets)
                 {
-                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER));
+                    SimpleDelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER));
                 }
 
                 if (buildWebGL && Build() != 0)
@@ -159,7 +159,7 @@ namespace WeChatWASM
         {
             UnityEngine.Debug.LogFormat("[Converter] Starting to adapt framewor. Dst: " + config.ProjectConf.DST);
 
-            UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, miniGameDir));
+            SimpleDelectDir(Path.Combine(config.ProjectConf.DST, miniGameDir));
             string text = String.Empty;
             if (WXExtEnvDef.GETDEF("UNITY_2020_1_OR_NEWER"))
             {
@@ -347,7 +347,7 @@ namespace WeChatWASM
 
 
                     var assetsOutputDir = Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER);
-                    UnityUtil.DelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER));
+                    SimpleDelectDir(Path.Combine(config.ProjectConf.DST, webglDir + "/" + BUNDLE_IDENTIFIER));
                     BuildAssetBundleOptions options = BuildAssetBundleOptions.AppendHashToAssetBundleName | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree | BuildAssetBundleOptions.None;
                     try
                     {
@@ -404,7 +404,7 @@ namespace WeChatWASM
             if (!Directory.Exists(src))
                 return;
 
-            UnityUtil.DelectDir(dst);
+            SimpleDelectDir(dst);
             Directory.CreateDirectory(dst);
             foreach (string filename in Directory.GetFiles(src, "*.*", SearchOption.AllDirectories))
             {
@@ -416,6 +416,37 @@ namespace WeChatWASM
                     File.Copy(filename, foutname, true);
                 }
                 else call(filename, foutname);
+            }
+        }
+
+        static void SimpleDelectDir(string srcPath)
+        {
+            if (!Directory.Exists(srcPath))
+            {
+                return;
+            }
+
+            try
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(srcPath);
+                FileSystemInfo[] fileSystemInfos = directoryInfo.GetFileSystemInfos();
+                FileSystemInfo[] array = fileSystemInfos;
+                foreach (FileSystemInfo fileSystemInfo in array)
+                {
+                    if (fileSystemInfo is DirectoryInfo && !fileSystemInfo.FullName.EndsWith(".git"))
+                    {
+                        DirectoryInfo directoryInfo2 = new DirectoryInfo(fileSystemInfo.FullName);
+                        directoryInfo2.Delete(recursive: true);
+                    }
+                    else
+                    {
+                        File.Delete(fileSystemInfo.FullName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
@@ -781,7 +812,7 @@ namespace WeChatWASM
 
                     // 删除 open-data 相应的文件夹
                     string openDataDir = Path.Combine(config.ProjectConf.DST, miniGameDir, "open-data");
-                    UnityUtil.DelectDir(openDataDir);
+                    SimpleDelectDir(openDataDir);
                     Directory.Delete(openDataDir, true);
                 }
 

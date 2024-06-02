@@ -269,7 +269,9 @@ public class AssetExport
 	{
         string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
         ExportAssets(dst_path);
-	}
+
+        CopyDirectorys(dst_path, Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
+    }
 
 	[MenuItem("ExportAssets/步骤2.打包所有资源(使用Lua源码)", false, 12)]
 	public static void NoZipPackUnityResNoCompileLua()

@@ -34,7 +34,7 @@ do
 		    goRoot.transform.localScale = Vector3(1, 1, 1);
 		    goRoot.layer = UnityEngine.LayerMask.NameToLayer("UI");
 		    local cam = goRoot:AddComponent(UnityEngine.Camera)
-		    cam.clearFlags = UnityEngine.CameraClearFlags.Depth
+		    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
 		    --cam.backgroundColor = Color(128,128,128,255)
 		    cam.cullingMask = bit.lshift(1,5)
 		    cam.orthographic = true;

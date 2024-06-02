@@ -84,6 +84,13 @@ public class FSoundManager : PersistentSingleton<FSoundManager>
         sound.Play();
     }
 
+    public virtual void PlayUISound(AudioClip Sfx)
+    {
+        if (!SfxOn)
+            return;
+		PlaySound(Sfx, Vector3.zero);
+    }
+
     void LateUpdate()
     {
         if (_backgroundMusic == null)

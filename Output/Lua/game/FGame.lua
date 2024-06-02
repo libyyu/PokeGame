@@ -82,11 +82,15 @@ do
 		    DontDestroyOnLoad(goAudio)
 		else
 			local finished
-			AsyncLoad(ResPathReader.CameraRoot, function(asset)
+			AsyncLoadArray({ResPathReader.CameraRoot, ResPathReader.RoundCorners, ResPathReader.IndependentRoundCorners}, function(assetArr)
+				local asset = assetArr[1]
 				local goCamRoot = Instantiate(asset)
 				goCamRoot.transform.localPosition = Vector3(0, 0, 0)
 				goCamRoot.transform.localScale = Vector3(1, 1, 1)
 				self.m_MainCam = goCamRoot.transform:Find("MainCameraRoot/MainCamera")
+
+				print("shader:", assetArr[2], assetArr[3])
+
 				finished = true
 			end)
 			while not finished do

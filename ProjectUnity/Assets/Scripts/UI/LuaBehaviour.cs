@@ -28,6 +28,16 @@ public class LuaBehaviour : MonoBehaviour {
         UnTouchGUIMsg();
         initialize = false;
     }
+
+    protected void OnBecameVisible()
+    {
+        CallMethod("onBecameVisible");
+    }
+    protected void OnBecameInvisible()
+    {
+        CallMethod("onBecameInvisible");
+    }
+
     /// <summary>
     /// 添加单击事件
     /// </summary>

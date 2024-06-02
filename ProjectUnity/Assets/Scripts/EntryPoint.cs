@@ -20,6 +20,9 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
  
     private LuaSvr lua = null;
 
+    private LuaFunction tickFun = null;
+    private LuaFunction lateTickFun = null;
+
     public LuaState LuaState
     {
         get
@@ -191,12 +194,13 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         DeltaTime = Time.deltaTime;
         m_TimerList.Tick(CurTime);
 
-        LuaState l = LuaSvr.mainState;
-        LuaFunction func = l.getFunction("TickGame");
-        if (null != func)
+        if(tickFun == null)
         {
-            func.call(DeltaTime);
-            func.Dispose();
+            tickFun = LuaSvr.mainState.getFunction("TickGame");
+        }
+        if (null != tickFun)
+        {
+            tickFun.call(DeltaTime);
         }
     }
 
@@ -204,12 +208,15 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     {
         if (!LuaSvr.inited || null == LuaSvr.mainState)
             return;
-        LuaState l = LuaSvr.mainState;
-        LuaFunction func = l.getFunction("LateTickGame");
-        if (null != func)
+
+
+        if (lateTickFun == null)
         {
-            func.call();
-            func.Dispose();
+            lateTickFun = LuaSvr.mainState.getFunction("LateTickGame");
+        }
+        if (null != lateTickFun)
+        {
+            lateTickFun.call();
         }
         m_LateTimerList.Tick(CurTime);
     }
@@ -222,6 +229,10 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #if !UNITY_WEBGL || UNITY_EDITOR
         LogUtil.DetachUnityLogHandle();
 #endif
+
+        if (tickFun != null) tickFun.Dispose(); tickFun = null;
+        if (lateTickFun != null) lateTickFun.Dispose(); lateTickFun = null;
+
 #if !UNITY_EDITOR
         if (null != lua) { lua.Close(); lua = null; }
 #endif
@@ -339,5 +350,18 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     public void OnReceivedWebGLMessage(string jsonStr)
     {
         LogUtil.Log("OnReceivedWebGLMessage:" + ", args:" + jsonStr);
+        try
+        {
+            if (!LuaSvr.inited || null == LuaSvr.mainState)
+                return;
+            LuaState l = LuaSvr.mainState;
+            LuaFunction func = l.getFunction("OnReceivedWebGLMessage");
+            if (null != func)
+            {
+                func.call(jsonStr);
+                func.Dispose();
+            }
+        }
+        catch (Exception e) { }
     }
 }

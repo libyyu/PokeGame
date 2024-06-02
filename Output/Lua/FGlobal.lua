@@ -82,8 +82,8 @@ function AsyncLoad(assetName, cb)
 end
 
 function AsyncLoadArray(assetNames, cb)
-	if type(assetName) ~= "table" then
-		error(("argument #%d expected table, but got %s"):format(2, type(assetName)))
+	if type(assetNames) ~= "table" then
+		error(("argument #%d expected table, but got %s"):format(2, type(assetNames)))
 	end
 
 	local results = {}
