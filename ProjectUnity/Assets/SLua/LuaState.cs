@@ -1296,9 +1296,16 @@ end
 	    {
             if (bytes.Length > 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
             {
-                var oldBytes = bytes;
-                bytes = new byte[bytes.Length - 3];
-                Array.Copy(oldBytes, 3, bytes, 0, bytes.Length);
+                try
+                {
+                    byte[] newbytes = new byte[bytes.Length - 3];
+                    Array.Copy(bytes, 3, newbytes, 0, newbytes.Length);
+                    return newbytes;
+                }
+                catch(Exception e)
+                {
+                    Logger.LogException(e);
+                }
             }
             return bytes;
 	    }

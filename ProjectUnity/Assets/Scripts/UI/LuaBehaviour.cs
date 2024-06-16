@@ -13,6 +13,9 @@ public class LuaBehaviour : MonoBehaviour {
     private LuaTable msgHandle = null;
     protected bool initialize = false;
 
+
+    private bool __visible = false;
+
     protected void Awake() {
         initialize = true;
         CallMethod("onAwake", gameObject);
@@ -20,6 +23,11 @@ public class LuaBehaviour : MonoBehaviour {
 
     protected void Start() {
         CallMethod("onStart");
+
+        if(!__visible && gameObject.activeSelf)
+        {
+            OnBecameVisible();
+        }
     }
 
     protected void OnDestroy()
@@ -31,10 +39,12 @@ public class LuaBehaviour : MonoBehaviour {
 
     protected void OnBecameVisible()
     {
+        __visible = true;
         CallMethod("onBecameVisible");
     }
     protected void OnBecameInvisible()
     {
+        __visible = false;
         CallMethod("onBecameInvisible");
     }
 
@@ -72,8 +82,34 @@ public class LuaBehaviour : MonoBehaviour {
 
     public void TouchGUIMsg(LuaTable luaMsgHandler)
     {
+        UnTouchGUIMsg();
         msgHandle = luaMsgHandler;
-        AttachEventHandle();
+        if (msgHandle != null)
+        {
+            LuaFunction fun = msgHandle["onClick"] as LuaFunction;
+            if(fun != null)
+            {
+                TouchButton();
+            }
+
+            fun = msgHandle["onSubmit"] as LuaFunction;
+            if (fun != null)
+            {
+                TouchInputField();
+            }
+
+            fun = msgHandle["onStepTweenFinish"] as LuaFunction;
+            if (fun != null)
+            {
+                TouchTweener();
+            }
+
+            fun = msgHandle["onScroll"] as LuaFunction;
+            if (fun != null)
+            {
+                TouchScroll();
+            }
+        }
     }
 
     [ContextMenu("UnTouchEvent")]
@@ -95,7 +131,7 @@ public class LuaBehaviour : MonoBehaviour {
         TouchScroll();
     }
 
-    void TouchButton()
+    public void TouchButton()
     {
         var comps = gameObject.GetComponentsInChildren<Button>(true);
         int Length = comps.Length;
@@ -105,7 +141,7 @@ public class LuaBehaviour : MonoBehaviour {
             EventClick.Get(button.gameObject).onClick += onClick;
         }
     }
-    void UnTouchButton()
+    public void UnTouchButton()
     {
         var comps = gameObject.GetComponentsInChildren<Button>(true);
         int Length = comps.Length;
@@ -115,7 +151,7 @@ public class LuaBehaviour : MonoBehaviour {
             EventClick.Get(button.gameObject).onClick -= onClick;
         }
     }
-	void TouchInputField()
+    public void TouchInputField()
 	{
 		var comps = gameObject.GetComponentsInChildren<InputField>(true);
 		int Length = comps.Length;
@@ -126,7 +162,7 @@ public class LuaBehaviour : MonoBehaviour {
             EventEdit.Get(inputfield.gameObject).onTextChange += onTextChange;
         }
 	}
-	void UnTouchInputField()
+    public void UnTouchInputField()
 	{
 		var comps = gameObject.GetComponentsInChildren<InputField>(true);
 		int Length = comps.Length;
@@ -137,7 +173,7 @@ public class LuaBehaviour : MonoBehaviour {
             EventEdit.Get(inputfield.gameObject).onTextChange -= onTextChange;
         }
 	}
-    void TouchTweener()
+    public void TouchTweener()
     {
         var comps = gameObject.GetComponentsInChildren<UGUI.ITween>(true);
         int Length = comps.Length;
@@ -148,7 +184,7 @@ public class LuaBehaviour : MonoBehaviour {
             tweener.onStepTweenFinish += onStepTweenFinish;
         }
     }
-    void UnTouchTweener()
+    public void UnTouchTweener()
     {
         var comps = gameObject.GetComponentsInChildren<UGUI.ITween>(true);
         int Length = comps.Length;

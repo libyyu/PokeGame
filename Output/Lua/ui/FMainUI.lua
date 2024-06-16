@@ -87,7 +87,7 @@ do
 		self.actListView.OnFetchMore = function(down)
 			if down then
 				self:RequestPage(self.m_requestPage, function(page, data)
-					print("get page ", page, data, dant and #data)
+					print("get page ", page, data, data and #data)
 					if data then
 						table.extend(self.actListData, data)
 						self.actListView.itemCount = #(self.actListData)
@@ -98,7 +98,7 @@ do
 		end
 
 		self:RequestPage(1, function(page, data)
-			print("get page ", page, data, dant and #data)
+			print("get page ", page, data, data and #data)
 			if data then
 				table.extend(self.actListData, data)
 				self.actListView.itemCount = #(self.actListData)
@@ -114,7 +114,9 @@ do
 		self:FindChildObj("Content/Loading"):SetActive(true)
 		self.m_bRequesting = true
 		_G.coro.start(function()
-			local request = UnityEngine.Networking.UnityWebRequest.Get("http://192.168.18.146:8001/mfwhotlist?page="..tostring(page))
+			local request = UnityEngine.Networking.UnityWebRequest.Get("http://wx.libyyu.com/mfwhotlist?page="..tostring(page))
+			-- request:SetRequestHeader("Access-Control-Allow-Origin", "*")
+			-- request:SetRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			request:SendWebRequest()
 			while not request.isDone do
 				_G.coro.yield()

@@ -1,5 +1,4 @@
 mergeInto(LibraryManager.library, {
-  //输出日志到浏览器console
   logToWeb:function(str) 
   {
       console.log(UTF8ToString(str)); 
@@ -53,5 +52,35 @@ mergeInto(LibraryManager.library, {
       console.log(UTF8ToString(method) , " method not found");
     }
     return null;
+  },
+  getStreamingAssetsDebugUrl:function()
+  {
+    var streamingAssetsDebugUrl = "";
+    if(typeof GameGlobal === "object" && typeof GameGlobal.manager === "object" && typeof GameGlobal.manager.streamingAssetsDebugUrl == 'string') {
+      streamingAssetsDebugUrl = GameGlobal.manager.streamingAssetsDebugUrl;
+    }
+    var length = lengthBytesUTF8(streamingAssetsDebugUrl) + 1;
+    var buffer = _malloc(length);
+    stringToUTF8(streamingAssetsDebugUrl, buffer, length);
+    return buffer;
+  },
+  getStreamingAssetsBackupUrls:function()
+  {
+    var array = [];
+    if(typeof GameGlobal === "object" && typeof GameGlobal.manager === "object" && typeof GameGlobal.manager.streamingAssetsBackupUrls == 'object') {
+      array = GameGlobal.manager.streamingAssetsBackupUrls;
+    }
+
+    var jsonString = JSON.stringify(array);
+
+    var lengthBytes = lengthBytesUTF8(jsonString) + 1;
+    var stringOnWasmHeap = _malloc(lengthBytes);
+    stringToUTF8(jsonString, stringOnWasmHeap, lengthBytes);
+
+    return stringOnWasmHeap;
+  },
+  freeStringArrayInJS:function(buffer)
+  {
+    _free(buffer);
   }
 });

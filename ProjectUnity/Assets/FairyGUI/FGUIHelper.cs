@@ -1,21 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using FairyGUI;
 using UnityEngine;
 using SLua;
 
 [CustomLuaClass]
 public static class FGUIHelper 
 {
-    public static GComponent ToCom(GObject obj)
+    public static FairyGUI.GComponent ToCom(FairyGUI.GObject obj)
     {
         if (obj == null)
             return null;
 
-        GComponent comp = null;
-        if (obj.GetType() == typeof(GLoader))
+        FairyGUI.GComponent comp = null;
+        if (obj.GetType() == typeof(FairyGUI.GLoader))
         {
-            GLoader loader = obj as GLoader;
+            FairyGUI.GLoader loader = obj as FairyGUI.GLoader;
             comp = loader.component;
         }
         else
@@ -25,13 +24,13 @@ public static class FGUIHelper
         return comp;
     }
 
-    public static GObject Find(GObject root, string path)
+    public static FairyGUI.GObject Find(FairyGUI.GObject root, string path)
     {
-        GComponent comp = ToCom(root);
+        FairyGUI.GComponent comp = ToCom(root);
         if (comp == null)
             return null;
 
-        GObject obj = null;
+        FairyGUI.GObject obj = null;
         string[] ns = path.Split(new char[] { '/' });
         foreach(string name in ns)
         {
@@ -48,8 +47,18 @@ public static class FGUIHelper
         return obj;
     }
 
-    public static FGUIWindow CreatePanel(string n1, string n2)
+    public static FGUIWindow CreateWindow(string n1, string n2)
     {
         return new FGUIWindow(n1, n2);
+    }
+
+    public static FairyGUI.UIPanel CreatePanel(string n1, string n2)
+    {
+        GameObject go = new GameObject(n2 + "@" + n1);
+        FairyGUI.UIPanel ret = go.AddComponent<FairyGUI.UIPanel>();
+        ret.packageName = n1;
+        ret.componentName = n2;
+
+        return ret;
     }
 }

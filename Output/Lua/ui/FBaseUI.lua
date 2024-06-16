@@ -8,14 +8,16 @@ local FDebugOption = require "game.FDebugOption"
 
 local FBaseUI = FLua.Class("FBaseUI")
 do
-	local s_lastPanel = nil
 	function FBaseUI:__constructor()
 		self.m_abName = ""
+		self.m_assetPath = ""
 		self.m_panelName = ""
 		self.m_panel = nil
-		self.m_msghandler = nil
 		self.m_loading = false
 		self.m_created = false
+		self.m_isfgui = false
+		self.m_fguiwindow = nil
+		self.m_msghandler = nil
 		self.m_UnloadBundleWhenDestroy = true
 		self.m_TriggerGCWhenDestroy = true
 		self.m_createCustomCallback = {}
@@ -23,25 +25,79 @@ do
 	end
 
 	function FBaseUI:GetUIRoot()
-		return FGUIMan.Instance():GetGUIRoot()
+		if self:UseFairyGUI() then
+			return FGUIMan.Instance():GetUGUIRoot()
+		else
+			return FGUIMan.Instance():GetUGUIRoot()
+		end
 	end
+
 	function FBaseUI:UseFairyGUI()
-		return FGUIMan.Instance():UseFairyGUI()
+		return self.m_isfgui
 	end
 
 	function FBaseUI:TouchGUIMsg()
-		self.m_msghandler = self.m_panel:GetComponent(LuaBehaviour)
-		if not self.m_msghandler then
-			self.m_msghandler = self.m_panel:AddComponent(LuaBehaviour)
+		if not self:UseFairyGUI() or not self.m_fguiwindow then
+			self.m_msghandler = self.m_panel:GetComponent(LuaBehaviour)
+			if not self.m_msghandler then
+				self.m_msghandler = self.m_panel:AddComponent(LuaBehaviour)
+			end
+			local function getFunc(name)
+				local func = self:tryget(name)
+				if func and type(func) == "function" then
+					return func
+				end
+				return nil
+			end
+			local mst = {
+				onDestroy = function() self:_Destroy() end,
+				onBecameVisible = function(...) self:_BecameVisible(...) end,
+				onBecameInvisible = function(...) self:_BecameInvisible(...) end,
+			}
+			local func = getFunc("OnClick")
+			if func then
+				mst.onClick = function(...) self:OnClick(...) end
+			end 
+			func = getFunc("OnSubmit")
+			if func then
+				mst.onSubmit = function(...) self:OnSubmit(...) end
+			end 
+			func = getFunc("OnStepTweenFinish")
+			if func then
+				mst.onStepTweenFinish = function(...) self:OnStepTweenFinish(...) end
+			end 
+			func = getFunc("OnScroll")
+			if func then
+				mst.onScroll = function(...) self:OnScroll(...) end
+			end 
+
+			self.m_msghandler:TouchGUIMsg(mst)
+		else
+			local mst = {
+				OnInit = function(...) print("OnInit", ...) end,
+				OnShown = function(...) self:_BecameVisible(...) end,
+				OnHide = function(...) self:_BecameInvisible(...) end,
+			}
+
+			if self.m_fguiwindow then
+				print("TouchGUIMsg", self.m_fguiwindow, self.m_panel)
+				local func = self:tryget("DoShowAnimation")
+				if func and type(func) == "function" then
+					mst.DoShowAnimation = function(...) print("DoShowAnimation", ...) end
+				end 
+				func = self:tryget("DoHideAnimation")
+				if func and type(func) == "function" then
+					mst.DoHideAnimation = function(...) print("DoHideAnimation", ...) end
+				end 
+				local ui = self.m_fguiwindow
+				ui:SetLuaHandler(mst)
+			else
+				local gpanel = self.m_panel:GetComponent("UIPanel")
+				local ui = gpanel.ui
+				print("TouchGUIMsg", ui, self.m_panel)
+				ui:SetLuaHandler(mst)
+			end
 		end
-		local mst = {
-			onDestroy = function() self:_Destroy() end,
-			onClick = function(go) self:_Click(go) end,
-			onSubmit = function(go,str) self:_Submit(go,str) end,
-			onStepTweenFinish = function(go) self:_onStepTweenFinish(go) end,
-			onScroll = function(go,v) self:_onScroll(go,v) end
-		}
-		self.m_msghandler:TouchGUIMsg(mst)
 	end
 
 	function FBaseUI:BringDepth()
@@ -52,13 +108,34 @@ do
 		-- canvas.overrideSorting = true
 	end
 
-	local function getPanelNameFromResName (resName)
-		local i, j, cap = resName:lower():find("/([%w_]+)%.prefab$")
-		if cap then
-			return cap
+	local function parseResource(resName)
+		if resName:find('@') then
+			local arr = resName:split('@')
+			local componentName, packageABPath = arr[1], arr[2]
+			local window = false
+			if componentName:find(':') then
+				local sb = componentName:split(':')
+				componentName = sb[1]
+				window = tonumber(sb[2]) == 1
+			end
+			local abName = TransformABName(packageABPath)
+			local i = packageABPath:find_last("/", true)
+			local packageName = packageABPath:sub(i+1, -1)
+			return true, abName, componentName, packageName, window
+		else
+			local prefabName
+			local i, j, cap = resName:find("/([%w_]+)%.prefab$")
+			if cap then
+				prefabName = cap
+			else
+				local i, j, cap = resName:find("([^/]*)$")
+				prefabName = cap or "<noname>"	
+			end
+
+			local abName = TransformABName(resName)
+
+			return false, abName, prefabName
 		end
-		local i, j, cap = resName:lower():find("([^/]*)$")
-		return cap or "<noname>"
 	end
 
 	function FBaseUI:CreatePanel(assetName)
@@ -66,48 +143,91 @@ do
 		FGUIMan.Instance():InitUIRoot()
 
 		if not self.m_loading and not self.m_created then
-			self.m_abName = assetName
-			self.m_panelName = getPanelNameFromResName(assetName)
+			local isfgui, abName, prefabName, packageName, window = parseResource(assetName)
+			print("parseResource", assetName, abName, prefabName, packageName)
 			self.m_loading = true
+			self.m_isfgui = isfgui
+			self.m_assetPath = assetName
+			self.m_panelName = prefabName
+			self.m_abName = abName
 			FGUIMan.Instance():RegisterPanel(assetName, self)
 			FGUIMan.Instance():LoadPanelRes(assetName, function(obj)
 				if self:UseFairyGUI() then
+					local bundle = obj
+					if bundle then
+						if not self.m_loading then
+							return
+						end
+						
+						if not GameUtil.IsEditorEnv() then
+							FairyGUI.UIPackage.AddPackage(bundle)
+						end
+						
+						if window then
+							print("CreateWindow",packageName,prefabName)
+							local panel = FGUIHelper.CreateWindow(packageName, prefabName)
+							if panel then
+								print("panel", panel)
+								self.m_fguiwindow = panel
+								self.m_panel = panel.rootContainer.gameObject
+								self.m_panel.layer = LayerMask.NameToLayer("FairyGUI")
+								self.m_panel.tag = "Panel"
+								self:_Create()
+								panel.modal = true
+								panel:Show()
+							end
+						else
+							print("CreatePanel",packageName,prefabName)
+							local panel = FGUIHelper.CreatePanel(packageName, prefabName)
+							if panel then
+								print("panel", panel)
+								self.m_panel = panel.gameObject
+								self.m_panel.layer = LayerMask.NameToLayer("FairyGUI")
+								self.m_panel.tag = "Panel"
+								self:_Create()
+							end
+						end
+
+						if not self.m_panel then
+							self:DestroyPanel()	
+							warn("CreatePanel Failed,assetname="..assetName)
+						end
+					else
+						self:DestroyPanel()
+						warn("CreatePanel Failed,assetbundle="..assetName)
+					end
 				else
 					if obj then
 						if not self.m_loading then
 							return
 						end
 						self.m_panel = Instantiate(obj, self.m_panelName, self:GetUIRoot())
+						self.m_panel.transform.localPosition = Vector3(0, 0, 0)
+						self.m_panel.transform.localScale = Vector3(1, 1, 1)
+						self.m_panel.layer = LayerMask.NameToLayer("UI")
+						self.m_panel.tag = "Panel"
 						self:_Create()
 					else
 						self:DestroyPanel()
 						warn("CreatePanel Failed,assetbundle="..assetName)
 					end
 				end
-			end)
+			end, self:UseFairyGUI())
 		end
 	end
 
-	-- function FBaseUI:Detach(root)
-	-- 	if self.m_panel then
-	-- 		self.m_panel.transform:SetParent(root)
-	-- 	end
-	-- 	return self.m_panel
-	-- end
-
-	-- function FBaseUI:Attach(go)
-	-- 	assert(go)
-	-- 	assert(go.tag == "Panel")
-	-- 	assert(not self.m_panel)
-
-	-- 	self.m_panel = go
-	-- 	self:_Create()
-	-- end
-
 	function FBaseUI:DestroyPanel()
 		if self.m_panel ~= nil then
-			UnityEngine.Object.Destroy(self.m_panel)
+			if self:UseFairyGUI() then
+				if self.m_fguiwindow then
+					FGUIMan.Instance():RemoveWindow(self.m_fguiwindow)
+				end
+				UnityEngine.Object.Destroy(self.m_panel)
+			else
+				UnityEngine.Object.Destroy(self.m_panel)
+			end
 		end
+
 		self.m_loading = false
 		self.m_created = false
 	end
@@ -137,11 +257,20 @@ do
 			warn("error" .. tostring(self) .. "(FindChild)".. ", self.m_panel is nil")
 			return nil
 		else
-			local obj = self.m_panel.transform:Find(objpath)
-			if not obj then
-				warn("can not " .. tostring(self) .. "(FindChild):".. objpath)
+			if self:UseFairyGUI() then
+				local obj = self:FindChildObj(objpath)
+				if not obj then
+					warn("can not " .. tostring(self) .. "(FindChild):".. objpath)
+				end
+				return FGUIHelper.ToCom(obj)
+			else
+				local obj = self.m_panel.transform:Find(objpath)
+				if not obj then
+					warn("can not " .. tostring(self) .. "(FindChild):".. objpath)
+				end
+
+				return obj
 			end
-			return obj
 		end
 	end
 
@@ -150,12 +279,24 @@ do
 			warn("error " .. tostring(self) .. "(FindChildObj)".. ", self.m_panel is nil")
 			return nil
 		else
-			local transform = self.m_panel.transform:Find(objpath)
-			if not transform then
-				warn("error " .. tostring(self) .. "(FindChildObj):".. objpath)
-				return nil
+			if self:UseFairyGUI() then
+				if not self.m_fguiwindow then
+					local uipanel = self.m_panel:GetComponent("UIPanel")
+					if uipanel and uipanel.ui then
+						return FGUIHelper.Find(uipanel.ui, objpath)
+					end
+				else
+
+				end
+				local uiwindow
 			else
-				return transform.gameObject
+				local transform = self.m_panel.transform:Find(objpath)
+				if not transform then
+					warn("error " .. tostring(self) .. "(FindChildObj):".. objpath)
+					return nil
+				else
+					return transform.gameObject
+				end
 			end
 		end
 	end
@@ -184,11 +325,6 @@ do
 	function FBaseUI:_Create()
 		self.m_loading = false
 		self.m_created = true
-		self.m_panel.layer = LayerMask.NameToLayer("UI")
-		self.m_panel.tag = "Panel"
-		-- self.m_panel.transform:SetParent(self:GetUIRoot())
-		-- self.m_panel.transform.localPosition = Vector3(0, 0, 0)
-		-- self.m_panel.transform.localScale = Vector3(1, 1, 1)
 		FGUIMan.Instance():RegisterPanelObj(self.m_panel, self)
 		self:TouchGUIMsg()
 		self:BringDepth()
@@ -205,6 +341,7 @@ do
 	function FBaseUI:_Destroy()
 		FGUIMan.Instance():UnRegisterPanelObj(self.m_panel)
 		self.m_panel = nil
+		self.m_fguiwindow = nil
 		self.m_loading = false
 		self.m_created = false
 		self:OnDestroy()
@@ -224,34 +361,18 @@ do
 			warn("["..self.m_panelName.."] destroyed trigger gc.")
 		end
 	end
-	function FBaseUI:OnClick(go)
-	end
-	function FBaseUI:_Click(go)
-		if FDebugOption.Instance():ShowClick() then
-			warn("id:["..go.name.."("..tostring(self)..")".."] is clicked")
-		end
-		self:OnClick(go)
-	end
-	function FBaseUI:OnSubmit(go,str)
-	end
-	function FBaseUI:_Submit(go,str)
-		self:OnSubmit(go,str)
+
+	function FBaseUI:OnVisibleChanged(bShow)
 	end
 
-	function FBaseUI:_onStepTweenFinish(go)
-		--warn("onStepTweenFinish",go.name)
+	function FBaseUI:_BecameVisible(...)
+		print("BecameVisible", self, ...)
+		self:OnVisibleChanged(true)
 	end
-
-	function FBaseUI:onScrollValue(go,v)
-	end
-	function FBaseUI:onScrollFinished(go)
-	end
-
-	function FBaseUI:_onScroll(go,v)
-		self:onScrollValue(go,v)
-		if v >= 1.0 then
-			self:onScrollFinished(go)
-		end
+	
+	function FBaseUI:_BecameInvisible(...)
+		print("BecameInvisible", self, ...)
+		self:OnVisibleChanged(false)
 	end
 end
 

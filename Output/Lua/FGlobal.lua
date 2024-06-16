@@ -48,12 +48,26 @@ function OnHotKeyInput( key, down )
 	end
 end
 
-function TransformABName(assetName)
-	local abName = assetName:lower()
-	if abName:sub(1, 7) ~= 'assets/' then
-		abName = "assets/" .. abName
+function TransformAssetName(assetName)
+	--Arts/UI/UIStart.prefab
+	--Main@Arts/UI/FairyGUI/Starup.ab
+
+	local assetName = assetName:lower()
+	local i = assetName:find('@')
+    if i then
+    	assetName = assetName:sub(i + 1, -1)
+    end
+
+	if assetName:sub(1, 7) ~= 'assets/' then
+		assetName = "assets/" .. assetName
 	end
 
+    return assetName
+end
+
+function TransformABName(assetName)
+	local abName = TransformAssetName(assetName)
+	
 	local i = abName:find_last(".", true)
     if i then
         abName = abName:sub(1, i - 1)

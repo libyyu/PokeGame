@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,1344" extention="Label">
+  <displayList>
+    <image id="n2_aewv" name="n2" src="aewv6" fileName="images/5.png" xy="6,0" size="750,1344"/>
+    <text id="n0_aewv" name="title" xy="87,38" size="584,90" fontSize="36" align="center" vAlign="middle" autoSize="none" singleLine="true" text="窗口标题">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+    <component id="n3_aewv" name="closeButton" src="aewvg" fileName="CloseBtn.xml" xy="661,2" size="100,117"/>
+    <graph id="n4_aewv" name="dragArea" xy="9,19" size="650,114"/>
+  </displayList>
+</component>

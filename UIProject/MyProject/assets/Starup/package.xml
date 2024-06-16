@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="vgfw4h8t">
+  <resources>
+    <component id="ktjh0" name="Main.xml" path="/" exported="true"/>
+    <image id="aewv2" name="huawen1_png.png" path="/image/"/>
+    <image id="aewv3" name="huawen2_png.png" path="/image/"/>
+    <image id="aewv4" name="loading.png.jpg" path="/image/"/>
+    <movieclip id="aewv5" name="pet.jta" path="/image/"/>
+    <component id="aewv6" name="LoadProgress.xml" path="/"/>
+    <component id="aewv8" name="testBtn.xml" path="/"/>
+  </resources>
+  <publish name="" path="C:\Workspace\Unity\PokeGame\ProjectUnity\Assets\Arts\UI\FairyGUI" packageCount="2"/>
+</packageDescription>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="90,100" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aewv" name="n0" src="aewv9" fileName="images/btnimage.png" xy="2,0" size="86,99">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <movieclip id="n1_aewv" name="n1" src="aewva" fileName="images/quan.jta" xy="-13,-6" size="120,120"/>
+  </displayList>
+  <Button/>
+</component>

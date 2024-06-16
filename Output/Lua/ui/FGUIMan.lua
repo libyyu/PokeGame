@@ -9,71 +9,95 @@ do
 		return l_instance
 	end
 	function FGUIMan:__constructor()
-		self.m_UIRoot = nil
+		self.m_UGUIRoot = nil
+		self.m_FGUIRoot = nil
 		self.m_PanelContainer = {}
 		self.m_ObjToPanel = setmetatable({}, {__mode = "k"})
 	end
 
-	function FGUIMan:GetGUIRoot()
-		return self.m_UIRoot
+	function FGUIMan:GetUGUIRoot()
+		return self.m_UGUIRoot
+	end
+	function FGUIMan:GetFGUIRoot()
+		return self.m_FGUIRoot
 	end
 
-	function FGUIMan:UseFairyGUI()
-		return false
+	function FGUIMan:InitUGUIRoot()
+		if self.m_UGUIRoot and not self.m_UGUIRoot.isNil then return end
+		print("GUIMan:InitUGUIRoot")
+
+		local goRoot = NewGameObject("UIRoot(2D)");
+	    goRoot.transform.localPosition = Vector3(0, 0, 0);
+	    goRoot.transform.localScale = Vector3(1, 1, 1);
+	    goRoot.layer = UnityEngine.LayerMask.NameToLayer("UI");
+	    local cam = goRoot:AddComponent(UnityEngine.Camera)
+	    cam.clearFlags = UnityEngine.CameraClearFlags.Depth
+	    --cam.backgroundColor = Color(128,128,128,255)
+	    cam.cullingMask = bit.lshift(1,5)
+	    cam.orthographic = true;
+	    cam.orthographicSize = 3.2
+	    cam.nearClipPlane = -10;
+	    cam.farClipPlane = 1000;
+	    cam.depth = 2
+
+	    goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
+        --goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
+
+        local goCanvas = NewGameObject("Canvas")
+        goCanvas.layer = UnityEngine.LayerMask.NameToLayer("UI");
+
+        goCanvas.transform:SetParent(goRoot.transform)
+	    goCanvas.transform.localPosition = Vector3(0, 0, 0);
+	    goCanvas.transform.localScale = Vector3(1, 1, 1);
+	    local canvas = goCanvas:AddComponent(LuaHelper.GetClsType("UnityEngine.Canvas"));
+	    canvas.renderMode = 1--UnityEngine.RenderMode.ScreenSpaceCamera;
+	    canvas.pixelPerfect = true
+	    canvas.worldCamera = cam
+
+	    local canScaler = goCanvas:AddComponent(UnityEngine.UI.CanvasScaler);
+	    canScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
+	    canScaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight
+	    canScaler.referenceResolution = Vector2(750, 1344)
+
+	    goCanvas:AddComponent(UnityEngine.UI.GraphicRaycaster);
+
+        --Event Handle
+		local goEvent = NewGameObject("EventSystem");
+	    goEvent:AddComponent(EventSystems.EventSystem);
+	    goEvent:AddComponent(EventSystems.StandaloneInputModule);
+	    --goEvent:AddComponent(EventSystems.TouchInputModule);
+	    DontDestroyOnLoad(goEvent)
+	    goEvent.transform:SetParent(goRoot.transform)
+
+	    self.m_UGUIRoot = goCanvas.transform
+	end
+
+	function FGUIMan:InitFGUIRoot()
+		if self.m_FGUIRoot and not self.m_FGUIRoot.isNil then return end
+		print("GUIMan:InitFGUIRoot")
+		FairyGUI.StageCamera.LayerName = "FairyGUI"
+		local camearGo = NewGameObject("Stage Camera");
+	    camearGo.transform.localPosition = Vector3(2.790179, -5, 0);
+	    camearGo.transform.localScale = Vector3(1, 1, 1);
+	    camearGo.layer = UnityEngine.LayerMask.NameToLayer("FairyGUI")
+	    local cam = camearGo:AddComponent(UnityEngine.Camera)
+	    cam.clearFlags = UnityEngine.CameraClearFlags.Depth
+	    --cam.backgroundColor = Color(128,128,128,255)
+	    cam.cullingMask = bit.lshift(1,20)
+	    cam.orthographic = true;
+	    cam.orthographicSize = 5
+	    cam.nearClipPlane = -30;
+	    cam.farClipPlane = 30;
+	    cam.depth = 4
+	    camearGo:AddComponent(LuaHelper.GetClsType("FairyGUI.StageCamera"))
+
+		--FairyGUI.GRoot.inst:SetContentScaleFactor(750, 1344)
+		self.m_FGUIRoot = FairyGUI.GRoot.inst.rootContainer.gameObject
 	end
 
 	function FGUIMan:InitUIRoot()
-		if self.m_UIRoot and not self.m_UIRoot.isNil then return end
-		print("GUIMan:InitUIRoot")
-		if self:UseFairyGUI() then
-			FairyGUI.GRoot.inst:SetContentScaleFactor(1344, 750)
-			self.m_UIRoot = FairyGUI.GRoot.inst.rootContainer.gameObject
-		else
-			local goRoot = NewGameObject("UIRoot(2D)");
-		    goRoot.transform.localPosition = Vector3(0, 0, 0);
-		    goRoot.transform.localScale = Vector3(1, 1, 1);
-		    goRoot.layer = UnityEngine.LayerMask.NameToLayer("UI");
-		    local cam = goRoot:AddComponent(UnityEngine.Camera)
-		    cam.clearFlags = UnityEngine.CameraClearFlags.SolidColor
-		    --cam.backgroundColor = Color(128,128,128,255)
-		    cam.cullingMask = bit.lshift(1,5)
-		    cam.orthographic = true;
-		    cam.orthographicSize = 3.2
-		    cam.nearClipPlane = -10;
-		    cam.farClipPlane = 1000;
-		    cam.depth = 2
-
-		    goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
-	        --goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
-
-	        local goCanvas = NewGameObject("Canvas")
-	        goCanvas.layer = UnityEngine.LayerMask.NameToLayer("UI");
-
-	        goCanvas.transform:SetParent(goRoot.transform)
-		    goCanvas.transform.localPosition = Vector3(0, 0, 0);
-		    goCanvas.transform.localScale = Vector3(1, 1, 1);
-		    local canvas = goCanvas:AddComponent(LuaHelper.GetClsType("UnityEngine.Canvas"));
-		    canvas.renderMode = 1--UnityEngine.RenderMode.ScreenSpaceCamera;
-		    canvas.pixelPerfect = true
-		    canvas.worldCamera = cam
-
-		    local canScaler = goCanvas:AddComponent(UnityEngine.UI.CanvasScaler);
-		    canScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
-		    canScaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight
-		    canScaler.referenceResolution = Vector2(750, 1344)
-
-		    goCanvas:AddComponent(UnityEngine.UI.GraphicRaycaster);
-
-	        --Event Handle
-			local goEvent = NewGameObject("EventSystem");
-		    goEvent:AddComponent(EventSystems.EventSystem);
-		    goEvent:AddComponent(EventSystems.StandaloneInputModule);
-		    --goEvent:AddComponent(EventSystems.TouchInputModule);
-		    DontDestroyOnLoad(goEvent)
-		    goEvent.transform:SetParent(goRoot.transform)
-
-		    self.m_UIRoot = goCanvas.transform
-		end
+		self:InitUGUIRoot()
+		self:InitFGUIRoot()
 	end
 
 	function FGUIMan:RegisterPanel(name, panel)
@@ -84,10 +108,10 @@ do
 	end
 
 	function FGUIMan:RegisterPanelObj(obj, panel)
-		self.m_ObjToPanel[obj] = panel
+		if obj then self.m_ObjToPanel[obj] = panel end
 	end
 	function FGUIMan:UnRegisterPanelObj(obj)
-		self.m_ObjToPanel[obj] = nil
+		if obj then self.m_ObjToPanel[obj] = nil end
 	end
 
 	function FGUIMan:GetPanelByObj(obj)
@@ -95,26 +119,20 @@ do
 	end
 
 	function FGUIMan:RemoveWindow(child)
-		if self:UseFairyGUI() then 
-			FairyGUI.GRoot.inst:RemoveChild(child)
-		end
+		FairyGUI.GRoot.inst:RemoveChild(child)
 	end
 
-	function FGUIMan:LoadPanelRes(assetName, callback)
-		if self:UseFairyGUI() then 
-			AsyncLoadBundleArray({ResPathReader.PokerCommon, assetName}, function(bundles)
-				if not bundles[1] then
-					warn("Failed to get common resource")
-				else
-					FairyGUI.UIPackage.AddPackage(bundles[1])
-				end
-				if bundles[2] then
-					FairyGUI.UIPackage.AddPackage(bundles[2])
-					callback(bundles[2])
-				else
-					callback(nil)
-				end
-			end)
+	function FGUIMan:LoadPanelRes(assetName, callback, fgui)
+		if fgui then 
+			if GameUtil.IsEditorEnv() then
+				print("AddPackage:", assetName, TransformAssetName(assetName))
+				FairyGUI.UIPackage.AddPackage(TransformAssetName(assetName))
+				callback({})
+			else
+				AsyncLoadABundle(assetName, function(bundle)
+					callback(bundle)
+				end)
+			end
 		else
 			AsyncLoad(assetName, function(obj)
 				callback(obj)
@@ -130,8 +148,8 @@ do
 					callback(panel)
 				end
 			end
-			function M.OnClick(panel, go)
-				if onclick then
+			if onclick then
+				M.OnClick = function(panel, go)
 					onclick(panel, go)
 				end
 			end

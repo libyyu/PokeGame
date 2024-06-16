@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using WeChatWASM;
 using UObject = UnityEngine.Object;
 
 
@@ -543,23 +544,17 @@ public class UnityAssetBundleLoader : IAssetLoader
                 }
             }
 
+            ReturnTuple<bool> LoadCacheResult = new ReturnTuple<bool>();
 #if UNITY_WEBGL && !UNITY_EDITOR
-            if (File.Exists(assetBundleCachedPath))
-            {
-                // 加载 AssetBundle
-                AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(assetBundleCachedPath);
-                yield return bundleRequest;
-
-                AssetBundle assetBundle = bundleRequest.assetBundle;
-                if (assetBundle != null)
-                {
-                    m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
-                    LogUtil.Log(string.Format("load asset from cache. {0}", assetBundleCachedPath));
-                    if (action != null) action(true);
-                    yield break;
-                }
-            }
+            yield return OnLoadABFromCache(abName, uri, assetBundleCachedPath, LoadCacheResult);
+#else
+            yield return OnLoadABFromCache(abName, uri, null, LoadCacheResult);
 #endif
+            if(LoadCacheResult.value_0)
+            {
+                if (action != null) action(true);
+                yield break;
+            }
         }
 
         float beginTime = Time.realtimeSinceStartup;
@@ -577,9 +572,16 @@ public class UnityAssetBundleLoader : IAssetLoader
             {
                 m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
 #if UNITY_WEBGL && !UNITY_EDITOR
-                // 将字节内容写入目标文件
-                File.WriteAllBytes(assetBundleCachedPath, bundleData);
-                LogUtil.Log(string.Format("save assetbundle to cache {0}", assetBundleCachedPath));
+                try
+                {
+                    // 将字节内容写入目标文件
+                    File.WriteAllBytes(assetBundleCachedPath, bundleData);
+                    LogUtil.Log(string.Format("save assetbundle to cache {0}", assetBundleCachedPath));
+                }
+                catch(Exception e)
+                {
+                    LogUtil.LogWarning(string.Format("save assetbundle to cache. {0} {1}", assetBundleCachedPath, e.ToString()));
+                }
 #endif
 
                 if (action != null) action(true);
@@ -591,26 +593,48 @@ public class UnityAssetBundleLoader : IAssetLoader
         }
         else
         {
-#if UNITY_WEBGL && !UNITY_EDITOR
-            if (isManifest && File.Exists(assetBundleCachedPath))
-            {
-                // 加载 AssetBundle
-                AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(assetBundleCachedPath);
-                yield return bundleRequest;
-
-                AssetBundle assetBundle = bundleRequest.assetBundle;
-                if (assetBundle != null)
-                {
-                    m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
-                    LogUtil.LogWarning(string.Format("load asset from cache. {0}", assetBundleCachedPath));
-                    if (action != null) action(true);
-                    yield break;
-                }
-            }
-#endif
             LogUtil.LogWarning(string.Format("load asset field. {0}", uri.ToString()));
             LogUtil.LogWarning(request.error);
             if (action != null) action(false);
+        }
+    }
+
+    IEnumerator OnLoadABFromCache(string abName, System.Uri uri, string assetBundleCachedPath, ReturnTuple<Boolean> LoadResult)
+    {
+        LoadResult.value_0 = false;
+        // Load AssetBundle from cache
+        UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
+        yield return request.SendWebRequest();
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
+            if (assetBundle != null)
+            {
+                m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+                LogUtil.Log(string.Format("load asset from cache. {0}", uri.ToString()));
+                LoadResult.value_0 = true;
+                yield break;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(assetBundleCachedPath) && File.Exists(assetBundleCachedPath))
+        {
+            // 加载 AssetBundle
+            AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(assetBundleCachedPath);
+            yield return bundleRequest;
+
+            AssetBundle assetBundle = bundleRequest.assetBundle;
+            if (assetBundle != null)
+            {
+                m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+                LogUtil.Log(string.Format("load asset from cache. {0}", assetBundleCachedPath));
+                LoadResult.value_0 = true;
+                yield break;
+            }
+            else
+            {
+                LogUtil.LogWarning(string.Format("load assetbundle from cache failed. {0}", assetBundleCachedPath));
+            }
         }
     }
 
@@ -618,9 +642,8 @@ public class UnityAssetBundleLoader : IAssetLoader
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         string abNameHashed = TransformABNameToHashABName(abName);
-        var streamingAssetsUrl = Application.streamingAssetsPath;
-        if(WebCommon.isRunEnvWX())
-            streamingAssetsUrl = WebCommon.get_streamingAssetsUrl();
+        var streamingAssetsUrl = WebCommon.get_streamingAssetsMainUrl();
+
         System.Uri uri = null;
         if (typeof(T) == typeof(AssetBundleManifest))
         {
@@ -632,7 +655,91 @@ public class UnityAssetBundleLoader : IAssetLoader
         {
             uri = new System.Uri(streamingAssetsUrl + "/" + abNameHashed);
         }
-        yield return OnLoadAssetBundleInner<T>(uri, abName, null);
+
+        ReturnTuple<Boolean> LoadABResult = new ReturnTuple<Boolean>();
+        yield return OnLoadAssetBundleInner<T>(uri, abName, (bool succeed) =>
+        {
+            if (succeed) LoadABResult.value_0 = true;
+        });
+
+        if (!LoadABResult.value_0)
+        {
+            string[] backupUrls = WebCommon.get_streamingAssetsBackupUrls();
+            if (backupUrls != null && backupUrls.Length > 0)
+            {
+                LogUtil.LogWarning(string.Format("backupUrls. {0}", backupUrls.Length));
+                for (int i = 0; i < backupUrls.Length && !LoadABResult.value_0; ++i)
+                {
+                    LogUtil.LogWarning(string.Format("backup url. {0}", backupUrls[i]));
+                    if (typeof(T) == typeof(AssetBundleManifest))
+                    {
+                        var sep = "?";
+                        if (abNameHashed.Contains('?')) sep = "&";
+                        uri = new System.Uri(backupUrls[i] + "/" + abNameHashed + sep + "t_=" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
+                    }
+                    else
+                    {
+                        uri = new System.Uri(backupUrls[i] + "/" + abNameHashed);
+                    }
+                    yield return OnLoadAssetBundleInner<T>(uri, abName, (bool succeed) =>
+                    {
+                        if (succeed) LoadABResult.value_0 = true;
+                    });
+
+                    if (LoadABResult.value_0) break;
+                }
+            }
+            else
+                LogUtil.LogWarning(string.Format("backupUrls empty"));
+        }
+
+        //try read from cache
+        if (typeof(T) == typeof(AssetBundleManifest))
+        {
+            AssetBundleInfo bundleInfo = GetLoadedAssetBundle(abName);
+            if (bundleInfo == null)
+            {
+                string abNameHashedNoPath = abNameHashed;
+                int pos = abNameHashed.LastIndexOf("/");
+                if (pos != -1)
+                {
+                    abNameHashedNoPath = abNameHashed.Substring(pos + 1);
+                }
+
+                string assetBundleCachedPath = Path.Combine(Application.persistentDataPath, abNameHashedNoPath);
+
+                ReturnTuple<bool> LoadCacheResult = new ReturnTuple<bool>();
+                yield return OnLoadABFromCache(abName, uri, assetBundleCachedPath, LoadCacheResult);
+                if(LoadCacheResult.value_0)
+                {
+                    yield break;
+                }
+
+                string[] backupUrls = WebCommon.get_streamingAssetsBackupUrls();
+                if (backupUrls != null && backupUrls.Length > 0)
+                {
+                    for (int i = 0; i < backupUrls.Length && !LoadABResult.value_0; ++i)
+                    {
+                        if (typeof(T) == typeof(AssetBundleManifest))
+                        {
+                            var sep = "?";
+                            if (abNameHashed.Contains('?')) sep = "&";
+                            uri = new System.Uri(backupUrls[i] + "/" + abNameHashed + sep + "t_=" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
+                        }
+                        else
+                        {
+                            uri = new System.Uri(backupUrls[i] + "/" + abNameHashed);
+                        }
+
+                        yield return OnLoadABFromCache(abName, uri, assetBundleCachedPath, LoadCacheResult);
+                        if (LoadCacheResult.value_0)
+                        {
+                            yield break;
+                        }
+                    }
+                }
+            }
+        }
 #else
         bool bLoaded = false;
         for(int i=0; i< SearchPaths.Length && !bLoaded; ++i)

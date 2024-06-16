@@ -73,6 +73,7 @@ namespace SLua
                 typeof(FByteBuffer),
 				typeof(FTcpSocketNetworkComponent),
                 typeof(UnityEngine.GameObject),
+                typeof(FairyGUI.GComponent),
             };
         }
 
@@ -83,7 +84,6 @@ namespace SLua
             // add its name into list, SLua will generate all exported interface automatically for you
 
             //list.Add("NGUI");
-            list.Add("FairyGUI");
 #if UNITY_WEBGL || WEIXINMINIGAME || UNITY_EDITOR
             //list.Add("Wx");
 #endif
@@ -114,6 +114,7 @@ namespace SLua
             return new HashSet<string>
             {
                 //"NLuaTest.Mock"
+                "FairyGUI",
             };
         }
 

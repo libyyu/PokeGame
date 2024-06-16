@@ -33,7 +33,7 @@ do
 
 	function FAssetBundleUtil:AsyncLoadABundle(assetBundleName, cb)
 		print("LoadABundle:" .. assetBundleName)
-		self.m_AssetsMgr:LoadABundleAsync(assetBundleName, assetName, function(obj)
+		self.m_AssetsMgr:LoadABundleAsync(assetBundleName, function(obj)
 			if cb then cb(obj) end
 		end)
 	end

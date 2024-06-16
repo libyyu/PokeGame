@@ -30,13 +30,32 @@ do
 
 	function FPanelStartUI:OnCreate()
 		self:FindChildObj("progressbar"):SetActive(false)
+
+		self:FindChildObj("btnStart"):GetComponent("Button").onClick:AddListener(function()
+			self:ShowBag()
+		end)
 	end
 
-	function FPanelStartUI:OnClick(go)
-		if go.name == "btnStart" then
-			theGame:EnterGameLogic()		
-		end
+	function FPanelStartUI:ShowBag()
+		require "ui.FGUIMan".Instance():CreateSimpleUI(ResPathReader.BagBtnUI, function(panel)
+			print('panel:FindChildObj("BagBtn")', panel:FindChildObj("BagBtn"))
+			panel:FindChildObj("BagBtn").onClick:Add(function()
+				print("bag btn click")
+				require "ui.FGUIMan".Instance():CreateSimpleUI(ResPathReader.BagMainUI, function(bag)
+					panel:DestroyPanel()
+				end)
+			end)
+
+			self:DestroyPanel()
+		end)
 	end
+
+	-- function FPanelStartUI:OnClick(go)
+	-- 	if go.name == "btnStart" then
+	-- 		--theGame:EnterGameLogic()		
+	-- 		self:ShowBag()
+	-- 	end
+	-- end
 
 	function FPanelStartUI:AutoProgress(time, start, to, onfinish)
 		self:FindChildObj("progressbar"):SetActive(true)

@@ -46,7 +46,7 @@ public class MyPostprocessor : AssetPostprocessor
         */
         for (int i = 0; i < importedAssets.Length; ++i)
         {
-            AssetExport.AutoSetAssetBundleName(importedAssets[i]);
+            //AssetExport.AutoSetAssetBundleName(importedAssets[i]);
         }
     }
 }

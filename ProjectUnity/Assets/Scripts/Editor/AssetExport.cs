@@ -191,7 +191,38 @@ public class AssetExport
         }
 	}
 
-	[MenuItem("ExportAssets/测试")]
+    static void DelectDirectory(string srcPath)
+    {
+        if (!Directory.Exists(srcPath))
+        {
+            return;
+        }
+
+        try
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(srcPath);
+            FileSystemInfo[] fileSystemInfos = directoryInfo.GetFileSystemInfos();
+            FileSystemInfo[] array = fileSystemInfos;
+            foreach (FileSystemInfo fileSystemInfo in array)
+            {
+                if (fileSystemInfo is DirectoryInfo && !fileSystemInfo.FullName.EndsWith(".git"))
+                {
+                    DirectoryInfo directoryInfo2 = new DirectoryInfo(fileSystemInfo.FullName);
+                    directoryInfo2.Delete(recursive: true);
+                }
+                else
+                {
+                    File.Delete(fileSystemInfo.FullName);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    [MenuItem("ExportAssets/测试")]
 	static void Test()
 	{
 		CopyDirectorys (Application.dataPath+"/../../Output",Application.dataPath+"/../../Output2");
@@ -270,6 +301,7 @@ public class AssetExport
         string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
         ExportAssets(dst_path);
 
+		DelectDirectory(Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
         CopyDirectorys(dst_path, Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
     }
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="100,100">
+  <displayList>
+    <image id="n0_aewv" name="n0" src="aewv2" fileName="images/1.png" xy="5,5" size="90,90"/>
+    <loader id="n1_aewv" name="icon" xy="6,6" size="88,88"/>
+    <image id="n2_aewv" name="n2" src="aewv4" fileName="images/3.png" xy="0,0" size="100,100"/>
+    <text id="n3_aewv" name="title" xy="6,64" size="88,39" fontSize="28" color="#ff0000" autoSize="none" text="aaaaaaa"/>
+  </displayList>
+</component>

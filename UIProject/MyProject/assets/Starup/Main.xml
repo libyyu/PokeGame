@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,1344">
+  <displayList>
+    <graph id="n0_aewv" name="n0" xy="0,0" size="750,1344" type="rect" fillColor="#ff336666"/>
+    <component id="n3_aewv" name="n3" src="aewv6" fileName="LoadProgress.xml" xy="101,1212">
+      <relation target="" sidePair="center-center"/>
+      <ProgressBar value="50" max="100"/>
+    </component>
+    <component id="n4_aewv" name="n4" src="aewv8" fileName="testBtn.xml" xy="72,988" size="85,59"/>
+  </displayList>
+</component>
