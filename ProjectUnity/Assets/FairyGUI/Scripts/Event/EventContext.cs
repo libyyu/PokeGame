@@ -91,6 +91,13 @@ namespace FairyGUI
             pool.Push(value);
         }
 
+        public override string ToString()
+        {
+            string bas = base.ToString();
+            if(sender != null && sender is GObject)
+                return bas + string.Format("(type:{0}, {1} {2})", type, ((GObject)sender).ToString(), ((GObject)sender).gameObjectName);
+            return bas + string.Format("(type:{0}, {1})", type, sender != null ? sender.ToString() : "");
+        }
 
 
 #if UNITY_2019_3_OR_NEWER

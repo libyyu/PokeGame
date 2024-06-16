@@ -7,7 +7,6 @@
     <image id="aewv4" name="loading.png.jpg" path="/image/"/>
     <movieclip id="aewv5" name="pet.jta" path="/image/"/>
     <component id="aewv6" name="LoadProgress.xml" path="/"/>
-    <component id="aewv8" name="testBtn.xml" path="/"/>
   </resources>
   <publish name="" path="C:\Workspace\Unity\PokeGame\ProjectUnity\Assets\Arts\UI\FairyGUI" packageCount="2"/>
 </packageDescription>

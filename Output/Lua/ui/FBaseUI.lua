@@ -37,17 +37,17 @@ do
 	end
 
 	function FBaseUI:TouchGUIMsg()
+		local function getFunc(name)
+			local func = self:tryget(name)
+			if func and type(func) == "function" then
+				return func
+			end
+			return nil
+		end
 		if not self:UseFairyGUI() or not self.m_fguiwindow then
 			self.m_msghandler = self.m_panel:GetComponent(LuaBehaviour)
 			if not self.m_msghandler then
 				self.m_msghandler = self.m_panel:AddComponent(LuaBehaviour)
-			end
-			local function getFunc(name)
-				local func = self:tryget(name)
-				if func and type(func) == "function" then
-					return func
-				end
-				return nil
 			end
 			local mst = {
 				onDestroy = function() self:_Destroy() end,
@@ -56,22 +56,40 @@ do
 			}
 			local func = getFunc("OnClick")
 			if func then
-				mst.onClick = function(...) self:OnClick(...) end
+				mst.onClick = function(...) print("ui:click", ...) self:OnClick(...) end
 			end 
 			func = getFunc("OnSubmit")
 			if func then
 				mst.onSubmit = function(...) self:OnSubmit(...) end
 			end 
-			func = getFunc("OnStepTweenFinish")
+			func = getFunc("OnChange")
 			if func then
-				mst.onStepTweenFinish = function(...) self:OnStepTweenFinish(...) end
+				mst.onTextChange = function(...) self:OnChange(...) end
 			end 
-			func = getFunc("OnScroll")
-			if func then
-				mst.onScroll = function(...) self:OnScroll(...) end
-			end 
+			-- func = getFunc("OnStepTweenFinish")
+			-- if func then
+			-- 	mst.onStepTweenFinish = function(...) self:OnStepTweenFinish(...) end
+			-- end 
+			-- func = getFunc("OnScroll")
+			-- if func then
+			-- 	mst.onScroll = function(...) self:OnScroll(...) end
+			-- end 
 
 			self.m_msghandler:TouchGUIMsg(mst)
+
+			if self:UseFairyGUI() then
+				local gpanel = self.m_panel:GetComponent("UIPanel")
+				local ui = gpanel.ui
+				if mst.onClick then
+					ui:AddEventListener("onClick", mst.onClick)
+				end
+				if mst.onSubmit then
+					ui:AddEventListener("onSubmit", mst.onSubmit)
+				end
+				if mst.onTextChange then
+					ui:AddEventListener("onChanged", mst.onTextChange)
+				end
+			end
 		else
 			local mst = {
 				OnInit = function(...) print("OnInit", ...) end,
@@ -91,11 +109,21 @@ do
 				end 
 				local ui = self.m_fguiwindow
 				ui:SetLuaHandler(mst)
-			else
-				local gpanel = self.m_panel:GetComponent("UIPanel")
-				local ui = gpanel.ui
-				print("TouchGUIMsg", ui, self.m_panel)
-				ui:SetLuaHandler(mst)
+				if getFunc("OnClick") then
+					ui:AddEventListener("onClick", function(...)
+						print("ui:click", ...) self:OnClick(...) 
+					end)
+				end
+				if getFunc("OnSubmit") then
+					ui:AddEventListener("onSubmit", function(...)
+						print("ui:input-submit", ...) self:OnSubmit(...) 
+					end)
+				end
+				if getFunc("OnChange") then
+					ui:AddEventListener("onChanged", function(...)
+						print("ui:input-changed", ...) self:OnChange(...) 
+					end)
+				end
 			end
 		end
 	end

@@ -97,6 +97,14 @@ public class LuaBehaviour : MonoBehaviour {
             {
                 TouchInputField();
             }
+            else
+            {
+                fun = msgHandle["onTextChange"] as LuaFunction;
+                if(fun != null )
+                {
+                    TouchInputField();
+                }
+            }
 
             fun = msgHandle["onStepTweenFinish"] as LuaFunction;
             if (fun != null)

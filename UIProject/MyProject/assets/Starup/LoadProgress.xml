@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="577,53" extention="ProgressBar">
   <displayList>
-    <image id="n0_aewv" name="n0" src="aewv4" fileName="image/loading.png.jpg" xy="53,17" size="470,16">
+    <image id="n0_aewv" name="n0" src="aewv4" fileName="image/loading.png.jpg" xy="53,17" size="470,16" grayed="true">
       <relation target="" sidePair="width-width,height-height"/>
     </image>
     <image id="n1_aewv" name="bar" src="aewv4" fileName="image/loading.png.jpg" xy="53,17" size="470,16"/>
     <image id="n2_aewv" name="n2" src="aewv2" fileName="image/huawen1_png.png" xy="3,-4" size="85,59"/>
     <image id="n3_aewv" name="n3" src="aewv3" fileName="image/huawen2_png.png" xy="485,-4"/>
-    <loader id="n5_aewv" name="n5" xy="5,-37" size="100,100" url="ui://vgfw4h8taewv5"/>
+    <loader id="n5_aewv" name="ani" xy="455,-37" size="100,100" url="ui://vgfw4h8taewv5">
+      <relation target="n1_aewv" sidePair="right-right"/>
+    </loader>
   </displayList>
   <ProgressBar/>
 </component>

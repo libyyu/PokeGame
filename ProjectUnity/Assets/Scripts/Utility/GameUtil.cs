@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 [CustomLuaClass]
 public static class GameUtil
@@ -947,6 +948,29 @@ public static class GameUtil
 
             // 返回十六进制字符串
             return sb.ToString();
+        }
+    }
+
+    public static void AsyncLoadScene(string sceneName, Action<float> loadPro = null)
+    {
+        EntryPoint.Instance.StartCoroutine(DoLoad(sceneName, loadPro));
+    }
+
+    static IEnumerator DoLoad(string sceneName, Action<float> loadPro)
+    {
+#if UNITY_5_3_OR_NEWER
+        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+#else
+        AsyncOperation op = Application.LoadLevelAsync(sceneName);
+#endif
+        float startTime = Time.time;
+        while (!op.isDone)
+        {
+            float value = ((Time.time - startTime) * 100f / 3f);
+            if (value > 100.0f)
+                value = 100.0f;
+            if (loadPro != null) loadPro(value);
+            yield return null;
         }
     }
 

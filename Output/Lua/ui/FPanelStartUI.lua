@@ -4,11 +4,6 @@ local FGUITools = require "utility.FGUITools"
 local l_instance = nil
 local FPanelStartUI = FLua.Class(FBaseUI, "FPanelStartUI")
 do
-	local OBJPATH = 
-	{
-		Name = "login_panel/input_group/account/input_account",
-		Passwd = "login_panel/input_group/password/input_password",
-	}
 	function FPanelStartUI.Instance()
 		if not l_instance then
 			l_instance = FPanelStartUI()
@@ -21,7 +16,7 @@ do
 	function FPanelStartUI:ShowPanel(show)
 		if show then
 			if not self.m_panel then
-				self:CreatePanel(ResPathReader.StartUI)
+				self:CreatePanel(ResPathReader.StarupUI)
 			end
 		else
 			self:DestroyPanel()
@@ -29,9 +24,16 @@ do
 	end
 
 	function FPanelStartUI:OnCreate()
-		self:FindChildObj("progressbar"):SetActive(false)
+		-- self:FindChildObj("progressbar"):SetActive(false)
 
-		self:FindChildObj("btnStart"):GetComponent("Button").onClick:AddListener(function()
+		-- self:FindChildObj("btnStart"):GetComponent("Button").onClick:AddListener(function()
+		-- 	self:ShowBag()
+		-- end)
+		local pb = self:FindChild("progressBar")
+		print("pb", pb)
+		pb.value = 0
+		pb:AutoProgress(1.5, nil, 100, function()
+			print("load finished")
 			self:ShowBag()
 		end)
 	end

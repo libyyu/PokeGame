@@ -74,7 +74,7 @@ do
 
 	function FGUIMan:InitFGUIRoot()
 		if self.m_FGUIRoot and not self.m_FGUIRoot.isNil then return end
-		print("GUIMan:InitFGUIRoot")
+		
 		FairyGUI.StageCamera.LayerName = "FairyGUI"
 		local camearGo = NewGameObject("Stage Camera");
 	    camearGo.transform.localPosition = Vector3(2.790179, -5, 0);
@@ -91,8 +91,11 @@ do
 	    cam.depth = 4
 	    camearGo:AddComponent(LuaHelper.GetClsType("FairyGUI.StageCamera"))
 
-		--FairyGUI.GRoot.inst:SetContentScaleFactor(750, 1344)
 		self.m_FGUIRoot = FairyGUI.GRoot.inst.rootContainer.gameObject
+		print("GUIMan:InitFGUIRoot", self.m_FGUIRoot)
+		FairyGUI.GRoot.inst:SetContentScaleFactor(750, 1344, FairyGUI.UIContentScaler.ScreenMatchMode.MatchWidthOrHeight)
+
+
 	end
 
 	function FGUIMan:InitUIRoot()
@@ -125,12 +128,22 @@ do
 	function FGUIMan:LoadPanelRes(assetName, callback, fgui)
 		if fgui then 
 			if GameUtil.IsEditorEnv() then
+				local commonAsset = ResPathReader.CommonBundle
+				print("AddPackage:", commonAsset, TransformAssetName(commonAsset))
+				FairyGUI.UIPackage.AddPackage(TransformAssetName(commonAsset))
 				print("AddPackage:", assetName, TransformAssetName(assetName))
 				FairyGUI.UIPackage.AddPackage(TransformAssetName(assetName))
+				FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
+				print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
 				callback({})
 			else
-				AsyncLoadABundle(assetName, function(bundle)
-					callback(bundle)
+				AsyncLoadABundleArray({ ResPathReader.CommonBundle, assetName }, function(bundles)
+					if bundles[1] then
+						FairyGUI.UIPackage.AddPackage(bundles[1])
+						FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
+						print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
+					end
+					callback(bundle[2])
 				end)
 			end
 		else

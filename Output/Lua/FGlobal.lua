@@ -115,12 +115,30 @@ function AsyncLoadArray(assetNames, cb)
 	end
 end
 
-function AsyncLoadABundle(assetBundleName)
+function AsyncLoadABundle(assetBundleName, cb)
 	local abName = TransformABName(assetBundleName)
 	local FAssetBundleUtil = require "utility.FAssetBundleUtil"
 	FAssetBundleUtil.Instance():AsyncLoadABundle(abName, function(ab)
 		cb(ab)
 	end)
+end
+
+function AsyncLoadABundleArray(assetBundleNames, cb)
+	if type(assetBundleName) ~= "table" then
+		error(("argument #%d expected table, but got %s"):format(2, type(assetBundleName)))
+	end
+	local finishnum = 0
+	local num = #assetBundleName
+	local result = {}
+	for i, v in ipairs(assetBundleName) do
+		AsyncLoadABundle(v, function(ab)
+			result[i] = ab
+			finishnum = finishnum + 1
+			if finishnum == num then
+				cb(result)
+			end
+		end)
+	end
 end
 
 function UnloadAssetBundle(assetBundleName, unload)

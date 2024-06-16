@@ -7,6 +7,7 @@ local respath_list =
 	MainWorld = "Arts/Prefabs/Scene/Environment_Prefab.prefab",
 	RoundCorners = "Scripts/UI/UiRoundedCorners/RoundedCorners.shader",
 	IndependentRoundCorners = "Scripts/UI/UiRoundedCorners/IndependentRoundedCorners.shader",
+	CommonBundle = "Arts/UI/FairyGUI/Common",
 	StarupUI = "Main@Arts/UI/FairyGUI/Starup",
 	BagBtnUI = "Main@Arts/UI/FairyGUI/Package",
 	BagMainUI = "BagWin:1@Arts/UI/FairyGUI/Package",

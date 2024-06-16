@@ -6,6 +6,8 @@ namespace FairyGUI
 {
     public class GObject : EventDispatcher
     {
+        public GObject rootUI { get; private set; }
+
         /// <summary>
         /// GObject的id，仅作为内部使用。与name不同，id值是不会相同的。
         /// id is for internal use only.
@@ -160,6 +162,10 @@ namespace FairyGUI
             _internalVisible = true;
             id = "_n" + _gInstanceCounter++;
             name = string.Empty;
+
+            // Begin LDF
+            rootUI = this;
+            // End LDF
 
             CreateDisplayObject();
 
@@ -1840,6 +1846,13 @@ namespace FairyGUI
         internal void InternalSetParent(GComponent value)
         {
             parent = value;
+
+            // Begin LDF
+            if (parent != null)
+            {
+                this.rootUI = parent.rootUI;
+            }
+            // End LDF
         }
 
         virtual protected void HandlePositionChanged()

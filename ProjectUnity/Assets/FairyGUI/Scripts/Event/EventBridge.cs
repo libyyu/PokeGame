@@ -143,6 +143,15 @@ namespace FairyGUI
         {
             _dispatching = true;
             context.sender = owner;
+            if (context.initiator != null && context.initiator is Container)
+            {
+                Container c = context.initiator as Container;
+                if (c.gOwner != null)
+                {
+                    context.sender = c.gOwner;
+                }
+            }            
+                
             try
             {
                 if (_callback1 != null)
@@ -163,6 +172,15 @@ namespace FairyGUI
 
             _dispatching = true;
             context.sender = owner;
+            if (context.initiator != null && context.initiator is Container)
+            {
+                Container c = context.initiator as Container;
+                if (c.gOwner != null)
+                {
+                    context.sender = c.gOwner;
+                }
+            }
+
             try
             {
                 _captureCallback(context);

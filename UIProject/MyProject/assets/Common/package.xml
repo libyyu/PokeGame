@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="dhp1kx65">
+  <resources>
+    <sound id="aewv0" name="click.wav" path="/sound/" exported="true"/>
+    <sound id="aewv1" name="tabswitch.wav" path="/sound/" exported="true"/>
+    <component id="aewv3" name="Tips.xml" path="/" exported="true"/>
+  </resources>
+  <publish name=""/>
+</packageDescription>
