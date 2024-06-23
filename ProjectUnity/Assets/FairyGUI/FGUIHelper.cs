@@ -17,6 +17,10 @@ public static class FGUIHelper
             FairyGUI.GLoader loader = obj as FairyGUI.GLoader;
             comp = loader.component;
         }
+        else if(obj.GetType() == typeof(FairyGUI.GComponent))
+        {
+            comp = obj as FairyGUI.GComponent;
+        }
         else
         {
             comp = obj.asCom;

@@ -1,26 +1,20 @@
-local FBaseUI = require "ui.FBaseUI"
+local FPanelBaseUI = require "ui.FPanelBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FPanelStartUI = FLua.Class(FBaseUI, "FPanelStartUI")
+local FPanelStartUI = FLua.Class(FPanelBaseUI, "FPanelStartUI")
 do
 	function FPanelStartUI.Instance()
 		if not l_instance then
 			l_instance = FPanelStartUI()
-			l_instance.m_UnloadBundleWhenDestroy = true
-			l_instance.m_TriggerGCWhenDestroy = true
+			--l_instance.m_UnloadBundleWhenDestroy = true
+			--l_instance.m_TriggerGCWhenDestroy = true
 		end
 		return l_instance
 	end
 
-	function FPanelStartUI:ShowPanel(show)
-		if show then
-			if not self.m_panel then
-				self:CreatePanel(ResPathReader.StarupUI)
-			end
-		else
-			self:DestroyPanel()
-		end
+	function FPanelStartUI:GetResPath()
+		return ResPathReader.StarupUI
 	end
 
 	function FPanelStartUI:OnCreate()
@@ -29,12 +23,18 @@ do
 		-- self:FindChildObj("btnStart"):GetComponent("Button").onClick:AddListener(function()
 		-- 	self:ShowBag()
 		-- end)
-		local pb = self:FindChild("progressBar")
+		local pb = self:RequireFind("progressBar")
 		print("pb", pb)
 		pb.value = 0
-		pb:AutoProgress(1.5, nil, 100, function()
+		pb:AutoProgress(2, nil, 100, function()
 			print("load finished")
-			self:ShowBag()
+			self:ShowMain()
+		end)
+	end
+
+	function FPanelStartUI:ShowMain()
+		require "ui.FPanelMainUI".Instance():ShowPanel(true, nil, function(panel)
+			self:DestroyPanel()
 		end)
 	end
 

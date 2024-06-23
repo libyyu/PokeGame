@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,100">
+  <displayList>
+    <component id="n2_aewv" name="b1" src="aewv5" fileName="btns/Button1.xml" xy="0,15" group="n1_aewv">
+      <relation target="" sidePair="left-left"/>
+      <Button title="AAAA"/>
+    </component>
+    <component id="n3_aewv" name="b2" src="aewv5" fileName="btns/Button1.xml" xy="299,15" group="n1_aewv">
+      <relation target="" sidePair="center-center"/>
+      <Button title="BBBBB"/>
+    </component>
+    <component id="n4_aewv" name="b3" src="aewv5" fileName="btns/Button1.xml" xy="572,15" group="n1_aewv">
+      <relation target="" sidePair="right-right"/>
+      <Button title="CCCCC"/>
+    </component>
+    <group id="n1_aewv" name="n1" xy="0,15" size="745,74"/>
+  </displayList>
+</component>

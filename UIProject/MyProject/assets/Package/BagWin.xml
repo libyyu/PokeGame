@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="750,1344">
   <displayList>
-    <component id="n0_aewv" name="frame" src="aewvh" fileName="WinFrame.xml" xy="0,0"/>
-    <list id="n1_aewv" name="list" xy="67,180" size="610,869" layout="pagination" overflow="scroll" lineGap="5" colGap="2" lineItemCount="6" defaultItem="ui://d2qjqg75aewvi">
+    <component id="n0_aewv" name="frame" src="aewvh" fileName="WinFrame.xml" xy="0,0" size="750,1344">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <list id="n1_aewv" name="list" xy="67,119" size="610,1046" layout="pagination" overflow="scroll" lineGap="5" colGap="2" lineItemCount="6" defaultItem="ui://d2qjqg75aewvi">
+      <relation target="" sidePair="width-width,height-height"/>
       <item/>
       <item/>
       <item/>

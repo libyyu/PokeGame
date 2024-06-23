@@ -9,6 +9,7 @@ local respath_list =
 	IndependentRoundCorners = "Scripts/UI/UiRoundedCorners/IndependentRoundedCorners.shader",
 	CommonBundle = "Arts/UI/FairyGUI/Common",
 	StarupUI = "Main@Arts/UI/FairyGUI/Starup",
+	FMainUI = "Main@Arts/UI/FairyGUI/Main",
 	BagBtnUI = "Main@Arts/UI/FairyGUI/Package",
 	BagMainUI = "BagWin:1@Arts/UI/FairyGUI/Package",
 

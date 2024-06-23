@@ -7,7 +7,7 @@
     <image id="aewv3" name="2.png" path="/images/"/>
     <image id="aewv4" name="3.png" path="/images/"/>
     <image id="aewv5" name="4.png" path="/images/"/>
-    <image id="aewv6" name="5.png" path="/images/"/>
+    <image id="aewv6" name="5.png" path="/images/" scale="9grid" scale9grid="42,44,517,312"/>
     <image id="aewv7" name="7.png" path="/images/"/>
     <image id="aewv8" name="8.png" path="/images/"/>
     <image id="aewv9" name="btnimage.png" path="/images/"/>

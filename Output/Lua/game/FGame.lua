@@ -3,7 +3,6 @@ theGame = nil
 local FLogicSession = require "network.FLogicSession"
 local FAssetBundleUtil = require "utility.FAssetBundleUtil"
 local FLibEvent = require "utility.FLibEvent"
-local FConsoleUI = require "ui.FConsoleUI"
 local FCommand = require "game.FCommand"
 
 local FGame = FLua.FinalClass("FGame")

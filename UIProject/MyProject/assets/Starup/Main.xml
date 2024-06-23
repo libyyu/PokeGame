@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="750,1344">
   <displayList>
-    <graph id="n0_aewv" name="bg" xy="0,0" size="750,1344" type="rect" fillColor="#ff336666"/>
-    <component id="n3_aewv" name="progressBar" src="aewv6" fileName="LoadProgress.xml" xy="101,1212">
-      <relation target="" sidePair="center-center"/>
-      <ProgressBar value="50" max="100"/>
-    </component>
+    <graph id="n0_aewv" name="bg" xy="0,0" size="750,1344" type="rect" fillColor="#ff336666">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <loader id="n3_aewv" name="progressBar" xy="101,1212" size="577,53" url="ui://davz98f3aewv9">
+      <relation target="" sidePair="center-center,bottom-bottom"/>
+    </loader>
   </displayList>
 </component>

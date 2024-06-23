@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="dzefjlp5">
+  <resources>
+    <component id="aewv0" name="TabBar.xml" path="/" exported="true"/>
+    <image id="aewv2" name="b4.png" path="/image/"/>
+    <image id="aewv3" name="b5.png" path="/image/" scale="tile" scale9grid="40,17,80,34"/>
+    <component id="aewv5" name="Button1.xml" path="/components/btns/"/>
+    <component id="aewv6" name="Main.xml" path="/" exported="true"/>
+    <component id="aewv7" name="Content.xml" path="/components/"/>
+    <component id="aewvc" name="ListData.xml" path="/components/"/>
+    <component id="aewvd" name="listItem.xml" path="/components/"/>
+    <component id="aewve" name="Ad.xml" path="/components/"/>
+    <image id="aewvg" name="CoverImage.png" path="/image/"/>
+    <image id="aewvh" name="haibian.jpg" path="/image/"/>
+    <image id="aewvi" name="BG1.jpg" path="/image/"/>
+  </resources>
+  <publish name=""/>
+</packageDescription>

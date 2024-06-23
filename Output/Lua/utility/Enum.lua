@@ -65,4 +65,7 @@ do
 	end
 end
 
+
+_G.Enum = Enum
+
 return Enum

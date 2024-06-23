@@ -35,11 +35,86 @@ do
 			end
 			return t[key]
 		end
+
+		local mtComp = LuaHelper.InstanceMeta(FairyGUI.GComponent)
+		function mtComp:FindDirect(name)
+			if name == "." or name == "" then
+				return self
+			end
+			name = name:replace('.', '/', {plain=true})
+			local sb = name:split('/')
+
+			local child = FGUIHelper.ToCom(self)
+			for i, n in ipairs(sb) do
+				child = child:GetChild(n)
+				local child2 = FGUIHelper.ToCom(child)
+				if child2 then child = child2 end
+				if not child then
+					return nil
+				end
+			end
+			return child
+		end
+
+		function mtComp:RequireFind(name)
+			local child = self:FindDirect(name)
+			if not child then
+				error("failed to find child'" .. name .. "'")
+			end
+			return child
+		end
+
+		local mtGLoader = LuaHelper.InstanceMeta(FairyGUI.GLoader)
+		function mtGLoader:FindDirect(name)
+			if name == "." or name == "" then
+				local child2 = FGUIHelper.ToCom(self)
+				if child2 then 
+					return child2
+				end
+				return self
+			end
+			name = name:replace('.', '/', {plain=true})
+			local sb = name:split('/')
+
+			local child = FGUIHelper.ToCom(self)
+			for i, n in ipairs(sb) do
+				child = child:GetChild(n)
+				local child2 = FGUIHelper.ToCom(child)
+				if child2 then child = child2 end
+				if not child then
+					return nil
+				end
+			end
+			return child
+		end
+		function mtGLoader:RequireFind(name)
+			local child = self:FindDirect(name)
+			if not child then
+				error("failed to find child'" .. name .. "'")
+			end
+			return child
+		end
 	end
 end
 
 do
 	local mt = LuaHelper.InstanceMeta(UnityEngine.GameObject)
+	function mt:FindDirect(name)
+		if name == "." or name == "" then
+			return self
+		end
+		name = name:replace('.', '/', {plain=true})
+		local sb = name:split('/')
+
+		local child = self.m_viewObj.transform
+		for _, n in ipairs(sb) do
+			child = child:Find(n)
+			if not child then
+				return nil
+			end
+		end
+		return child.gameObject
+	end
 end
 
 do
@@ -125,6 +200,7 @@ do
 				self.value = newProgress
 				currentProgress = newProgress
 				last = UnityEngine.Time.realtimeSinceStartup
+				--print("tick newProgress:", currentProgress, to)
 			end)
 
 			self:SetLuaUserData("AutoProgress", idTimer)

@@ -124,13 +124,13 @@ function AsyncLoadABundle(assetBundleName, cb)
 end
 
 function AsyncLoadABundleArray(assetBundleNames, cb)
-	if type(assetBundleName) ~= "table" then
+	if type(assetBundleNames) ~= "table" then
 		error(("argument #%d expected table, but got %s"):format(2, type(assetBundleName)))
 	end
 	local finishnum = 0
-	local num = #assetBundleName
+	local num = #assetBundleNames
 	local result = {}
-	for i, v in ipairs(assetBundleName) do
+	for i, v in ipairs(assetBundleNames) do
 		AsyncLoadABundle(v, function(ab)
 			result[i] = ab
 			finishnum = finishnum + 1
@@ -196,6 +196,10 @@ end
 
 function DontDestroyOnLoad(go)
 	UnityEngine.Object.DontDestroyOnLoad(go)
+end
+
+function IsValidObject(obj)
+	return obj ~= nil and not obj.isNil
 end
 
 
@@ -264,5 +268,11 @@ end
 function TickGame(DeltaTime)
 	TickCoroutine(DeltaTime)
 	if theGame then
+	end
+end
+
+function OnApplicationQuit()
+	if FairyGUI then
+		FairyGUI.GLoader.gLoaderFunc = nil
 	end
 end

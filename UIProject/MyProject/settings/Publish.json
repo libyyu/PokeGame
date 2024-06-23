@@ -9,7 +9,7 @@
   "compressPNG": false,
   "codeGeneration": {
     "allowGenCode": false,
-    "codePath": "",
+    "codePath": "C:\\Workspace\\Unity\\PokeGame\\Output\\FGUI",
     "classNamePrefix": "UI_",
     "memberNamePrefix": "m_",
     "packageName": null,

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,200">
+  <displayList>
+    <graph id="n5_aewv" name="icon" xy="16,11" size="273,175" type="rect" lineSize="0" corner="16"/>
+    <richtext id="n6_aewv" name="name" xy="318,15" size="244,36" fontSize="26" vAlign="middle" autoSize="none" text="&lt;span&gt;名字&lt;/span&gt;"/>
+    <richtext id="n7_aewv" name="content" xy="318,53" size="396,123" fontSize="24" autoSize="none" text="dfgsdafgdsgsdfgsdfgsdfg&#xA;dfsgdsgsdgsdfgsdgsdfg"/>
+  </displayList>
+</component>

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using FairyGUI.Utils;
+using System.Text;
+using System.Linq;
 
 namespace FairyGUI
 {
@@ -82,6 +84,15 @@ namespace FairyGUI
             }
 
             return this;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(base.ToString());
+            if(name != null) sb.Append("|" + name);
+            if(file != null) sb.Append("|" + file);
+            return sb.ToString();
         }
     }
 }

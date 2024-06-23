@@ -998,7 +998,7 @@ end
             LuaDLL.lua_pop(L, 1);
 
             string str = s.ToString();
-            Logger.LogError(str);
+            Logger.LogError("[LUA]" + str);
             LuaState state = LuaState.get(L);
             if (state.errorDelegate != null)
             {

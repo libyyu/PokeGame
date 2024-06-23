@@ -26,7 +26,7 @@ do
 
 	function FBaseUI:GetUIRoot()
 		if self:UseFairyGUI() then
-			return FGUIMan.Instance():GetUGUIRoot()
+			return FGUIMan.Instance():GetFGUIRoot()
 		else
 			return FGUIMan.Instance():GetUGUIRoot()
 		end
@@ -166,6 +166,15 @@ do
 		end
 	end
 
+	if FairyGUI then
+		FairyGUI.GLoader.gLoaderFunc = function(url, loader)
+			print("loader:", url, loader, loader.rootOwner.displayObject.gameObject)
+			--local panel = FGUIMan.Instance():GetPanelByObj(loader.rootOwner.displayObject.gameObject.transform.parent.gameObject)
+			print("loader:", panel)
+			return true
+		end
+	end
+
 	function FBaseUI:CreatePanel(assetName)
 		--Init GUIRoot
 		FGUIMan.Instance():InitUIRoot()
@@ -186,11 +195,7 @@ do
 						if not self.m_loading then
 							return
 						end
-						
-						if not GameUtil.IsEditorEnv() then
-							FairyGUI.UIPackage.AddPackage(bundle)
-						end
-						
+												
 						if window then
 							print("CreateWindow",packageName,prefabName)
 							local panel = FGUIHelper.CreateWindow(packageName, prefabName)
@@ -208,10 +213,13 @@ do
 							print("CreatePanel",packageName,prefabName)
 							local panel = FGUIHelper.CreatePanel(packageName, prefabName)
 							if panel then
-								print("panel", panel)
+								print("panel", panel, self:GetUIRoot())
+								panel.fitScreen = FairyGUI.FitScreen.FitSize
 								self.m_panel = panel.gameObject
+								self.m_panel.transform:SetParent(self:GetUIRoot().transform)
 								self.m_panel.layer = LayerMask.NameToLayer("FairyGUI")
 								self.m_panel.tag = "Panel"
+								panel:CreateUI()
 								self:_Create()
 							end
 						end
@@ -253,6 +261,10 @@ do
 				UnityEngine.Object.Destroy(self.m_panel)
 			else
 				UnityEngine.Object.Destroy(self.m_panel)
+			end
+		else
+			if self.m_UnloadBundleWhenDestroy then
+				UnloadAssetBundle(self.m_abName, false)
 			end
 		end
 
@@ -374,7 +386,8 @@ do
 		self.m_created = false
 		self:OnDestroy()
 		FireEvent(EventDef.PanelDestroy,self)
-		warn("[" .. self.m_panelName.."] is Destroy")
+		local debugName = "[" .. self.m_panelName .. "@" .. self.m_abName .. "]"
+		warn(debugName,"is Destroy")
 		for _,func in ipairs(self.m_destoryCustomCallback) do
 			func(self)
 		end
@@ -382,11 +395,11 @@ do
 
 		if self.m_UnloadBundleWhenDestroy then
 			UnloadAssetBundle(self.m_abName,false)
-			warn("["..self.m_panelName.."] asset is unload.")
+			warn(debugName, "asset is unload.")
 		end
 		if self.m_TriggerGCWhenDestroy then
 			GameUtil.LuaGC()
-			warn("["..self.m_panelName.."] destroyed trigger gc.")
+			warn(debugName, "destroyed trigger gc.")
 		end
 	end
 

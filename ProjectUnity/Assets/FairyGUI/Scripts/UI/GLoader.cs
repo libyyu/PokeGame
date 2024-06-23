@@ -34,6 +34,9 @@ namespace FairyGUI
         public Action __loadExternal;
         public Action<NTexture> __freeExternal;
 #endif
+        public delegate bool GlobalLoadDelegate(string url, GLoader t);
+        public static GlobalLoadDelegate gLoaderFunc = null;
+
 
         public GLoader()
         {
@@ -464,7 +467,10 @@ namespace FairyGUI
                 }
             }
             else
-                SetErrorState();
+            {
+                //SetErrorState();
+                LoadExternal();
+            }
         }
 
         virtual protected void LoadExternal()
@@ -476,6 +482,11 @@ namespace FairyGUI
                 return;
             }
 #endif
+            if(gLoaderFunc != null && gLoaderFunc(_url, this))
+            {
+                return;
+            }
+
             Texture2D tex = (Texture2D)Resources.Load(_url, typeof(Texture2D));
             if (tex != null)
                 onExternalLoadSuccess(new NTexture(tex));
@@ -503,6 +514,11 @@ namespace FairyGUI
             _content.scaleByTile = false;
             texture.onSizeChanged += _reloadDelegate;
             UpdateLayout();
+        }
+
+        public void OnLoadFinished(bool bSuccess)
+        {
+            if (bSuccess) { UpdateLayout(); } else { SetErrorState(); }
         }
 
         public void onExternalLoadFailed()
@@ -727,6 +743,8 @@ namespace FairyGUI
 
             if (!string.IsNullOrEmpty(_url))
                 LoadContent();
+            else
+                LoadExternal();
         }
     }
 }

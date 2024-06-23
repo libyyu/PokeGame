@@ -37,7 +37,7 @@ public class AssetExport
 		{
 			return;
 		}
-        else if (abName.Contains("/resource/"))
+        else if (abName.Contains("/resources/"))
         {
             return;
         }

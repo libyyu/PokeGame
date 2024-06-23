@@ -109,6 +109,7 @@ namespace SLua
 			addMember(l, Equals);
 			addMember(l, GetType);
             addMember(l, Unlink);
+            addMember(l, IsExtend);
             addMember(l, "isNil", get_isNil,null,true);
 			LuaDLL.lua_setfield(l, LuaIndexes.LUA_REGISTRYINDEX, "__luabaseobject");
 
@@ -194,8 +195,51 @@ namespace SLua
 				return error(l, e);
 			}
 		}
-		
-		[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static public int IsExtend(IntPtr l)
+        {
+            try
+            {
+                object obj = checkVar(l, 1);
+				Type checkT = null;
+                if (matchType(l, 2, typeof(string)))
+				{
+                    string cls;
+                    checkType(l, 2, out cls);
+                    checkT = LuaObject.FindType(cls);
+                }
+                else if (matchType(l, 2, typeof(Type)))
+				{
+                    checkType(l, 2, out checkT);
+                }
+
+				bool ret = false;
+				if(checkT != null)
+				{
+                    Type t = obj.GetType();
+                    while (t != null)
+                    {
+                        if (t == checkT)
+                        {
+                            ret = true;
+							break;
+                        }
+
+                        t = t.BaseType;
+                    }
+                }
+                pushValue(l, true);
+                pushValue(l, ret);
+                return 2;
+            }
+            catch (Exception e)
+            {
+                return error(l, e);
+            }
+        }
+
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
         static public int get_isNil(IntPtr l)
         {
             try

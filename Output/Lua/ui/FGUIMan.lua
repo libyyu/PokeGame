@@ -9,9 +9,10 @@ do
 		return l_instance
 	end
 	function FGUIMan:__constructor()
+		self.m_UIRoot = nil
 		self.m_UGUIRoot = nil
 		self.m_FGUIRoot = nil
-		self.m_PanelContainer = {}
+		self.m_panelSet = {}
 		self.m_ObjToPanel = setmetatable({}, {__mode = "k"})
 	end
 
@@ -30,6 +31,8 @@ do
 	    goRoot.transform.localPosition = Vector3(0, 0, 0);
 	    goRoot.transform.localScale = Vector3(1, 1, 1);
 	    goRoot.layer = UnityEngine.LayerMask.NameToLayer("UI");
+	    goRoot.transform:SetParent(self.m_UIRoot.transform)
+
 	    local cam = goRoot:AddComponent(UnityEngine.Camera)
 	    cam.clearFlags = UnityEngine.CameraClearFlags.Depth
 	    --cam.backgroundColor = Color(128,128,128,255)
@@ -38,7 +41,7 @@ do
 	    cam.orthographicSize = 3.2
 	    cam.nearClipPlane = -10;
 	    cam.farClipPlane = 1000;
-	    cam.depth = 2
+	    cam.depth = 0
 
 	    goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.FlareLayer"))
         --goRoot:AddComponent(LuaHelper.GetClsType("UnityEngine.GUILayer"));
@@ -66,7 +69,6 @@ do
 	    goEvent:AddComponent(EventSystems.EventSystem);
 	    goEvent:AddComponent(EventSystems.StandaloneInputModule);
 	    --goEvent:AddComponent(EventSystems.TouchInputModule);
-	    DontDestroyOnLoad(goEvent)
 	    goEvent.transform:SetParent(goRoot.transform)
 
 	    self.m_UGUIRoot = goCanvas.transform
@@ -74,12 +76,13 @@ do
 
 	function FGUIMan:InitFGUIRoot()
 		if self.m_FGUIRoot and not self.m_FGUIRoot.isNil then return end
-		
+
 		FairyGUI.StageCamera.LayerName = "FairyGUI"
 		local camearGo = NewGameObject("Stage Camera");
 	    camearGo.transform.localPosition = Vector3(2.790179, -5, 0);
 	    camearGo.transform.localScale = Vector3(1, 1, 1);
 	    camearGo.layer = UnityEngine.LayerMask.NameToLayer("FairyGUI")
+
 	    local cam = camearGo:AddComponent(UnityEngine.Camera)
 	    cam.clearFlags = UnityEngine.CameraClearFlags.Depth
 	    --cam.backgroundColor = Color(128,128,128,255)
@@ -88,26 +91,46 @@ do
 	    cam.orthographicSize = 5
 	    cam.nearClipPlane = -30;
 	    cam.farClipPlane = 30;
-	    cam.depth = 4
+	    cam.depth = 1
 	    camearGo:AddComponent(LuaHelper.GetClsType("FairyGUI.StageCamera"))
 
-		self.m_FGUIRoot = FairyGUI.GRoot.inst.rootContainer.gameObject
+
+	    local goRoot = NewGameObject("FGUIRoot(2D)");
+	    goRoot.transform.localPosition = Vector3(0, 0, 0);
+	    goRoot.transform.localScale = Vector3(1, 1, 1);
+	    goRoot.layer = UnityEngine.LayerMask.NameToLayer("FairyGUI")
+	    goRoot.transform:SetParent(self.m_UIRoot.transform)
+		self.m_FGUIRoot = goRoot
+
 		print("GUIMan:InitFGUIRoot", self.m_FGUIRoot)
 		FairyGUI.GRoot.inst:SetContentScaleFactor(750, 1344, FairyGUI.UIContentScaler.ScreenMatchMode.MatchWidthOrHeight)
-
-
+		FairyGUI.Stage.inst.gameObject:GetComponent(FairyGUI.UIContentScaler).ignoreOrientation = true
+		print("Stage width:", FairyGUI.Stage.inst.width, FairyGUI.Stage.inst.height)
+		print("Screen width:", UnityEngine.Screen.width, UnityEngine.Screen.height)
 	end
 
 	function FGUIMan:InitUIRoot()
+		if not self.m_UIRoot or self.m_UIRoot.isNil then
+			self.m_UIRoot = NewGameObject("UIRootContainer")
+		    self.m_UIRoot.transform.localPosition = Vector3(0, 0, 0)
+		    self.m_UIRoot.transform.localScale = Vector3(1, 1, 1)
+		end
 		self:InitUGUIRoot()
 		self:InitFGUIRoot()
 	end
 
-	function FGUIMan:RegisterPanel(name, panel)
-		self.m_PanelContainer[name] = panel
+	function FGUIMan:RegisterPanel(panel)
+		self.m_panelSet[panel] = true
 	end
-	function FGUIMan:UnRegisterPanel(name)
-		self.m_PanelContainer[name] = nil
+	function FGUIMan:UnRegisterPanel(panel)
+		self.m_panelSet[panel] = nil
+	end
+	function FGUIMan:IsPanelRegistered(panel)
+		return self.m_panelSet[panel] == true
+	end
+
+	function FGUIMan:EachPanel()
+		return pairs(self.m_panelSet)
 	end
 
 	function FGUIMan:RegisterPanelObj(obj, panel)
@@ -121,31 +144,85 @@ do
 		return self.m_ObjToPanel[obj]
 	end
 
-	function FGUIMan:RemoveWindow(child)
-		FairyGUI.GRoot.inst:RemoveChild(child)
+	local function LoadFairyGUIPackage(assetName, callback)
+		if GameUtil.IsEditorEnv() then
+			local commonAsset = ResPathReader.CommonBundle
+			print("AddPackage:", commonAsset, TransformAssetName(commonAsset))
+			FairyGUI.UIPackage.AddPackage(TransformAssetName(commonAsset))
+			FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
+			print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
+
+			print("AddPackage:", assetName, TransformAssetName(assetName))
+			local pack = FairyGUI.UIPackage.AddPackage(TransformAssetName(assetName))
+			if not pack then
+				callback(nil)
+				return
+			end
+
+			local dependencies = pack.dependencies or {}
+			for i,v in ipairs(dependencies) do
+				for k,v2 in pairs(v) do
+					print("dependencies", i, k, v2)
+					if k == "name" then
+						local commonAsset = "Arts/UI/FairyGUI/" .. v2
+						print("AddPackage:", commonAsset, TransformAssetName(commonAsset))
+						FairyGUI.UIPackage.AddPackage(TransformAssetName(commonAsset)) 
+					end
+				end
+			end
+
+			callback({})
+		else
+			AsyncLoadABundleArray({ ResPathReader.CommonBundle, assetName }, function(bundles)
+				if bundles[1] then
+					FairyGUI.UIPackage.AddPackage(bundles[1])
+					FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
+					print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
+				end
+				if not bundles[2] then
+					callback(nil)
+					return
+				end
+
+				local pack = FairyGUI.UIPackage.AddPackage(bundles[2])
+				if not pack then
+					callback(nil)
+					return
+				end
+
+				local dependenciesab = {}
+				local dependencies = pack.dependencies or {}
+				for i,v in ipairs(dependencies) do
+					for k,v2 in pairs(v) do
+						print("dependencies", i, k, v2)
+						if k == "name" then
+							local commonAsset = "Arts/UI/FairyGUI/" .. v2
+							dependenciesab[#dependenciesab+1] = commonAsset
+						end
+					end
+				end
+
+				if #dependenciesab >0 then
+					AsyncLoadABundleArray(dependenciesab, function(dependencie_bundles)
+						if dependencie_bundles then
+							for _, ab in ipairs(dependencie_bundles) do
+								FairyGUI.UIPackage.AddPackage(ab)
+							end
+						end
+
+						callback(bundles[2])
+					end)
+				else
+					callback(bundles[2])
+				end
+			end)
+		end
 	end
+
 
 	function FGUIMan:LoadPanelRes(assetName, callback, fgui)
 		if fgui then 
-			if GameUtil.IsEditorEnv() then
-				local commonAsset = ResPathReader.CommonBundle
-				print("AddPackage:", commonAsset, TransformAssetName(commonAsset))
-				FairyGUI.UIPackage.AddPackage(TransformAssetName(commonAsset))
-				print("AddPackage:", assetName, TransformAssetName(assetName))
-				FairyGUI.UIPackage.AddPackage(TransformAssetName(assetName))
-				FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
-				print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
-				callback({})
-			else
-				AsyncLoadABundleArray({ ResPathReader.CommonBundle, assetName }, function(bundles)
-					if bundles[1] then
-						FairyGUI.UIPackage.AddPackage(bundles[1])
-						FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
-						print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
-					end
-					callback(bundle[2])
-				end)
-			end
+			LoadFairyGUIPackage(assetName, callback)
 		else
 			AsyncLoad(assetName, function(obj)
 				callback(obj)
@@ -154,7 +231,7 @@ do
 	end
 
 	function FGUIMan:CreateSimpleUI(assetName, callback, onclick)
-		local M = FLua.Class(require "ui.FBaseUI")
+		local M = FLua.Class(require "ui.FPanelBaseUI")
 		do
 			function M.OnCreate(panel)
 				if callback then 
@@ -162,8 +239,8 @@ do
 				end
 			end
 			if onclick then
-				M.OnClick = function(panel, go)
-					onclick(panel, go)
+				M.OnClick = function(panel, ...)
+					onclick(panel, ...)
 				end
 			end
 		end

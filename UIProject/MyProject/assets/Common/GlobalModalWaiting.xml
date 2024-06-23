@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="100,100">
+  <displayList>
+    <image id="n6_aewv" name="n6" src="aewv4" fileName="image/icon_zzz.png" xy="0,0" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+  </displayList>
+  <transition name="t0" autoPlay="true" autoPlayRepeat="-1"/>
+</component>

@@ -1126,6 +1126,7 @@ namespace FairyGUI
                 return null;
 
             _constructing++;
+            g.rootOwner = g;
             g.ConstructFromResource();
             _constructing--;
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="davz98f3">
+  <resources>
+    <component id="aewv9" name="LoadProgress.xml" path="/" exported="true"/>
+    <image id="aewva" name="loading.png.jpg" path="/image/"/>
+    <image id="aewvb" name="huawen1_png.png" path="/image/"/>
+    <image id="aewvc" name="huawen2_png.png" path="/image/"/>
+    <movieclip id="aewvd" name="pet.jta" path="/image/"/>
+  </resources>
+  <publish name="" genCode="true"/>
+</packageDescription>

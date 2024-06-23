@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,1244">
+  <displayList>
+    <component id="n8_aewv" name="ad" src="aewve" fileName="components/Ad.xml" xy="0,0">
+      <relation target="" sidePair="width-width,top-top"/>
+    </component>
+    <component id="n14_aewv" name="listContainer" src="aewvc" fileName="components/ListData.xml" xy="0,120" size="750,1124">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+  </displayList>
+</component>

@@ -1490,10 +1490,14 @@ namespace FairyGUI
                     if (pi != null)
                     {
                         child = UIObjectFactory.NewObject(pi);
+                        child.rootOwner = this.rootOwner;
                         child.ConstructFromResource();
                     }
                     else
+                    {
                         child = UIObjectFactory.NewObject(type);
+                        child.rootOwner = this.rootOwner;
+                    }
                 }
 
                 child.underConstruct = true;

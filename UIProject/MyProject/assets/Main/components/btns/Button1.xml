@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="173,74" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aewv" name="n0" src="aewv2" fileName="image/b4.png" xy="0,0">
+      <gearDisplay controller="button" pages="0"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_aewv" name="n1" src="aewv3" fileName="image/b5.png" xy="5,2">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n2_aewv" name="n2" src="aewv3" fileName="image/b5.png" xy="5,2">
+      <gearDisplay controller="button" pages="2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n3_aewv" name="title" xy="13,13" size="149,47" fontSize="22" color="#ffffff" align="center" vAlign="middle" autoSize="none" text=""/>
+  </displayList>
+  <Button/>
+</component>

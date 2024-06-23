@@ -118,12 +118,14 @@ public class FTimerList
             if (tm.end_time <= cur)
             {
                 IntPtr L = getL();
+                int error = LuaObject.pushTry(L);
                 if (tm.cbparam != LuaRefValue.LUA_NOREF)
                     LuaDLL.lua_rawgeti(L, LuaIndexes.LUA_REGISTRYINDEX, tm.cbparam); // cbparam
                 else
                     LuaDLL.lua_pushnil(L);
 
-                tm.callback.pcall(1, 0);
+                tm.callback.pcall(1, error);
+                LuaDLL.lua_remove(L, error);
 
                 if (tm.bOnce)
                 {
