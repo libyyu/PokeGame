@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,1344" bgColor="#336666">
+  <displayList>
+    <component id="n2_aewv" name="toggle" src="aewve" fileName="components/Button1.xml" xy="0,0" size="75,49">
+      <Button title="打开" selectedTitle="关闭"/>
+    </component>
+    <text id="n7_m0ju" name="input" xy="88,2" size="602,53" fontSize="24" color="#ffffff" vAlign="middle" autoSize="none" singleLine="true" text="" input="true" prompt="请输入指令并回车">
+      <relation target="" sidePair="width-width,top-top"/>
+    </text>
+    <component id="n6_m0ju" name="consoleGroup" src="m0jui" fileName="components/consoleGroup.xml" xy="0,65">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+  </displayList>
+</component>

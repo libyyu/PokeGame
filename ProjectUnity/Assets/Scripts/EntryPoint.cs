@@ -73,9 +73,9 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 
     void SetupEnvironment()
     {
-#if !UNITY_WEBGL || UNITY_EDITOR
         LogUtil.loglevel = logLevel;
         LogUtil.AttachUnityLogHandle();
+#if !UNITY_WEBGL || UNITY_EDITOR
         LogFile.Instance.Init();
 #endif
         FTimerList.RegisterTimerList(m_TimerList, gameObject);
@@ -202,9 +202,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         m_TimerList.Clear();
         m_LateTimerList.Clear();
         //关闭lua虚拟机前停止日志传递lua
-#if !UNITY_WEBGL || UNITY_EDITOR
         LogUtil.DetachUnityLogHandle();
-#endif
 
         if (tickFun != null) tickFun.Dispose(); tickFun = null;
         if (lateTickFun != null) lateTickFun.Dispose(); lateTickFun = null;

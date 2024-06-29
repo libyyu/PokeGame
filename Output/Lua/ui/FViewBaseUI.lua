@@ -272,6 +272,15 @@ do
 		return true
 	end
 
+	function FViewBaseUI:DetachAllSubView(bInvokeOnDestroy)
+		if self.m_subViews then
+			for _, subView in ipairs(self.m_subViews) do
+				self:DetachSubView(subView, bInvokeOnDestroy)
+			end
+		end
+	end
+
+
 	function FViewBaseUI:SetVisible(b)
 		self:SetVisibleInner(b)
 	end
@@ -327,14 +336,20 @@ do
 		local obj = self:GetRootObjSafe()
 		if obj then
 			local oldVisible = self:IsVisible()
-			if obj.SetActive then
-				obj:SetActive(b)
-			elseif obj.displayObject then
-				obj.displayObject.visible = b
-			elseif obj.gameObject then
-				obj.gameObject:SetActive(b)
+			if obj:IsExtend("FairyGUI.GComponent") then --GComponent
+				if obj.displayObject then
+					obj.displayObject.visible = b
+				elseif obj.gameObject then
+					obj.gameObject:SetActive(b)
+				else
+					logError("viewObj not valid fgui object")
+				end
 			else
-				logError("viewObj not valid ugui or fgui object")
+				if obj.SetActive then
+					obj:SetActive(b)
+				else
+					logError("viewObj not valid ugui object")
+				end
 			end
 			local newVisible = self:IsVisible()
 			if oldVisible ~= newVisible then
@@ -356,7 +371,7 @@ do
 		self:InvokeSubViewsFunction("AfterCreateInternal")
 	end
 
-	function FViewBaseUI:OnDestroyInternal()
+	function FViewBaseUI:OnDestroyInternal()		
 		self:OnDestroy()
 		if self.m_subViews then
 			for i=#self.m_subViews, 1, -1 do

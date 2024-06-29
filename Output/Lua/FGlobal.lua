@@ -48,25 +48,28 @@ function OnHotKeyInput( key, down )
 	end
 end
 
-function TransformAssetName(assetName)
+function TransformAssetName(inAssetName)
 	--Arts/UI/UIStart.prefab
 	--Main@Arts/UI/FairyGUI/Starup.ab
 
-	local assetName = assetName:lower()
-	local i = assetName:find('@')
+	inAssetName = inAssetName:lower()
+	local assetPath = inAssetName
+	local assetName
+	local i = inAssetName:find('@')
     if i then
-    	assetName = assetName:sub(i + 1, -1)
+    	assetPath = inAssetName:sub(i + 1, -1)
+    	assetName = inAssetName:sub(1, i-1)
     end
 
-	if assetName:sub(1, 7) ~= 'assets/' then
-		assetName = "assets/" .. assetName
+	if assetPath:sub(1, 7) ~= 'assets/' then
+		assetPath = "assets/" .. assetPath
 	end
 
-    return assetName
+    return assetPath, assetName
 end
 
-function TransformABName(assetName)
-	local abName = TransformAssetName(assetName)
+function TransformABAndAssetName(assetName)
+	local abName, mainName = TransformAssetName(assetName)
 	
 	local i = abName:find_last(".", true)
     if i then
@@ -77,6 +80,11 @@ function TransformABName(assetName)
 	if abName:sub(-3) ~= abExt then
 		abName = abName .. abExt
 	end
+	return abName, mainName or assetName
+end
+
+function TransformABName(assetName)
+	local abName = TransformABAndAssetName(assetName)
 	return abName
 end
 
@@ -91,8 +99,8 @@ function AsyncLoad(assetName, cb)
 	if type(assetName) ~= "string" then
 		error(("argument #%d expected string, but got %s"):format(1, type(assetName)))
 	end
-	local abName = TransformABName(assetName)
-	AsyncLoadWithAB(abName, assetName, cb)
+	local abName, mainName = TransformABAndAssetName(assetName)
+	AsyncLoadWithAB(abName, mainName, cb)
 end
 
 function AsyncLoadArray(assetNames, cb)

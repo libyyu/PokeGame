@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5267416fcbdb4cd4daa66cab4d6a195d
+guid: 010ba4afa003c99419a8a7fe000f894f
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -136,5 +136,5 @@ TextureImporter:
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
-  assetBundleName: assets/arts/ui/fairygui/package.ab
+  assetBundleName: assets/arts/ui/fairygui/loadingbar.ab
   assetBundleVariant: 

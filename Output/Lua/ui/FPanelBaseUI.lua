@@ -80,7 +80,12 @@ function FPanelBaseUI:__constructor()
 	---@type boolean
 	self.m_created = false	--OnCreate 是否已调用
 
+	self.m_opaque = false
+
+
 	self.m_destroyByNewCreate = false
+
+	self.m_dontDestroyOnLoad = false
 
 	self:SetViewRoot(self)
 end
@@ -246,7 +251,11 @@ function FPanelBaseUI:CreatePanelInternal(resName, callback)
 	--注册顶级 Panel
 	self:RegisterPanel()
 
-	self:LoadPanel(resName, nil, function (bSucceeded)
+	local parent = nil
+	-- if self.m_dontDestroyOnLoad then
+	-- 	parent = FairyGUI.GRoot.inst.gameObject
+	-- end
+	self:LoadPanel(resName, parent, function (bSucceeded)
 		if not bSucceeded then
 			if callback then callback(false) end
 			self:AfterDestroyInternal()
@@ -310,6 +319,10 @@ function FPanelBaseUI:OnLoadPanel()
 	self:OnCreateInternal()
 	self.m_created = true
 
+	if self.m_isfgui then
+		self.m_panel.opaque = self.m_opaque
+	end
+
 	local real_active = self:IsVisible()
 	self:OnShowInternal(real_active)
 
@@ -336,17 +349,17 @@ function FPanelBaseUI:OnChangePanelObject()
 	self:UpdateSubViewObj()
 end
 
-if FairyGUI then
-	FairyGUI.GLoader.gLoaderFunc = function(url, loader)
-		print("loader:", url, loader.name, loader.rootOwner, loader.rootOwner:GetHashCode(), loader.rootOwner.displayObject.gameObject)
-		-- local panel = loader.rootOwner:GetLuaUserData("__panel", self)
-		-- print("loader:", panel)
-		-- if loader.name == 'data' then
-		-- 	loader.url = "ui://dzefjlp5aewvc"
-		-- end
-		return true
-	end
-end
+-- if FairyGUI then
+-- 	FairyGUI.GLoader.gLoaderFunc = function(url, loader)
+-- 		print("loader:", url, loader.name, loader.rootOwner, loader.rootOwner:GetHashCode(), loader.rootOwner.displayObject.gameObject)
+-- 		-- local panel = loader.rootOwner:GetLuaUserData("__panel", self)
+-- 		-- print("loader:", panel)
+-- 		-- if loader.name == 'data' then
+-- 		-- 	loader.url = "ui://dzefjlp5aewvc"
+-- 		-- end
+-- 		return true
+-- 	end
+-- end
 
 function FPanelBaseUI:TouchMsgHandler()
 	local function getFunc(name)
@@ -410,11 +423,16 @@ function FPanelBaseUI:TouchMsgHandler()
 			end
 		end
 	else
+		if self.m_msgHandler then
+			return
+		end
+
 		local mst = {
 			OnInit = function(...) print("OnInit", ...) end,
 			OnShown = function(...) self:_BecameVisible(...) end,
 			OnHide = function(...) self:_BecameInvisible(...) end,
 		}
+		self.m_msgHandler = mst
 
 		if self.m_fguiOwner then
 			print("TouchGUIMsg", self.m_panel, self.m_fguiOwner)
@@ -472,7 +490,8 @@ function FPanelBaseUI:_SetPanelToLayerMaxDepth()
 	local real_depth = GetLayerNextTopDepth(self:GetDepthLayer())
 	if self.m_isfgui then
 		if self.m_isfguiWindow then
-
+			self.m_panel:SetSortingOrder(real_depth, true)
+			self:_AddPanelToLayerDepth(real_depth)
 		else
 			local panel = self.m_fguiOwner:GetComponent("UIPanel")
 			panel:SetSortingOrder(real_depth, true)
@@ -490,7 +509,8 @@ function FPanelBaseUI:_SetPanelToLayerMinDepth()
 
 	if self.m_isfgui then
 		if self.m_isfguiWindow then
-
+			self.m_panel:SetSortingOrder(real_depth, true)
+			self:_AddPanelToLayerDepth(real_depth)
 		else
 			local panel = self.m_fguiOwner:GetComponent("UIPanel")
 			panel:SetSortingOrder(real_depth)

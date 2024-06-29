@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5267416fcbdb4cd4daa66cab4d6a195d
+guid: 6d973fffc700d014ba66ec9bc353785a
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -136,5 +136,5 @@ TextureImporter:
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
-  assetBundleName: assets/arts/ui/fairygui/package.ab
+  assetBundleName: assets/arts/ui/fairygui/main.ab
   assetBundleVariant: 

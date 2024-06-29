@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: bd609be8f8292db45b328148e094e08a
+guid: 1baf33afdf5020844b0baf9b5a3abdee
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -136,5 +136,5 @@ TextureImporter:
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
-  assetBundleName: assets/arts/ui/fairygui/starup.ab
+  assetBundleName: assets/arts/ui/fairygui/common.ab
   assetBundleVariant: 

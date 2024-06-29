@@ -46,17 +46,12 @@ do
 		return self.m_createRequested and self.m_isLoading
 	end
 
+	local bAddFont
 	local function LoadFairyGUIPackage(assetName, callback)
 		if GameUtil.IsEditorEnv() then
-			local commonAsset = ResPathReader.CommonBundle
-			print("AddPackage:", commonAsset, TransformAssetName(commonAsset))
-			FairyGUI.UIPackage.AddPackage(TransformAssetName(commonAsset))
-			FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
-			FairyGUI.UIConfig.globalModalWaiting = "ui://Common/GlobalModalWaiting"
-			print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
-
-			print("AddPackage:", assetName, TransformAssetName(assetName))
-			local pack = FairyGUI.UIPackage.AddPackage(TransformAssetName(assetName))
+			local assetPath = TransformAssetName(assetName)
+			print("AddPackage:", assetName, assetPath)
+			local pack = FairyGUI.UIPackage.AddPackage(assetPath)
 			if not pack then
 				callback(nil)
 				return
@@ -68,26 +63,25 @@ do
 					print("dependencies", i, k, v2)
 					if k == "name" then
 						local commonAsset = "Arts/UI/FairyGUI/" .. v2
-						print("AddPackage:", commonAsset, TransformAssetName(commonAsset))
-						FairyGUI.UIPackage.AddPackage(TransformAssetName(commonAsset)) 
+						local commonAssetPath = TransformAssetName(commonAsset)
+						print("AddPackage:", commonAsset, commonAssetPath)
+						FairyGUI.UIPackage.AddPackage(commonAssetPath) 
 					end
 				end
 			end
 
 			callback({})
 		else
-			AsyncLoadABundleArray({ ResPathReader.CommonBundle, assetName }, function(bundles)
-				if bundles[1] then
-					FairyGUI.UIPackage.AddPackage(bundles[1])
-					FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
-					print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
-				end
-				if not bundles[2] then
+			local assetArr = { assetName }
+			AsyncLoadABundleArray(assetArr, function(bundles)
+				local bundleIndex = #assetArr
+				if not bundles[bundleIndex] then
 					callback(nil)
 					return
 				end
+				print("bundle", bundles[bundleIndex])
 
-				local pack = FairyGUI.UIPackage.AddPackage(bundles[2])
+				local pack = FairyGUI.UIPackage.AddPackage(bundles[bundleIndex])
 				if not pack then
 					callback(nil)
 					return
@@ -113,10 +107,10 @@ do
 							end
 						end
 						
-						callback(bundles[2])
+						callback(bundles[bundleIndex])
 					end)
 				else
-					callback(bundles[2])
+					callback(bundles[bundleIndex])
 				end
 			end)
 		end
@@ -240,6 +234,8 @@ do
 					local objpanel = window.rootContainer.gameObject
 					objpanel.layer = LayerMask.NameToLayer("FairyGUI")
 					objpanel.tag = "Panel"
+					window.modal = true
+					window:Show()
 				end
 				onResourceLoaded(window)
 			else
@@ -252,6 +248,7 @@ do
 					objpanel.transform:SetParent(parentObj.transform)
 					objpanel.layer = LayerMask.NameToLayer("FairyGUI")
 					objpanel.tag = "Panel"
+					panel:CreateUI()
 				end
 				onResourceLoaded(panel)
 			end

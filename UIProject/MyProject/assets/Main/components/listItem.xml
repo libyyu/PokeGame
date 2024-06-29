@@ -2,7 +2,11 @@
 <component size="750,200">
   <displayList>
     <graph id="n5_aewv" name="icon" xy="16,11" size="273,175" type="rect" lineSize="0" corner="16"/>
-    <richtext id="n6_aewv" name="name" xy="318,15" size="244,36" fontSize="26" vAlign="middle" autoSize="none" text="&lt;span&gt;名字&lt;/span&gt;"/>
-    <richtext id="n7_aewv" name="content" xy="318,53" size="396,123" fontSize="24" autoSize="none" text="dfgsdafgdsgsdfgsdfgsdfg&#xA;dfsgdsgsdgsdfgsdgsdfg"/>
+    <richtext id="n6_aewv" name="name" xy="318,15" size="373,36" font="ui://dhp1kx65aewvb" fontSize="26" vAlign="middle" autoSize="ellipsis" text="&lt;span&gt;名字kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk&lt;/span&gt;">
+      <relation target="" sidePair="width-width"/>
+    </richtext>
+    <richtext id="n7_aewv" name="content" xy="318,53" size="396,133" font="ui://dhp1kx65aewvb" fontSize="24" autoSize="ellipsis" autoClearText="true" text="dfgsdafgdsgsdfgsdfgsdfghjhuihhjkhklkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk&#xA;dfsgdsgsdgsdfgsdgsdfg">
+      <relation target="" sidePair="width-width"/>
+    </richtext>
   </displayList>
 </component>

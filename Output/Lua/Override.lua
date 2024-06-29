@@ -44,9 +44,17 @@ do
 			name = name:replace('.', '/', {plain=true})
 			local sb = name:split('/')
 
-			local child = FGUIHelper.ToCom(self)
+			local root = self
+			if self:IsExtend("FairyGUI.Window") then
+				root = self.contentPane
+			end
+
+			local child = FGUIHelper.ToCom(root)
 			for i, n in ipairs(sb) do
 				child = child:GetChild(n)
+				if child and i < #sb and child:IsExtend("FairyGUI.GGroup") then
+					child = child.parent
+				end
 				local child2 = FGUIHelper.ToCom(child)
 				if child2 then child = child2 end
 				if not child then
@@ -79,6 +87,9 @@ do
 			local child = FGUIHelper.ToCom(self)
 			for i, n in ipairs(sb) do
 				child = child:GetChild(n)
+				if child and i < #sb and child:IsExtend("FairyGUI.GGroup") then
+					child = child.parent
+				end
 				local child2 = FGUIHelper.ToCom(child)
 				if child2 then child = child2 end
 				if not child then

@@ -33,6 +33,10 @@ do
 			self:Update(self.data)
 		end
 
+		function FViewItem:toString()
+			return string.format("FViewItem-%d", self.m_index)
+		end
+
 		function FViewItem:Update(data)
 			if not data then return end
 			self.data = data
@@ -40,7 +44,7 @@ do
 			--graph.shape.graphics.texture = icon.texture
 			--graph.shape.visible = true
 			local imageCode = path.join(UnityEngine.Application.persistentDataPath, GameUtil.CalculateMD5Hash(data.image))
-			local texCache = GameUtil.LoadTexture2DFromFile(imageCode)
+			local texCache = false --GameUtil.LoadTexture2DFromFile(imageCode)
 			if texCache then
 				print("load image from cache:", data.image)
 				--icon.texture = texCache
@@ -74,6 +78,7 @@ do
 		self.m_bRequesting = false
 		self.m_requestPage = 1
 		self.actListData = {}
+		self.m_ModalWait = nil
 	end
 
 	function FPanelMainUI.Instance()
@@ -95,33 +100,67 @@ do
 	end
 
 	function FPanelMainUI:AfterCreate()
+		self.list.m_viewObj.scrollPane.onPullUpRelease:Add(function() 
+			self:RequestPage(self.m_requestPage, function(page, data)
+				print("get page ", page, data, data and #data)
+				if data then
+					table.extend(self.actListData, data)
+					self.list:SetCount(#(self.actListData))
+					self.m_requestPage = page + 1
+				end
+			end)
+		end)
+
 		self:RequestPage(1, function(page, data)
-		print("get page ", page, data, data and #data)
-		if data then
-			table.extend(self.actListData, data)
-			-- self.actListView.itemCount = #(self.actListData)
-			self.m_requestPage = page + 1
-			self.list:SetCount(#(self.actListData))
+			print("get page ", page, data, data and #data)
+			if data then
+				table.extend(self.actListData, data)
+				-- self.actListView.itemCount = #(self.actListData)
+				self.m_requestPage = page + 1
+				self.list:SetCount(#(self.actListData))
+			end
+		end)
+	end
+
+	function FPanelMainUI:ShowModalWait(show)
+		if show then
+			if not self.m_ModalWait then
+				local panel = FairyGUI.UIPackage.CreateObjectFromURL(FairyGUI.UIConfig.globalModalWaiting)
+				self.m_ModalWait = panel
+				self.m_ModalWait:SetHome(self.m_panel)
+			end
+			self.m_ModalWait:SetSize(self.m_panel.width, self.m_panel.height)
+			self.m_ModalWait:AddRelation(self.m_panel, FairyGUI.RelationType.Size)
+			self.m_panel:AddChild(self.m_ModalWait)
+		else
+			if IsValidObject(self.m_ModalWait) and self.m_ModalWait.parent then
+				self.m_panel:RemoveChild(self.m_ModalWait)
+			end
 		end
-	end)
 	end
 
 	function FPanelMainUI:RequestPage(page, callback)
 		if self.m_bRequesting then
 			return 
 		end
-		FairyGUI.GRoot.inst:ShowModalWait()
+		--FairyGUI.GRoot.inst:ShowModalWait()
+		self:ShowModalWait(true)
 		self.m_bRequesting = true
 		_G.coro.start(function()
-			local request = UnityEngine.Networking.UnityWebRequest.Get("http://wx.libyyu.com/mfwhotlist?page="..tostring(page))
-			-- request:SetRequestHeader("Access-Control-Allow-Origin", "*")
+			local request = UnityEngine.Networking.UnityWebRequest.Get("http://192.168.18.146:8008/mfwhotlist?page="..tostring(page))
+			if IsWXRuntime() then
+				request:SetRequestHeader("UnityWebGL", "wx")
+			elseif IsWebGLRuntime() then
+				request:SetRequestHeader("UnityWebGL", "web")
+			end
 			-- request:SetRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			request:SendWebRequest()
 			while not request.isDone do
 				_G.coro.yield()
 			end
 			self.m_bRequesting = false
-			FairyGUI.GRoot.inst:CloseModalWait()
+			--FairyGUI.GRoot.inst:CloseModalWait()
+			self:ShowModalWait(false)
 			if self:IsValid() then
 				if request.result == UnityEngine.Networking.UnityWebRequest.Result.Success then
 					local text = request.downloadHandler.text

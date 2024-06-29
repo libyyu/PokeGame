@@ -29,6 +29,7 @@ public static class GameUtil
 
     public static string FixAssetPath(string assetPath)
     {
+        if (assetPath.Length == 0) return "";
         string outName = assetPath.ToLower();
         if (outName.StartsWith('/')) outName = outName.Substring(1);
         if (!outName.StartsWith("assets/"))

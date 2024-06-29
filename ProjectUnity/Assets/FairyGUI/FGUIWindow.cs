@@ -26,4 +26,11 @@ public class FGUIWindow : FairyGUI.Window
     {
         return FGUIHelper.Find(this.contentPane, name);
     }
+
+    public void SetSortingOrder(int value, bool apply)
+    {
+        this.rootContainer._panelOrder = value;
+        if (apply)
+            FairyGUI.Stage.inst.ApplyPanelOrder(this.rootContainer);
+    }
 }

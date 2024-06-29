@@ -7,7 +7,7 @@
     <component id="n1_aewv" name="Tabbar" src="aewv0" fileName="TabBar.xml" xy="0,1244">
       <relation target="" sidePair="width-width,bottom-bottom"/>
     </component>
-    <component id="n2_aewv" name="Content" src="aewv7" fileName="Content.xml" xy="0,0" size="750,1244">
+    <component id="n2_aewv" name="Content" src="aewv7" fileName="components/Content.xml" xy="0,0">
       <relation target="" sidePair="width-width,height-height"/>
     </component>
   </displayList>

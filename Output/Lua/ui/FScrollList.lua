@@ -117,9 +117,9 @@ function FScrollList:SetCount(count, ...)
 	local force_update = select(1, ...)
 	force_update = force_update == nil and true or force_update
 	self:SetCountNoForceUpdate(count)
-	if force_update and new_count == old_count then
-		self:ForceUpdate()
-	end
+	-- if force_update and new_count == old_count then
+	-- 	self:ForceUpdate()
+	-- end
 end
 
 function FScrollList:ForceUpdate()
@@ -138,7 +138,8 @@ function FScrollList:_Init()
 		error(string.format("[FScrollList] object <%s> is not a ScrollList.", tostring(self.m_viewObj)))
 	end
 	self.m_viewObj:SetVirtual()
-	self.m_viewObj.itemRenderer = function(index, itemObj)
+	self.m_viewObj.itemRenderer = function(cindex, itemObj)
+		local index = cindex + 1
 		if not self._is_inited then
 			return
 		end
@@ -195,6 +196,30 @@ end
 function FScrollList:OnDestroy()
 	self._data_list = nil
 	self._is_inited = false
+	self:DetachAllSubView(true)
+	local cur_view_count = #self._view_list
+	do
+		for i = cur_view_count, 1, -1 do
+			local view = self._view_list[i]
+			if view then
+				if view.m_viewObj and not view.m_viewObj.isNil then
+					local wrapper = self._obj_wrapper_map[view.m_viewObj]
+					if wrapper then
+						wrapper:SetView(nil, false, true)
+					end
+				end
+				table.remove(self._view_list, i)
+			end
+		end
+		local exist_obj_map = {}
+		for k, v in pairs(self._obj_wrapper_map) do
+			if v:GetRootView() ~= nil and (not v:IsValid() or not exist_obj_map[v.m_viewObj]) then
+				self:DetachSubView(v, true)
+				self._obj_wrapper_map[k] = nil
+			end
+		end
+	end
+	self._view_list = {}
 end
 
 function FScrollList:_GetWrappedView(index)
@@ -220,6 +245,7 @@ function FScrollList:TrySetViewData(view, index)
 end
 
 function FScrollList:BeforeDetached(view)
+	print("FScrollList:BeforeDetached")
     self:SetCount(0, false)
 	self.m_viewObj.itemRenderer = nil
 end

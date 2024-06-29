@@ -17,8 +17,13 @@ do
 		self.m_AssetsMgr = FResourceLoader.inst
 	end
 
+	function FAssetBundleUtil:LoadAsset(assetBundleName, assetName)
+		print("LoadAsset:" .. assetBundleName .. "@" .. (assetName or ""))
+		return self.m_AssetsMgr:LoadAsset(assetBundleName, assetName)
+	end
+
 	function FAssetBundleUtil:AsyncLoad(assetBundleName, assetName, cb)
-		print("LoadAsset:" .. assetBundleName .. "@" .. assetName)
+		print("LoadAsset:" .. assetBundleName .. "@" .. (assetName or ""))
 		self.m_AssetsMgr:LoadAssetAsync(assetBundleName, assetName, function(obj)
 			if cb then cb(obj) end
 		end)

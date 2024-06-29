@@ -9,6 +9,13 @@
     <component id="aewv8" name="WindowModalWaiting.xml" path="/" exported="true"/>
     <image id="aewv9" name="2.png" path="/image/" scale="9grid" scale9grid="18,18,36,36"/>
     <movieclip id="aewva" name="qtm011.jta" path="/image/"/>
+    <font id="aewvb" name="msyh.ttf" path="/fonts/" exported="true" renderMode="" samplePointSize="16"/>
+    <component id="aewvc" name="ConsoleLog.xml" path="/" exported="true"/>
+    <component id="aewve" name="Button1.xml" path="/components/"/>
+    <component id="aewvf" name="output.xml" path="/components/"/>
+    <component id="aewvg" name="ScrollBar_VT_grip.xml" path="/components/scrollbars/"/>
+    <component id="aewvh" name="ScrollBar_VT.xml" path="/components/scrollbars/" exported="true"/>
+    <component id="m0jui" name="consoleGroup.xml" path="/components/"/>
   </resources>
   <publish name=""/>
 </packageDescription>

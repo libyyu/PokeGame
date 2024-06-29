@@ -112,7 +112,7 @@ public class UnityEditorResourceLoader : IAssetLoader
             fpath = System.IO.Path.Join(SearchPaths[i], abName, filePath);
             if (File.Exists(fpath))
             {
-                LogUtil.Log("found : " + fpath);
+                //LogUtil.Log("found : " + fpath);
                 FileStream fs = File.Open(fpath, FileMode.Open);
                 long length = fs.Length;
                 byte[] bytes = new byte[length];
@@ -482,9 +482,16 @@ public class UnityAssetBundleLoader : IAssetLoader
                         for (int j = 0; j < assetNames.Length; j++)
                         {
                             string assetPath = assetNames[j];
-                            AssetBundleRequest request = ab.LoadAssetAsync(assetPath, list[i].assetType);
-                            yield return request;
-                            result.Add(request.asset);
+                            if (string.IsNullOrEmpty(assetPath))
+                            {
+                                result.Add(ab);
+                            }
+                            else
+                            {
+                                AssetBundleRequest request = ab.LoadAssetAsync(assetPath, list[i].assetType);
+                                yield return request;
+                                result.Add(request.asset);
+                            }
                         }
                     }
                 }
@@ -603,19 +610,19 @@ public class UnityAssetBundleLoader : IAssetLoader
     {
         LoadResult.value_0 = false;
         // Load AssetBundle from cache
-        UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
-        yield return request.SendWebRequest();
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
-            if (assetBundle != null)
-            {
-                m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
-                LogUtil.Log(string.Format("load asset from cache. {0}", uri.ToString()));
-                LoadResult.value_0 = true;
-                yield break;
-            }
-        }
+        //UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
+        //yield return request.SendWebRequest();
+        //if (request.result == UnityWebRequest.Result.Success)
+        //{
+        //    AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
+        //    if (assetBundle != null)
+        //    {
+        //        m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+        //        LogUtil.Log(string.Format("load asset from cache. {0}", uri.ToString()));
+        //        LoadResult.value_0 = true;
+        //        yield break;
+        //    }
+        //}
 
         if (!string.IsNullOrEmpty(assetBundleCachedPath) && File.Exists(assetBundleCachedPath))
         {
@@ -806,12 +813,16 @@ public class UnityAssetBundleLoader : IAssetLoader
     {
         Initialize(() =>
         {
-            List<string> fixedAssetsPath = new List<string>();
-            foreach (var assetPath in assetsPath)
+            List<string> fixedAssetsPath = null;
+            if (assetsPath != null)
             {
-                fixedAssetsPath.Add(GameUtil.FixAssetPath(assetPath));
+                fixedAssetsPath = new List<string>();
+                foreach (var assetPath in assetsPath)
+                {
+                    fixedAssetsPath.Add(GameUtil.FixAssetPath(assetPath));
+                }
             }
-            LoadAsset<UObject>(bundleName, fixedAssetsPath.ToArray(), (UObject[] objs) =>
+            LoadAsset<UObject>(bundleName, fixedAssetsPath != null ? fixedAssetsPath.ToArray() : null, (UObject[] objs) =>
             {
                 if (callback != null) callback(objs);
             });

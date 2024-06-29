@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="750,1283">
+  <displayList>
+    <graph id="n6_m0ju" name="n6" xy="0,0" size="750,1283" group="n8_m0ju" alpha="0.5" type="rect" fillColor="#ff336666">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <component id="n4_aewv" name="out" src="aewvf" fileName="components/output.xml" xy="0,0" size="750,1281" group="n8_m0ju">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <group id="n8_m0ju" name="consoleGroup" xy="0,0" size="750,1283"/>
+  </displayList>
+</component>

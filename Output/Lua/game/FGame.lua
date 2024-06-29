@@ -42,6 +42,7 @@ do
 		--初始化2D-ui根节点
 		require "ui.FGUIMan".Instance():InitUIRoot()
 		require "manager.FFlashTipMan".Instance():InitCacheRoot()
+		require"ui.FPanelConsoleUI".Instance():ShowPanel(true)
 
 		local musicGo = NewGameObject("BackgroundMusic")
 		self.m_backgroundMusicComp = musicGo:AddComponent(LuaHelper.GetClsType("FBackgroundMusic"))
@@ -81,7 +82,13 @@ do
 		    DontDestroyOnLoad(goAudio)
 		else
 			local finished
-			AsyncLoadArray({ResPathReader.CameraRoot, ResPathReader.RoundCorners, ResPathReader.IndependentRoundCorners}, function(assetArr)
+			local resourceArr = {ResPathReader.CameraRoot, ResPathReader.RoundCorners, ResPathReader.IndependentRoundCorners, }
+			if FairyGUI and not GameUtil.IsEditorEnv() then
+				resourceArr[#resourceArr+1] = ResPathReader.FontBundle 		--4
+				resourceArr[#resourceArr+1] = ResPathReader.CommonBundle	--5
+			end
+			AsyncLoadArray(resourceArr, function(assetArr)
+				require"utility.Utils".printValue("assetArr", assetArr)
 				local asset = assetArr[1]
 				local goCamRoot = Instantiate(asset)
 				goCamRoot.transform.localPosition = Vector3(0, 0, 0)
@@ -90,11 +97,47 @@ do
 
 				print("shader:", assetArr[2], assetArr[3])
 
+				if FairyGUI then
+					if GameUtil.IsEditorEnv() then
+						local font = FairyGUI.DynamicFont()
+					  	font.name = "msyh"
+					  	font.nativeFont = require "utility.FAssetBundleUtil".Instance():LoadAsset("", ResPathReader.FontBundle)
+					  	FairyGUI.FontManager.RegisterFont(font)
+
+						local commonAsset = ResPathReader.CommonBundle
+						local assetPath = TransformAssetName(commonAsset)
+						print("AddPackage:", commonAsset, assetPath)
+						FairyGUI.UIPackage.AddPackage(assetPath)
+						FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
+						FairyGUI.UIConfig.globalModalWaiting = "ui://Common/GlobalModalWaiting"
+						print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
+					else
+						if assetArr[4] then
+							print("bundles", assetArr[4])
+							bAddFont = true
+							local font = FairyGUI.DynamicFont()
+						  	font.name = "msyh"
+						  	font.nativeFont = assetArr[4]
+						  	FairyGUI.FontManager.RegisterFont(font)
+						end
+
+						if assetArr[5] then
+							print("CommonBundle", assetArr[5])
+							FairyGUI.UIPackage.AddPackage(assetArr[5])
+							FairyGUI.UIConfig.buttonSound = FairyGUI.UIPackage.GetItemAssetByURL("ui://Common/tabswitch")
+							FairyGUI.UIConfig.globalModalWaiting = "ui://Common/GlobalModalWaiting"
+							print("FairyGUI.UIConfig.buttonSound", FairyGUI.UIConfig.buttonSound)
+						end
+					end
+				end
+
 				finished = true
 			end)
 			while not finished do
 				_G.coro.yield()
 			end
+
+			
 		end
 	end
 
@@ -114,8 +157,11 @@ do
 		FConsoleUI.Instance():DestroyPanel()
 	end
 	function FGame:OnUnityLog(t,str)
-		--table.insert(self.m_LogList,{type=t,str=str})
-		--FireEvent(EventDef.UnityLog,{type=t,str=str})
+		if #self.m_LogList > 300 then
+			table.remove(self.m_LogList, 1)
+		end
+		table.insert(self.m_LogList,{type=t,str=str})
+		FireEvent(EventDef.UnityLog,{type=t,str=str})
 	end
 	function FGame:GetAllLogs()
 		return self.m_LogList
