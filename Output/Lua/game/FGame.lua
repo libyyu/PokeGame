@@ -189,7 +189,7 @@ do
 				self.m_FPS:AddComponent(LuaHelper.GetClsType("FPS"))
 			end
 		else
-			if self.m_FPS then
+			if IsValidObject(self.m_FPS) then
 				DestroyObject(self.m_FPS)
 				self.m_FPS = nil
 			end

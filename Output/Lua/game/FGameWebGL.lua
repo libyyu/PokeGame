@@ -9,6 +9,7 @@ do
 		require "ui.FPanelStartUI".Instance():ShowPanel(true)
 	end
 	function FGame:LeaveLoginState()
+		require "ui.FPanelStartUI".Instance():ShowPanel(false)
 	end
 
 	function FGame:LoadHostPlayer()
@@ -39,18 +40,11 @@ do
 	end
 
 	function FGame:EnterGameLogic()
-		self:LeaveLoginState()
-		
-		local panel = require "ui.FPanelStartUI".Instance()
-		panel:AutoProgress(2, 0, 80)
-
-		local m = require "ui.FMainUI".Instance()
-		m:AttachCreateFunc(function()
-			panel:AutoProgress(1, nil, 100, function()
-				panel:DestroyPanel()
-			end)
+		self.m_isGameLogic = true
+		require "ui.FPanelMainUI".Instance():ShowPanel(true, nil, function(panel)
+			self:LeaveLoginState()
+			self:ResumeBackgroundMusic()
 		end)
-		m:ShowPanel(true)
 	end
 
 	function FGame:LeaveGameLogic()

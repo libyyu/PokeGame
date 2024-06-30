@@ -284,3 +284,36 @@ function OnApplicationQuit()
 		FairyGUI.GLoader.gLoaderFunc = nil
 	end
 end
+
+function _G.WriteToFile (path, content, binary)
+	GameUtil.CreateDirectoryForFile(path)
+	local fout = io.open(path, binary and "wb" or "w")
+	if fout then
+		fout:write(content)
+		fout:close()
+		return true
+	else
+		return false
+	end
+end
+function _G.AppendToFile(path, content)
+	GameUtil.CreateDirectoryForFile(path)
+	local fout = io.open(path, "a+")
+	if fout then
+		fout:write(content)
+		fout:close()
+		return true
+	else
+		return false
+	end
+end
+function _G.ReadFromFile (path, binary)
+	local fin = io.open(path, binary and "rb" or "r")
+	if fin then
+		local content = fin:read("*a")
+		fin:close()
+		return content
+	else
+		return nil
+	end
+end

@@ -28,7 +28,7 @@ do
 		pb.value = 0
 		pb:AutoProgress(2, nil, 100, function()
 			print("load finished")
-			self:ShowMain()
+			theGame:EnterGameLogic()
 		end)
 	end
 

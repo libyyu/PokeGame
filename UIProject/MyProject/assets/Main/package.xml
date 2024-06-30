@@ -8,11 +8,13 @@
     <component id="aewv6" name="Main.xml" path="/" exported="true"/>
     <component id="aewv7" name="Content.xml" path="/components/"/>
     <component id="aewvc" name="ListData.xml" path="/components/"/>
-    <component id="aewvd" name="listItem.xml" path="/components/"/>
     <component id="aewve" name="Ad.xml" path="/components/"/>
     <image id="aewvg" name="CoverImage.png" path="/image/"/>
     <image id="aewvh" name="haibian.jpg" path="/image/"/>
     <image id="aewvi" name="BG1.jpg" path="/image/"/>
+    <image id="m0juj" name="0.png" path="/image/" scale="9grid" scale9grid="17,16,74,76"/>
+    <component id="m0juk" name="Button2.xml" path="/components/"/>
+    <component id="m0jul" name="listItem.xml" path="/components/"/>
   </resources>
   <publish name=""/>
 </packageDescription>

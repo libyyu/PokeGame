@@ -14,6 +14,7 @@ local respath_list =
 	BagBtnUI = "Main@Arts/UI/FairyGUI/Package",
 	BagMainUI = "BagWin:1@Arts/UI/FairyGUI/Package",
 	ConsoleUI = "ConsoleLog@Arts/UI/FairyGUI/Common",
+	BackgroundMusic = "Arts/Sound/background.mp3",
 
 
 	
@@ -22,7 +23,6 @@ local respath_list =
 	MsgBoxUI = "TestProjName/UI/MsgBoxUI.prefab",
 	ServerListUI = "TestProjName/UI/ServerListUI.prefab",
 	WaitingUI = "TestProjName/UI/WaitingUI.prefab",
-	BackgroundMusic = "TestProjName/Sound/background.mp3",
 	UpdateUI = "TestProjName/UI/UpdateUI.prefab",
 }
 

@@ -1,22 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="750,1124">
   <displayList>
-    <list id="n0_aewv" name="list" xy="0,0" size="750,1124" overflow="scroll" defaultItem="ui://dzefjlp5aewvd" align="center" vAlign="middle" autoClearItems="true">
+    <list id="n0_aewv" name="list" xy="0,0" size="750,1124" overflow="scroll" defaultItem="ui://dzefjlp5m0jul" align="center" vAlign="middle" autoClearItems="true">
       <relation target="" sidePair="width-width,height-height"/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
-      <item/>
       <item/>
       <item/>
       <item/>

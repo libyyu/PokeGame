@@ -99,11 +99,14 @@ do
 		--local list = listData:RequireFind("list")
 	end
 
+	function FPanelMainUI:OnClick(eventContext)
+	end
+
 	function FPanelMainUI:AfterCreate()
 		self.list.m_viewObj.scrollPane.onPullUpRelease:Add(function() 
 			self:RequestPage(self.m_requestPage, function(page, data)
 				print("get page ", page, data, data and #data)
-				if data then
+				if data and #data >0 then
 					table.extend(self.actListData, data)
 					self.list:SetCount(#(self.actListData))
 					self.m_requestPage = page + 1
@@ -113,7 +116,7 @@ do
 
 		self:RequestPage(1, function(page, data)
 			print("get page ", page, data, data and #data)
-			if data then
+			if data and #data >0 then
 				table.extend(self.actListData, data)
 				-- self.actListView.itemCount = #(self.actListData)
 				self.m_requestPage = page + 1
@@ -147,12 +150,13 @@ do
 		self:ShowModalWait(true)
 		self.m_bRequesting = true
 		_G.coro.start(function()
-			local request = UnityEngine.Networking.UnityWebRequest.Get("http://192.168.18.146:8008/mfwhotlist?page="..tostring(page))
+			local request = UnityEngine.Networking.UnityWebRequest.Get("http://192.168.18.146:8001/mfwhotlist?page="..tostring(page))
 			if IsWXRuntime() then
 				request:SetRequestHeader("UnityWebGL", "wx")
-			elseif IsWebGLRuntime() then
+			elseif IsWebGLRuntime() and not GameUtil.IsEditorEnv() then
 				request:SetRequestHeader("UnityWebGL", "web")
 			end
+			-- request:SetRequestHeader("Accept-Encoding", "gzip, deflate")
 			-- request:SetRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			request:SendWebRequest()
 			while not request.isDone do
