@@ -58,6 +58,19 @@ do
 		end
 	end
 
+	function FPanelConsoleUI:OnSubmit(eventContext)
+		if not eventContext then return end
+		if not eventContext.sender then return end
+		local name = eventContext.sender.name
+		if name ~= 'input' then return end
+		local text = eventContext.sender.text
+		if string.isEmpty(text) then
+			return
+		end
+		eventContext.sender.text = ""
+		theGame:ExecuteDebugString(text)
+	end
+
 	function FPanelConsoleUI:AppendLog(t,str)
 		local oldText = self.m_consoleText.text
 	    if t == UnityEngine.LogType.Exception or
@@ -70,7 +83,7 @@ do
 	        self.m_consoleText.text = oldText .. "\n" .. "[color=#FFFFFF]" .. str .. "[/color]"
 	    end
 
-	    self:RequireFind("consoleGroup/out").scrollPane:ScrollBottom()
+	    --self:RequireFind("consoleGroup/out").scrollPane:ScrollBottom()
 	end
 
 	function FPanelConsoleUI:RefreshLog(rebuild)

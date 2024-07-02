@@ -157,7 +157,7 @@ do
 		FConsoleUI.Instance():DestroyPanel()
 	end
 	function FGame:OnUnityLog(t,str)
-		if #self.m_LogList > 300 then
+		if #self.m_LogList > 100 then
 			table.remove(self.m_LogList, 1)
 		end
 		table.insert(self.m_LogList,{type=t,str=str})

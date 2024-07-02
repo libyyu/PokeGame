@@ -66,6 +66,10 @@ do
 			content.text = data.brief
 
 		end
+
+		function FViewItem:OnClick()
+			GameUtil.CallNativeMethod("OpenUrl", self.data.url)
+		end
 	end
 
 	function FPanelMainUI:__constructor()
@@ -100,6 +104,10 @@ do
 	end
 
 	function FPanelMainUI:OnClick(eventContext)
+		local sender = eventContext.sender
+		local index = self.list.m_viewObj.selectedIndex + 1
+		local view = self.list:GetItem(index)
+		view:OnClick()
 	end
 
 	function FPanelMainUI:AfterCreate()

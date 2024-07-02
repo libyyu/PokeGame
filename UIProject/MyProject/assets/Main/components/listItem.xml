@@ -14,7 +14,7 @@
       <gearDisplay controller="button" pages="1,3"/>
       <relation target="" sidePair="width-width,height-height"/>
     </graph>
-    <graph id="n3_m0ju" name="icon" xy="16,11" size="273,175" type="rect" lineSize="0" corner="16"/>
+    <graph id="n3_m0ju" name="icon" xy="16,11" size="273,175" touchable="false" type="rect" lineSize="0" corner="16"/>
     <richtext id="n4_m0ju" name="name" xy="316,14" size="373,36" touchable="false" font="ui://dhp1kx65aewvb" fontSize="26" color="#ffffff" vAlign="middle" autoSize="ellipsis" text="&lt;span&gt;名字kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk&lt;/span&gt;">
       <relation target="" sidePair="width-width"/>
     </richtext>
