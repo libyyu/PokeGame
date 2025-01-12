@@ -5,6 +5,10 @@ Vector2 = UnityEngine.Vector2
 Vector3 = UnityEngine.Vector3
 Quaternion = UnityEngine.Quaternion
 
+if not rawget(GameUtil, "AssetRoot") then
+	rawset(GameUtil, "AssetRoot", UnityEngine.Application.dataPath .. "/../../Output")
+end
+
 function OnUnityLog(t,str)
 	if theGame then
 		theGame:OnUnityLog(t,str)

@@ -172,7 +172,7 @@ do
 		end
 		self.m_isLoading = true
 		local isfgui, abName, prefabName, packageName, window = parseResource(resName)
-		print("parseResource", resName, abName, prefabName, packageName)
+		print("parseResource", isfgui, resName, abName, prefabName, packageName)
 		self.m_isfgui = isfgui
 		self.m_isfguiWindow = window
 		self.m_assetPath = resName

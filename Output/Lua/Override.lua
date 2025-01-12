@@ -117,7 +117,7 @@ do
 		name = name:replace('.', '/', {plain=true})
 		local sb = name:split('/')
 
-		local child = self.m_viewObj.transform
+		local child = self.transform
 		for _, n in ipairs(sb) do
 			child = child:Find(n)
 			if not child then

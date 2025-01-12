@@ -38,10 +38,10 @@ do
 	end
 
 	function FUpdateUI:OnCreate()		
-		self.m_progress = self:FindChildObj(OBJPATH.progress):GetComponent("Slider")
-		self.m_tip = self:FindChildObj(OBJPATH.tip)
-		self.m_localversion = self:FindChildObj(OBJPATH.localversion)
-		self.m_remoteversion = self:FindChildObj(OBJPATH.remoteversion)
+		self.m_progress = self:FindDirect(OBJPATH.progress):GetComponent("Slider")
+		self.m_tip = self:FindDirect(OBJPATH.tip)
+		self.m_localversion = self:FindDirect(OBJPATH.localversion)
+		self.m_remoteversion = self:FindDirect(OBJPATH.remoteversion)
 		self.m_progress.interactable = false
 
 		self:SetLoaclVersion(self.localverionVal)
