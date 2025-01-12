@@ -116,7 +116,7 @@ namespace SLua
 #if (UNITY_IPHONE || UNITY_WEBGL) && !UNITY_EDITOR
 		public const string LUADLL = "__Internal";
 #else
-        public const string LUADLL = "FengEngine";
+        public const string LUADLL = "FSLua";
 #endif
 
         [DllImport(LUADLL, CallingConvention = CallingConvention.Cdecl)]

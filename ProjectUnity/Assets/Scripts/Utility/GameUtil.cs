@@ -277,31 +277,33 @@ public static class GameUtil
         var url = new System.Uri(filePath);
         if (File.Exists(url.ToString()))
             return true;
+#if !UNITY_WEBGL || UNITY_EDITOR
         try
         {
-            UnityWebRequest request = UnityWebRequest.Head(url);
-            request.SendWebRequest();
-            while (!request.isDone) { } //webgl中不能使用
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-                return false;
-
-            return request.responseCode == 200;
+            return LuaDLLNativeRuntime.FileExists(filePath);
         }
         catch (System.Exception)
         {
             return false;
         }
+#else
+        return File.Exists(filePath);
+#endif
     }
 
     public static byte[] ReadAssetFile(string filePath)
     {
         try
         {
-            byte[] ret = null;
-            _ansy_open_file_(filePath, (bool success, object data) =>
-            {
-                if (success) ret = data as byte[];
-            });
+#if !UNITY_WEBGL || UNITY_EDITOR
+            byte[] ret = LuaDLLNativeRuntime.ReadFileAllBytes(filePath);
+#else
+            byte[] ret =File.ReadAllBytes(filePath);
+#endif
+            //_ansy_open_file_(filePath, (bool success, object data) =>
+            //{
+            //    if (success) ret = data as byte[];
+            //});
 
             return ret;
         }
@@ -766,18 +768,26 @@ public static class GameUtil
 
     public static Texture2D LoadTexture2DFromFile(string path)
     {
-        if (!File.Exists(path)) return null;
+        try
+        {
+            if (!File.Exists(path)) return null;
 
-        // 创建一个Texture2D
-        Texture2D texture = new Texture2D(1, 1);
+            // 创建一个Texture2D
+            Texture2D texture = new Texture2D(1, 1);
 
-        // 加载图片数据
-        byte[] imageData = File.ReadAllBytes(path);
+            // 加载图片数据
+            byte[] imageData = File.ReadAllBytes(path);
 
-        // 将图片数据加载到Texture2D对象中
-        texture.LoadImage(imageData);
+            // 将图片数据加载到Texture2D对象中
+            texture.LoadImage(imageData);
 
-        return texture;
+            return texture;
+        }
+        catch(Exception e)
+        {
+            LogUtil.LogException(e);
+            return null;
+        }
     }
 
     static bool IsInsideRoundedCorner(int x, int y, int width, int height, float radius)
@@ -975,4 +985,11 @@ public static class GameUtil
         }
     }
 
+    public static string CallNativeMethod(string method, string jsonParams)
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return WebCommon.callJSMethod(method, jsonParams);
+#endif
+        return null;
+    }
 }

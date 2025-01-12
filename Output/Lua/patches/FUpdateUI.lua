@@ -1,8 +1,8 @@
-local FBaseUI = require "ui.FBaseUI"
+local FPanelBaseUI = require "ui.FPanelBaseUI"
 local FGUITools = require "utility.FGUITools"
 
 local l_instance = nil
-local FUpdateUI = FLua.Class(FBaseUI, "FUpdateUI")
+local FUpdateUI = FLua.Class(FPanelBaseUI, "FUpdateUI")
 do
 	local OBJPATH = 
 	{

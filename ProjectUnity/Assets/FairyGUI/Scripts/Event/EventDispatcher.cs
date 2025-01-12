@@ -208,12 +208,20 @@ namespace FairyGUI
                 bridge = TryGetEventBridge(strType);
 
             EventBridge gBridge = null;
+            EventBridge gBridge2 = null;
             if ((this is DisplayObject) && ((DisplayObject)this).gOwner != null)
+            {
                 gBridge = ((DisplayObject)this).gOwner.TryGetEventBridge(strType);
+                if (((DisplayObject)this).gOwner.rootOwner != null)
+                {
+                    gBridge2 = ((DisplayObject)this).gOwner.rootOwner.TryGetEventBridge(strType);
+                }
+            }
 
             bool b1 = bridge != null && !bridge.isEmpty;
             bool b2 = gBridge != null && !gBridge.isEmpty;
-            if (b1 || b2)
+            bool b3 = gBridge2 != null && !gBridge2.isEmpty;
+            if (b1 || b2 || b3)
             {
                 EventContext context = EventContext.Get();
                 context.initiator = initiator != null ? initiator : this;
@@ -233,6 +241,12 @@ namespace FairyGUI
                 {
                     gBridge.CallCaptureInternal(context);
                     gBridge.CallInternal(context);
+                }
+
+                if (b3)
+                {
+                    gBridge2.CallCaptureInternal(context);
+                    gBridge2.CallInternal(context);
                 }
 
                 EventContext.Return(context);

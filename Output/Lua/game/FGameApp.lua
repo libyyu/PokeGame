@@ -1,6 +1,10 @@
 
 local FGame = FLua.ForwardClass("FGame")
 do
+	function FGame:OnRun()
+		self:EnterLoginStage()
+	end
+	
 	function FGame:EnterLoginStage()
 		self:InitLoginInfo()
 		local login = require "ui.FLoginUI"

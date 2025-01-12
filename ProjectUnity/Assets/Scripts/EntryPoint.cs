@@ -23,6 +23,13 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
     private LuaFunction tickFun = null;
     private LuaFunction lateTickFun = null;
 
+    [DoNotToLua]
+    public bool HasStart
+    {
+        get;
+        private set;
+    }
+
     public LuaState LuaState
     {
         get
@@ -80,6 +87,9 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #endif
         FTimerList.RegisterTimerList(m_TimerList, gameObject);
         FTimerList.RegisterTimerList(m_LateTimerList, gameObject);
+        string output = Application.dataPath + "/../../Output";
+        int pckLayer = LuaDLLNativeRuntime.AddFilePackageLayer(output, 0, true);
+        LuaDLLNativeRuntime.exp_InitAllLayer();
     }
 
     void SetupPath()
@@ -158,6 +168,8 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 
         //srv = new FConsole.FSocketServer ();
         //srv.CreateAndListen ();
+
+        HasStart = true;
     }
 
     // Update is called once per frame

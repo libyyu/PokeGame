@@ -105,9 +105,12 @@ do
 
 	function FPanelMainUI:OnClick(eventContext)
 		local sender = eventContext.sender
-		local index = self.list.m_viewObj.selectedIndex + 1
-		local view = self.list:GetItem(index)
-		view:OnClick()
+		if sender.gameObjectName == "listItem" then
+			local index = self.list.m_viewObj.selectedIndex + 1
+			print("listItemclick", index)
+			local view = self.list:GetItem(index)
+			view:OnClick()
+		end
 	end
 
 	function FPanelMainUI:AfterCreate()

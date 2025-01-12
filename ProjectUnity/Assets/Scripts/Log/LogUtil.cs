@@ -102,6 +102,8 @@ public static class LogUtil
 		SLua.LuaState l = SLua.LuaSvr.mainState;
         if (null == l)
             return false;
+        if (EntryPoint.Instance == null || !EntryPoint.Instance.HasStart)
+            return false;
         SLua.LuaFunction func = l.getFunction("OnUnityLog");
         if (null != func)
         {

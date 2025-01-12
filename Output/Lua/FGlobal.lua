@@ -220,14 +220,15 @@ function NewByteBuffer(data)
 end
 
 function ReadFileContent(filename)
-	local buff
-	if GameUtil.CanSepAssets and GameUtil.IsAssetFileExists(GameUtil.SepPath.."/"..filename) then
-		buff = GameUtil.ReadAssetFile(GameUtil.SepPath.."/"..filename)
-	elseif GameUtil.IsAssetFileExists(GameUtil.AssetRoot.."/"..filename) then
-		buff = GameUtil.ReadAssetFile(GameUtil.AssetRoot.."/"..filename)
-	else
-		buff = GameUtil.ReadAssetFile(GameUtil.BaseStreamAssetPath.."/res_base/"..filename)
-	end
+	print("ReadFileContent", filename)
+	local buff = GameUtil.ReadAssetFile(filename)
+	-- if GameUtil.CanSepAssets and GameUtil.IsAssetFileExists(GameUtil.SepPath.."/"..filename) then
+	-- 	buff = GameUtil.ReadAssetFile(GameUtil.SepPath.."/"..filename)
+	-- elseif GameUtil.IsAssetFileExists(GameUtil.AssetRoot.."/"..filename) then
+	-- 	buff = GameUtil.ReadAssetFile(GameUtil.AssetRoot.."/"..filename)
+	-- else
+	-- 	buff = GameUtil.ReadAssetFile(GameUtil.BaseStreamAssetPath.."/res_base/"..filename)
+	-- end
 	if buff then
 		return LuaHelper.BytesToLuaString(buff)
 	else
