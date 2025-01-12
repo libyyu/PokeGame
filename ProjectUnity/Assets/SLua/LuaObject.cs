@@ -301,9 +301,32 @@ namespace SLua
 			return err;
 		}
 
-		static int luaOp(IntPtr l, string f, string tip)
+        static bool hasOpFunction(IntPtr l, int index, string f)
 		{
-			int err = getOpFunction(l, f, tip);
+			int nTop = LuaDLL.lua_gettop(l);
+			//checkLuaObject(l, 1);
+			LuaDLL.lua_pushvalue(l, index);
+            while (!LuaDLL.lua_isnil(l, -1))
+            {
+                LuaDLL.lua_getfield(l, -1, f);
+                if (!LuaDLL.lua_isnil(l, -1))
+                {
+					LuaDLL.lua_settop(l, nTop);
+					return true;
+                }
+                LuaDLL.lua_pop(l, 1); //pop nil
+                LuaDLL.lua_getfield(l, -1, "__parent");
+                LuaDLL.lua_remove(l, -2); //pop base
+            }
+
+            LuaDLL.lua_settop(l, nTop);
+            return false;
+        }
+
+
+        static int luaOp(IntPtr l, string f, string tip)
+		{
+			int err = getOpFunction(l, f, tip);//try, opFn
 			LuaDLL.lua_pushvalue(l, 1);
 			LuaDLL.lua_pushvalue(l, 2);
 			if (LuaDLL.lua_pcall(l, 2, 1, err) != 0)
@@ -490,9 +513,9 @@ namespace SLua
 		public static void createTypeMetatable(IntPtr l, LuaCSFunction con, Type self, Type parent)
 		{
 			checkMethodValid(con);
-
-			// set parent
-			bool parentSet = false;
+            int nTop = LuaDLL.lua_gettop(l);
+            // set parent
+            bool parentSet = false;
 			LuaDLL.lua_pushstring(l, "__parent");
 			while (parent != null && parent != typeof(object) && parent != typeof(ValueType))
 			{
@@ -515,18 +538,20 @@ namespace SLua
 					break;
 				}
 			}
-
-			if(!parentSet)
+            nTop = LuaDLL.lua_gettop(l);
+            if (!parentSet)
 			{
 				LuaDLL.luaL_getmetatable(l, "__luabaseobject");
 				LuaDLL.lua_rawset(l, -3);
 			}
-
-			completeInstanceMeta(l, self);
-			completeTypeMeta(l, con, self);
-
-			LuaDLL.lua_pop(l, 1); // pop type Table
-		}
+            nTop = LuaDLL.lua_gettop(l);
+            completeInstanceMeta(l, self);
+            nTop = LuaDLL.lua_gettop(l);
+            completeTypeMeta(l, con, self);
+            nTop = LuaDLL.lua_gettop(l);
+            LuaDLL.lua_pop(l, 1); // pop type Table
+            nTop = LuaDLL.lua_gettop(l);
+        }
 
 		static void completeTypeMeta(IntPtr l, LuaCSFunction con, Type self)
 		{
@@ -580,8 +605,11 @@ namespace SLua
 			LuaDLL.lua_setfield(l, -2, "__div");
 			pushValue(l, lua_unm);
 			LuaDLL.lua_setfield(l, -2, "__unm");
-			pushValue(l, lua_eq);
-			LuaDLL.lua_setfield(l, -2, "__eq");
+			if (hasOpFunction(l, -2, "op_Equality"))
+			{
+				pushValue(l, lua_eq);
+				LuaDLL.lua_setfield(l, -2, "__eq");
+			}
             pushValue(l, lua_le);
             LuaDLL.lua_setfield(l, -2, "__le");
             pushValue(l, lua_lt);
