@@ -84,6 +84,7 @@ namespace SLua
             // add its name into list, SLua will generate all exported interface automatically for you
 
             //list.Add("NGUI");
+            list.Add("Wx");
 #if UNITY_WEBGL || WEIXINMINIGAME || UNITY_EDITOR
             //list.Add("Wx");
 #endif

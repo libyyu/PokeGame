@@ -301,8 +301,16 @@ public class AssetExport
         string dst_path = Application.dataPath + "/../../Output/StreamingAssets";
         ExportAssets(dst_path);
 
-		DelectDirectory(Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
-        CopyDirectorys(dst_path, Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
+		if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.WebGL)
+		{
+			DelectDirectory(Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
+			CopyDirectorys(dst_path, Application.dataPath + "/../../wxproj/webgl/StreamingAssets");
+		}
+		else if(EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows ||
+            EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64)
+		{
+
+		}
     }
 
 	[MenuItem("ExportAssets/步骤2.打包所有资源(使用Lua源码)", false, 12)]

@@ -7,9 +7,63 @@ using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using WeChatWASM;
 using UObject = UnityEngine.Object;
 
+class load_asset_wrapper
+{
+    string name;
+    string folder;
+    public load_asset_wrapper(string name, string folder = null)
+    {
+        this.name = name;
+        this.folder = folder;
+    }
+
+    ~load_asset_wrapper()
+    {
+    }
+
+    public byte[] readData()
+    {
+        string szFile = this.name;
+        string szFileName = "";
+        if (this.folder != null) szFileName = Path.Join(this.folder, szFile);
+        else szFileName += szFile;
+        return LuaDLLNativeRuntime.ReadFileAllBytes(szFileName);
+    }
+}
+
+class find_asset_wrapper
+{
+    string name;
+    string folder;
+    public int flag;
+    public string finalPath;
+
+    public find_asset_wrapper(string name, string folder = null)
+    {
+        this.name = name;
+        this.folder = folder;
+        this.flag = 0;
+    }
+
+    public static bool operator true(find_asset_wrapper ths)
+    {
+        string szFile = ths.name;
+        string szFileName = "";
+        if (ths.folder != null) szFileName = Path.Join(ths.folder, szFile);
+        else szFileName += szFile;
+        return LuaDLLNativeRuntime.FileExists(szFileName, out ths.finalPath, out ths.flag);
+    }
+    public static bool operator false(find_asset_wrapper ths)
+    {
+        string szFile = ths.name;
+        string szFileName = "";
+        if (ths.folder != null) szFileName = Path.Join(ths.folder, szFile);
+        else szFileName += szFile;
+        return !LuaDLLNativeRuntime.FileExists(szFileName, out ths.finalPath, out ths.flag);
+    }
+}
 
 public abstract class IAssetLoader
 {
@@ -106,6 +160,14 @@ public class UnityEditorResourceLoader : IAssetLoader
             return System.IO.File.ReadAllBytes(fpath);
         }
 
+        find_asset_wrapper finder = new find_asset_wrapper(filePath, abName);
+        if(finder)
+        {
+            load_asset_wrapper loader = new load_asset_wrapper(filePath, abName);
+            byte[] bytes = loader.readData();
+            return bytes;
+        }
+
         string[] SearchPaths = new string[] { Application.dataPath + "/../../Output" };
         for (int i = 0; i < SearchPaths.Length; ++i)
         {
@@ -122,6 +184,7 @@ public class UnityEditorResourceLoader : IAssetLoader
                 return bytes;
             }
         }
+
         return null;
     }
 }
@@ -169,8 +232,10 @@ public class UnityAssetBundleLoader : IAssetLoader
 			return Application.persistentDataPath + "/assets"; //该目录有读写权限
 #elif UNITY_IPHONE
             return Application.temporaryCachePath + "/assets"; //该目录有读写权限
-#else
+#elif UNITY_EDITOR
             return Application.dataPath + "/../../Output";
+#else
+            return Application.dataPath + "/Output";
 #endif
         }
     }
@@ -645,6 +710,28 @@ public class UnityAssetBundleLoader : IAssetLoader
         }
     }
 
+    IEnumerator OnLoadABFromMemory(string abName, byte[] data, ReturnTuple<Boolean> LoadResult)
+    {
+        LoadResult.value_0 = false;
+        // 加载 AssetBundle
+        AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromMemoryAsync(data);
+        yield return bundleRequest;
+
+        AssetBundle assetBundle = bundleRequest.assetBundle;
+        if (assetBundle != null)
+        {
+            m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
+            LogUtil.Log(string.Format("load asset from memory. {0}", abName));
+            LoadResult.value_0 = true;
+            yield break;
+        }
+        else
+        {
+            LogUtil.LogWarning(string.Format("load assetbundle from memory failed. {0}", abName));
+        }
+    }
+
+
     IEnumerator OnLoadAssetBundle<T>(string abName) where T : UObject
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -748,18 +835,39 @@ public class UnityAssetBundleLoader : IAssetLoader
             }
         }
 #else
-        bool bLoaded = false;
-        for(int i=0; i< SearchPaths.Length && !bLoaded; ++i)
+        LogUtil.Log("OnLoadAssetBundle: {0} {1}", abName, typeof(T).ToString());
+        string filePath = AssetBundleManifestName + "/" + abName;
+        find_asset_wrapper finder = new find_asset_wrapper(filePath);
+        if (finder)
         {
-            string assetRPath = SearchPaths[i];
-            var uri = new System.Uri(assetRPath + "/" + AssetBundleManifestName + "/" + abName);
-            yield return OnLoadAssetBundleInner<T>(uri, abName, (bool succeed) => 
-            {
-                if (succeed) bLoaded = true;
-            });
+            //AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(finder.finalPath);
+            //yield return bundleRequest;
+            //LogUtil.Log("OnLoadAssetBundle: LoadFromFileAsync {0} {1}", finder.finalPath, bundleRequest.assetBundle);
+            //File.WriteAllBytes(finder.finalPath + ".0.packageRead", File.ReadAllBytes(finder.finalPath));
 
-            if (bLoaded) break;
+            load_asset_wrapper loader = new load_asset_wrapper(filePath);
+            byte[] bytes = loader.readData();
+            if(bytes != null)
+            {
+                //File.WriteAllBytes(finder.finalPath + ".1.packageRead", bytes);
+
+                ReturnTuple<Boolean> LoadABResult = new ReturnTuple<Boolean>();
+                yield return OnLoadABFromMemory(abName, bytes, LoadABResult);
+            }
         }
+
+        //bool bLoaded = false;
+        //for(int i=0; i< SearchPaths.Length && !bLoaded; ++i)
+        //{
+        //    string assetRPath = SearchPaths[i];
+        //    var uri = new System.Uri(assetRPath + "/" + AssetBundleManifestName + "/" + abName);
+        //    yield return OnLoadAssetBundleInner<T>(uri, abName, (bool succeed) => 
+        //    {
+        //        if (succeed) bLoaded = true;
+        //    });
+
+        //    if (bLoaded) break;
+        //}
 #endif
     }
 
@@ -914,18 +1022,38 @@ public class UnityAssetBundleLoader : IAssetLoader
            LogUtil.Log("TextAsset not loaded:" + realAssetPath);
         }
 #else
-        for (int i = 0; i < SearchPaths.Length; ++i)
-        {
-            string fpath = System.IO.Path.Join(SearchPaths[i], abName, filePath);
-            if (File.Exists(fpath))
-            {
-                LogUtil.Log("found : " + fpath);
-                FileStream fs = File.Open(fpath, FileMode.Open);
-                long length = fs.Length;
-                byte[] bytes = new byte[length];
-                fs.Read(bytes, 0, bytes.Length);
-                fs.Close();
+        //eg. lua   Main.lua
+        LogUtil.Log("ReadFileBytesImpl : {0} {1}", abName, filePath);
+        //for (int i = 0; i < SearchPaths.Length; ++i)
+        //{
+        //    string fpath = System.IO.Path.Join(SearchPaths[i], abName, filePath);
+        //    if (File.Exists(fpath))
+        //    {
+        //        LogUtil.Log("found : " + fpath);
+        //        FileStream fs = File.Open(fpath, FileMode.Open);
+        //        long length = fs.Length;
+        //        byte[] bytes = new byte[length];
+        //        fs.Read(bytes, 0, bytes.Length);
+        //        fs.Close();
 
+        //        return bytes;
+        //    }
+        //}
+
+        find_asset_wrapper finder = new find_asset_wrapper(filePath, abName);
+        if (finder)
+        {
+            load_asset_wrapper loader = new load_asset_wrapper(filePath, abName);
+            byte[] bytes = loader.readData();
+            return bytes;
+        }
+        if(filePath.EndsWith(".lua"))
+        {
+            find_asset_wrapper finder2 = new find_asset_wrapper(filePath + ".bytes", abName);
+            if (finder2)
+            {
+                load_asset_wrapper loader = new load_asset_wrapper(filePath + ".bytes", abName);
+                byte[] bytes = loader.readData();
                 return bytes;
             }
         }

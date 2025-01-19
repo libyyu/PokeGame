@@ -1,3 +1,4 @@
+#if (UNITY_WEBGL || WEIXINMINIGAME) && !UNITY_EDITOR
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -346,4 +347,5 @@ public class WXProfileStatsScript : MonoBehaviour, WeChatWASM.WXSDKManagerHandle
     }
 
 }
+#endif
 #endif

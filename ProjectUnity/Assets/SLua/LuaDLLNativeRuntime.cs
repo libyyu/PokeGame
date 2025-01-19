@@ -22,6 +22,11 @@
             //Byte[] buffer = System.Text.Encoding.Default.GetBytes(str);
             return buffer;
         }
+        public static string AnsiToString(byte[] buffer)
+        {
+            Encoding encoding = Encoding.UTF8;
+            return encoding.GetString(buffer);
+        }
 
 #if (UNITY_IPHONE) && !UNITY_EDITOR
 		const string FileSystemDLL = "__Internal";
@@ -32,7 +37,6 @@
         {
             exp_EstablishAnyLog(On_FLib_AnyLog);
             //L_SetupLuaState(L);
-            AddFilePackageLayer("./ppp", 0, true);
         }
 
         public static void UnEstablish()
@@ -89,6 +93,7 @@
 
         public static int AddFilePackageLayer(string szPath, int mode, bool isReadonly)
         {
+            LogUtil.Log("AddFilePackageLayer {0} {1}", szPath, mode);
             return exp_AddFilePackageLayer(StringToAnsi(szPath), mode, isReadonly);
         }
 
@@ -124,11 +129,39 @@
         public extern static void exp_ReleaseFileBuffer(IntPtr pData);
 
         [DllImport(FileSystemDLL, CallingConvention = CallingConvention.Cdecl)]
-        extern static bool exp_FileExists([MarshalAs(UnmanagedType.LPArray)] byte[] szPath);
+        public extern static void exp_ReleaseBuffer(IntPtr pData);
+
+        [DllImport(FileSystemDLL, CallingConvention = CallingConvention.Cdecl)]
+        extern static bool exp_FileExists([MarshalAs(UnmanagedType.LPArray)] byte[] szPath, out IntPtr pRealPath, out int nLength, out int Flag);
+
+        static bool FileExists(string szPath, out IntPtr pRealPath, out int nLength, out int Flag)
+        {
+            return exp_FileExists(StringToAnsi(szPath), out pRealPath, out nLength, out Flag);
+        }
+
+        public static bool FileExists(string szPath, out string RealPath, out int Flag)
+        {
+            Flag = -1;
+            RealPath = null;
+            IntPtr pRealPath = IntPtr.Zero;
+            int nLength;
+            bool ret = exp_FileExists(StringToAnsi(szPath), out pRealPath, out nLength, out Flag);
+            if (ret) 
+            {
+                byte[] result = new byte[nLength];
+                Marshal.Copy(pRealPath, result, 0, nLength);
+                RealPath = AnsiToString(result);
+            }
+
+            return ret;
+        }
 
         public static bool FileExists(string szPath)
         {
-            return exp_FileExists(StringToAnsi(szPath));
+            IntPtr pRealPath = IntPtr.Zero;
+            int nLength;
+            int Flag = -1;
+            return exp_FileExists(StringToAnsi(szPath), out pRealPath, out nLength, out Flag);
         }
     }
 }

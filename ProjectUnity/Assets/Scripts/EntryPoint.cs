@@ -87,8 +87,25 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #endif
         FTimerList.RegisterTimerList(m_TimerList, gameObject);
         FTimerList.RegisterTimerList(m_LateTimerList, gameObject);
+#if UNITY_EDITOR
         string output = Application.dataPath + "/../../Output";
         int pckLayer = LuaDLLNativeRuntime.AddFilePackageLayer(output, 0, true);
+#else
+        string pckPath = Application.dataPath + "/Output/pck";
+        int pckLayer = LuaDLLNativeRuntime.AddFilePackageLayer(pckPath, 0, true);
+
+        string patchesPath = Application.dataPath + "/Output/patches";
+        int patchesLayer = LuaDLLNativeRuntime.AddFilePackageLayer(patchesPath, 0, true);
+#if UNITY_ANDROID
+        string basePath = "jar:file://" + Application.dataPath + "!/assets/res_base";
+#elif UNITY_IPHONE
+        string basePath = Application.dataPath + "/Raw/res_base";
+#else
+        string basePath = Application.streamingAssetsPath + "/res_base";
+#endif
+        int baseLayer = LuaDLLNativeRuntime.AddFilePackageLayer(basePath, 0, true);
+#endif
+
         LuaDLLNativeRuntime.exp_InitAllLayer();
     }
 
@@ -132,7 +149,7 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
         }
         name = name.Replace('.', '/');
         name += ".lua";
-#if !UNITY_EDITOR
+#if UNITY_WEBGL && !UNITY_EDITOR
         name += ".bytes";
 #endif
         try
