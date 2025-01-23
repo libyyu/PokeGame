@@ -436,7 +436,7 @@ static void adddyncaptures (const char *s, Capture *base, int n, int fd) {
 
 #define condfailed(p)	{ int f = p->i.offset; if (f) p+=f; else goto fail; }
 
-static const char *match (lua_State *L,
+static const char *lmatch (lua_State *L,
                           const char *o, const char *s, const char *e,
                           LpegInstruction *op, Capture *capture, int ptop) {
   Stack stackbase[INITBACK];
@@ -2339,7 +2339,7 @@ static int matchl (lua_State *L) {
   lua_pushnil(L);  /* subscache */
   lua_pushlightuserdata(L, capture);  /* caplistidx */
   lua_getfenv(L, 1);  /* penvidx */
-  r = match(L, s, s + i, s + l, p, capture, ptop);
+  r = lmatch(L, s, s + i, s + l, p, capture, ptop);
   if (r == NULL) {
     lua_pushnil(L);
     return 1;

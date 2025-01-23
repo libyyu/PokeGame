@@ -13,6 +13,7 @@
 // #endif //__cplusplus
 
 #define LUA_WEBGL 1
+#define PLATFORM_WEBGL 1
 
 //base lua
 _FDeclsBegin
