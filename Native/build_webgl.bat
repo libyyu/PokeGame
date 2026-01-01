@@ -17,15 +17,18 @@ set EM_CONFIG=%emscriptenDir%\.emscripten
 set incPath=-I%srcDir%\lua\lua51\src
 
 ::slua
+@echo compile for webgl===slua
 call "%emcc%" -c -xc++ "%srcDir%\compile_webgl_slua.cpp" -o "webgl_slua.o"
 call "%emar%" rcs "%srcDir%\webgl_slua.a" "webgl_slua.o"
-
+copy /Y "%srcDir%\webgl_slua.a" %self_path%\..\ProjectUnity\Assets\Plugins\WebGL\FSLua.a
 
 ::flib
+@echo compile for webgl===flib
 call "%emcc%" %incPath% -c -xc++ "%srcDir%\compile_webgl_flib.cpp" -o "webgl_flib.o"
 call "%emar%" rcs "%srcDir%\webgl_flib.a" "webgl_flib.o"
+copy /Y "%srcDir%\webgl_flib.a" %self_path%\..\ProjectUnity\Assets\Plugins\WebGL\FileSystem.a
 
-
+@echo compile for webgl===combine to libFengEngine.a
 call "%emar%" rcs "%srcDir%\libFengEngine.a" "webgl_slua.o" webgl_flib.o"
 
 del "webgl_slua.o"

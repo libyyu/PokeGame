@@ -62,17 +62,50 @@ int exp_AddFilePackageLayer(const char* path, int mode, bool read_only)
 }
 bool exp_ReadFileBuffer(const char* szFile, char** ppbuffer, int* length)
 {
+	ByteArray data;
+	if(FReadAllBytes(szFile, data))
+	{
+		size_t fileLen = data.size();
+		char* pData = new char[fileLen+1];
+		if(!pData)
+		{
+		    F_CONSOLE(ERROR) << "Not enough memory when read " << szFile;
+		    return false;
+		}
+		pData[fileLen] = 0x0;
+		memcpy(pData, &data[0], fileLen);
+		*ppbuffer = pData;
+		*length = fileLen;
+		return true;
+	}
+
 	return false;
 }
 void exp_ReleaseFileBuffer(char* pbuffer)
 {
-
+	if (!!pbuffer)
+	{
+		delete[] pbuffer;
+	}
 }
 void exp_ReleaseBuffer(char* pbuffer)
 {
 	if (!!pbuffer)
 	{
 		delete[] pbuffer;
+	}
+}
+bool exp_FileExists(const char* path, char** outpath, int* outpathNum, int* flag)
+{
+	if (FFileExists(path))
+	{
+		size_t len = strlen(path);
+		char* pData = new char[len + 1];
+		memset(pData, 0x0, len);
+		strcpy(pData, path);
+		*outpath = pData;
+		*outpathNum = len;
+		*flag = 0;
 	}
 }
 _FDeclsCEnd

@@ -142,11 +142,26 @@ do
 	end
 
 	function FGame:Setup()
+		if IsStandaloneRuntime() then
+			local width = 750
+			local height = 1344
+			local mode = UnityEngine.FullScreenMode.Windowed
+			--UnityEngine.Screen.SetResolution(width, height, mode)
+		end
+
 		MainThreadTask.Init()
 		self:InitGame()
 	end
 
 	function FGame:Run()
+		if not IsWebGLRuntime() then
+			local FGameUpdate = require "patches.FGameUpdate"
+			FGameUpdate.Instance():Run()
+
+			while not FGameUpdate.Instance():IsFinished() do
+				_G.coro.yield()
+			end
+		end
 		self:OnRun()
 	end
 	
@@ -200,12 +215,12 @@ do
 		--测试背景音
 		AsyncLoad(ResPathReader.BackgroundMusic, function(obj)
 			if obj and not obj.isNil then
-				self.m_backgroundMusicComp:PlayBackgroundMusic(obj)
+				--self.m_backgroundMusicComp:PlayBackgroundMusic(obj)
 			end
 		end)
 	end
 end
-
+print("require:", "game.FGame" .. PlatformSuffix)
 require ("game.FGame" .. PlatformSuffix)
 
 theGame = FGame()

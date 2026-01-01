@@ -13,4 +13,6 @@
 
 #include "pb.c"
 
+#include "lbit.c"
+
 #include "slua.c"

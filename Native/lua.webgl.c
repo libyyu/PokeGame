@@ -56,7 +56,6 @@
 #include "lua/lua51/src/lapi.c"
 #include "lua/lua51/src/lauxlib.c"
 #include "lua/lua51/src/lbaselib.c"
-#include "lua/lua51/src/lbit.c"
 #include "lua/lua51/src/lcode.c"
 #include "lua/lua51/src/ldblib.c"
 #include "lua/lua51/src/ldebug.c"

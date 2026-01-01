@@ -989,7 +989,9 @@ public static class GameUtil
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         return WebCommon.callJSMethod(method, jsonParams);
-#endif
+#else
         return null;
+#endif
+
     }
 }

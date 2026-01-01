@@ -68,7 +68,13 @@ do
 		end
 
 		function FViewItem:OnClick()
-			GameUtil.CallNativeMethod("OpenUrl", self.data.url)
+			if IsWXRuntime() then
+				GameUtil.CallNativeMethod("OpenUrl", self.data.url)
+			elseif IsWebGLRuntime() and not GameUtil.IsEditorEnv() then
+				GameUtil.CallNativeMethod("OpenUrl", self.data.url)
+			else
+				UnityEngine.Application.OpenURL(self.data.url)
+			end
 		end
 	end
 
@@ -161,7 +167,14 @@ do
 		self:ShowModalWait(true)
 		self.m_bRequesting = true
 		_G.coro.start(function()
-			local request = UnityEngine.Networking.UnityWebRequest.Get("http://192.168.18.146:8001/mfwhotlist?page="..tostring(page))
+			local url
+			if GameUtil.IsEditorEnv() then
+				url = "http://localhost:9099/mfwhotlist?page="..tostring(page)
+			else
+				url = "http://127.0.0.1:8001/mfwhotlist?page="..tostring(page)
+			end
+
+			local request = UnityEngine.Networking.UnityWebRequest.Get(url)
 			if IsWXRuntime() then
 				request:SetRequestHeader("UnityWebGL", "wx")
 			elseif IsWebGLRuntime() and not GameUtil.IsEditorEnv() then
@@ -184,15 +197,15 @@ do
 						callback(page, false)
 					else
 						local jd = json.decode(text)
-						if not jd or not jd.data or jd.code ~= 0 then
-							warn("error search page", page, "respond text not valid json format")
+						if not jd or not jd.data or not (jd.code == 200 or jd.code == 0) then
+							warn("error search page", page, "respond text not valid json format", text)
 							callback(page, false)
 						else
-							callback(page, jd.data)
+							callback(page, jd.data.data)
 						end 
 					end
 				else
-					warn("error search page", page)
+					warn("error search page", page, request.result, request.error)
 					callback(page, false)
 				end
 			end 

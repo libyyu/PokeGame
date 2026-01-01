@@ -6,7 +6,13 @@ Vector3 = UnityEngine.Vector3
 Quaternion = UnityEngine.Quaternion
 
 if not rawget(GameUtil, "AssetRoot") then
-	rawset(GameUtil, "AssetRoot", UnityEngine.Application.dataPath .. "/../../Output")
+	if GameUtil.IsEditorEnv() then
+		print("rawset GameUtil.AssetRoot", UnityEngine.Application.dataPath .. "/../../Output")
+		rawset(GameUtil, "AssetRoot", UnityEngine.Application.dataPath .. "/../../Output")
+	else
+		print("rawset GameUtil.AssetRoot", UnityEngine.Application.dataPath .. "/Output")
+		rawset(GameUtil, "AssetRoot", UnityEngine.Application.dataPath .. "/Output")
+	end
 end
 
 function OnUnityLog(t,str)
@@ -248,6 +254,12 @@ function IsWXRuntime()
 	return IsWebGLRuntime() and not GameUtil.IsEditorEnv() and GameUtil.IsWXEnv()
 end
 
+function IsStandaloneRuntime()
+	return UnityEngine.RuntimePlatform.WindowsPlayer == UnityEngine.Application.platform 
+		or UnityEngine.RuntimePlatform.OSXPlayer == UnityEngine.Application.platform 
+		or UnityEngine.RuntimePlatform.LinuxPlayer == UnityEngine.Application.platform
+end
+
 _G.PlatformSuffix = IsWebGLRuntime() and "WebGL" or "App"
 print("PlatformSuffix", PlatformSuffix, "IsWebGLRuntime", IsWebGLRuntime(), "IsWXRuntime", IsWXRuntime())
 
@@ -320,5 +332,48 @@ function _G.ReadFromFile (path, binary)
 		return content
 	else
 		return nil
+	end
+end
+
+if GameUtil.IsEditorEnv() then
+	local function _GetDebugInfo(stack)
+		stack = stack or 2
+		local tInfo = debug.getinfo(stack, "Snl")
+		if tInfo == nil then
+			return ""
+		end
+		local source = tInfo.source or ""
+		if source:len() > 0 and source:sub(1, 1) == '@' then
+			source = source:sub(2, -1)
+		end
+		return string.format("[%s#%s:%d]", source, tInfo.name or "", tInfo.currentline)
+	end
+
+	local printFn = print
+	local warnFn = warn
+	local printerrorFn = printerror
+
+	printerror = function(...)
+		printFn(...)
+		printFn(debug.traceback())
+	end
+
+	print = function(...)
+		local source = {...}
+		local result = {}
+		for _, v in ipairs(source) do
+			result[#result+1] = tostring(v)
+		end
+		local info = _GetDebugInfo(3)
+		printFn(info, table.unpack(result))
+	end
+	warn = function(...)
+		local source = {...}
+		local result = {}
+		for _, v in ipairs(source) do
+			result[#result+1] = tostring(v)
+		end
+		local info = _GetDebugInfo(3)
+		warnFn(info, table.unpack(result))
 	end
 end

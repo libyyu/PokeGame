@@ -392,7 +392,7 @@ public class UnityAssetBundleLoader : IAssetLoader
             return;
         }
 
-        LogUtil.Log(string.Format("AssetBundleManifestName:{0}", AssetBundleManifestName));
+        //LogUtil.Log(string.Format("AssetBundleManifestName:{0}", AssetBundleManifestName));
         LoadAsset<AssetBundleManifest>(AssetBundleManifestName, new string[] { "AssetBundleManifest" }, delegate (UObject[] objs) {
             if (objs.Length > 0)
             {
@@ -721,7 +721,7 @@ public class UnityAssetBundleLoader : IAssetLoader
         if (assetBundle != null)
         {
             m_LoadedAssetBundles.Add(abName, new AssetBundleInfo(assetBundle));
-            LogUtil.Log(string.Format("load asset from memory. {0}", abName));
+            //LogUtil.Log(string.Format("load asset from memory. {0}", abName));
             LoadResult.value_0 = true;
             yield break;
         }
@@ -835,7 +835,7 @@ public class UnityAssetBundleLoader : IAssetLoader
             }
         }
 #else
-        LogUtil.Log("OnLoadAssetBundle: {0} {1}", abName, typeof(T).ToString());
+        //LogUtil.Log("OnLoadAssetBundle: {0} {1}", abName, typeof(T).ToString());
         string filePath = AssetBundleManifestName + "/" + abName;
         find_asset_wrapper finder = new find_asset_wrapper(filePath);
         if (finder)
@@ -1023,7 +1023,7 @@ public class UnityAssetBundleLoader : IAssetLoader
         }
 #else
         //eg. lua   Main.lua
-        LogUtil.Log("ReadFileBytesImpl : {0} {1}", abName, filePath);
+        //LogUtil.Log("ReadFileBytesImpl : {0} {1}", abName, filePath);
         //for (int i = 0; i < SearchPaths.Length; ++i)
         //{
         //    string fpath = System.IO.Path.Join(SearchPaths[i], abName, filePath);

@@ -87,6 +87,9 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #endif
         FTimerList.RegisterTimerList(m_TimerList, gameObject);
         FTimerList.RegisterTimerList(m_LateTimerList, gameObject);
+
+#if !UNITY_WEBGL || UNITY_EDITOR
+
 #if UNITY_EDITOR
         string output = Application.dataPath + "/../../Output";
         int pckLayer = LuaDLLNativeRuntime.AddFilePackageLayer(output, 0, true);
@@ -107,6 +110,8 @@ public class EntryPoint : PersistentSingleton<EntryPoint>
 #endif
 
         LuaDLLNativeRuntime.exp_InitAllLayer();
+
+#endif
     }
 
     void SetupPath()
